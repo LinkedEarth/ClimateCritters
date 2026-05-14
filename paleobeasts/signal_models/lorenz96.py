@@ -151,6 +151,12 @@ class Lorenz96(PBModel):
         ``kwargs={'dt': dt, 'si': si}``. All other methods delegate to the
         standard PBModel integration path.
         """
+        if method == 'l96_rk4' and self.J == 0:
+            raise ValueError(
+                "method='l96_rk4' is only valid for the two-scale system (J > 0). "
+                "For the single-scale system use method='RK45' or method='euler'."
+            )
+
         if self.J == 0 or method != 'l96_rk4':
             return super().integrate(
                 t_span=t_span, y0=y0, method=method, kwargs=kwargs,
