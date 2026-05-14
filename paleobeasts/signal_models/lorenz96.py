@@ -1,7 +1,6 @@
 import numpy as np
 
 from ..core.pbmodel import PBModel
-from ..utils.solver import Solution
 
 
 class Lorenz96(PBModel):
@@ -37,10 +36,10 @@ class Lorenz96(PBModel):
 
     Notes
     -----
-    For the two-scale system (``J>0``) use ``method='l96_rk4'`` with
-    ``kwargs={'dt': dt, 'si': si}``. Adaptive solvers (RK45) corrupt
-    ``state_variables`` via sub-step ``dydt`` evaluations; plain Euler is
-    too coarse to resolve the Y dynamics.
+    For the two-scale system (``J>0``) use ``method='rk4'`` with
+    ``kwargs={'dt': dt, 'si': si}``. Adaptive solvers (RK45) call ``dydt``
+    at intermediate sub-steps; the fixed-step RK4 in PBModel avoids this
+    problem. Plain Euler is too coarse to resolve the Y dynamics.
 
     References
     ----------
@@ -85,18 +84,17 @@ class Lorenz96(PBModel):
             return self._dydt_single(t, x)
         return self._dydt_two_scale(t, x)
 
+    def uses_post_history(self):
+        return True
+
     def _dydt_single(self, t, x):
+        x = np.asarray(x, dtype=float)
         F_t = self._forcing_value(t, x)
         n = self.n
 
         dxdt = np.zeros(n, dtype=float)
         for i in range(n):
             dxdt[i] = (x[(i + 1) % n] - x[i - 2]) * x[i - 1] - x[i] + F_t
-
-        new_row = np.array([tuple(x)], dtype=self.dtypes)
-        self.state_variables = np.concatenate([self.state_variables, new_row], axis=0)
-        if t > 0:
-            self.time.append(t)
 
         return dxdt.tolist()
 
@@ -137,135 +135,7 @@ class Lorenz96(PBModel):
                                      (Y_reshaped[k, jp2] - Y_reshaped[k, jm1]) -
                                      c * yjk + (h * c / b) * X[k])
 
-        new_row = np.array([tuple(np.concatenate([X, Y]))], dtype=self.dtypes)
-        self.state_variables = np.concatenate([self.state_variables, new_row], axis=0)
-        if t > 0:
-            self.time.append(t)
-
         return np.concatenate([dX, dY]).tolist()
-
-    def integrate(self, t_span=None, y0=None, method='RK45', kwargs=None, run_name=None):
-        """Integrate the model.
-
-        For the two-scale system (``J>0``) pass ``method='l96_rk4'`` with
-        ``kwargs={'dt': dt, 'si': si}``. All other methods delegate to the
-        standard PBModel integration path.
-        """
-        if method == 'l96_rk4' and self.J == 0:
-            raise ValueError(
-                "method='l96_rk4' is only valid for the two-scale system (J > 0). "
-                "For the single-scale system use method='RK45' or method='euler'."
-            )
-
-        if self.J == 0 or method != 'l96_rk4':
-            return super().integrate(
-                t_span=t_span, y0=y0, method=method, kwargs=kwargs,
-                run_name=run_name
-            )
-
-        # ── l96_rk4: fixed-step RK4 at the Y timescale ────────────────────
-        if t_span is None or y0 is None:
-            raise ValueError("t_span and y0 must be provided for l96_rk4.")
-
-        kwargs = kwargs or {}
-        if 'dt' not in kwargs or 'si' not in kwargs:
-            raise ValueError("kwargs must include 'dt' and 'si' for l96_rk4.")
-
-        dt = float(kwargs['dt'])
-        si = float(kwargs['si'])
-        t0, t1 = float(t_span[0]), float(t_span[1])
-        total_time = t1 - t0
-
-        if total_time <= 0:
-            raise ValueError("t_span must have t_span[1] > t_span[0].")
-
-        nt = int(round(total_time / si))
-        if abs(nt * si - total_time) > 1e-12:
-            raise ValueError("t_span length must be an integer multiple of si.")
-
-        if si < dt:
-            dt = si
-            ns = 1
-        else:
-            ns = int(round(si / dt))
-            if abs(ns * dt - si) > 1e-12:
-                raise ValueError("si must be an integer multiple of dt.")
-
-        self.t_span = t_span
-        self.y0 = y0
-        self.method = method
-        self.kwargs = kwargs
-
-        dtype = [(var, float) for var in self.state_variables_names]
-        self.dtypes = dtype
-
-        y0_arr = np.asarray(y0, dtype=float)
-        history = np.zeros((nt + 1, y0_arr.size), dtype=float)
-        time = np.zeros(nt + 1, dtype=float)
-
-        history[0] = y0_arr
-        time[0] = t0
-
-        K, J = self.n, self.J
-        X, Y = y0_arr[:K].copy(), y0_arr[K:].copy()
-
-        def rhs(t, X_in, Y_in):
-            F_t = self._forcing_value(t, np.concatenate([X_in, Y_in]))
-            h = self.get_param('h', t, X_in)
-            b = self.get_param('b', t, X_in)
-            c = self.get_param('c', t, X_in)
-
-            dX = np.zeros(K, dtype=float)
-            dY = np.zeros(K * J, dtype=float)
-            Y_reshaped = Y_in.reshape(K, J)
-            coupling = Y_reshaped.sum(axis=1)
-
-            for k in range(K):
-                xm1 = X_in[(k - 1) % K]
-                xm2 = X_in[(k - 2) % K]
-                xp1 = X_in[(k + 1) % K]
-                dX[k] = -xm1 * (xm2 - xp1) - X_in[k] + F_t - (h * c / b) * coupling[k]
-
-            if self.exact_rhs:
-                hcb = (h * c) / b
-                dY = (-c * b * np.roll(Y_in, -1) *
-                      (np.roll(Y_in, -2) - np.roll(Y_in, 1)) -
-                      c * Y_in + hcb * np.repeat(X_in, J))
-            else:
-                for k in range(K):
-                    for j in range(J):
-                        jm1 = (j - 1) % J
-                        jp1 = (j + 1) % J
-                        jp2 = (j + 2) % J
-                        yjk = Y_reshaped[k, j]
-                        dY[k * J + j] = (-c * b * Y_reshaped[k, jp1] *
-                                         (Y_reshaped[k, jp2] - Y_reshaped[k, jm1]) -
-                                         c * yjk + (h * c / b) * X_in[k])
-            return dX, dY
-
-        for step in range(nt):
-            base_t = t0 + step * si
-            for s in range(ns):
-                t_curr = base_t + s * dt
-                dX1, dY1 = rhs(t_curr, X, Y)
-                dX2, dY2 = rhs(t_curr + 0.5 * dt, X + 0.5 * dt * dX1, Y + 0.5 * dt * dY1)
-                dX3, dY3 = rhs(t_curr + 0.5 * dt, X + 0.5 * dt * dX2, Y + 0.5 * dt * dY2)
-                dX4, dY4 = rhs(t_curr + dt, X + dt * dX3, Y + dt * dY3)
-
-                X = X + (dt / 6.0) * ((dX1 + dX4) + 2.0 * (dX2 + dX3))
-                Y = Y + (dt / 6.0) * ((dY1 + dY4) + 2.0 * (dY2 + dY3))
-
-            history[step + 1] = np.concatenate([X, Y])
-            time[step + 1] = t0 + (step + 1) * si
-
-        state = np.zeros(nt + 1, dtype=self.dtypes)
-        for i, var in enumerate(self.state_variables_names):
-            state[var] = history[:, i]
-
-        self.state_variables = state
-        self.time = time
-        self.solution = Solution(time, history)
-        self.run_name = run_name if run_name is not None else f'{self.method}, dt={dt}, si={si}'
 
 
 # =============================================================================
