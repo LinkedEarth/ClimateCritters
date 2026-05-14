@@ -5,7 +5,7 @@ import warnings
 import numpy as np
 from pyleoclim.core import Series, MultipleSeries
 
-from ..utils.solver import euler_method, euler_maruyama_method
+from ..utils.solver import euler_method, euler_maruyama_method, Solution
 class PBModel:
     '''The overarching model structure for Paleobeasts. 
     
@@ -449,6 +449,49 @@ class PBModel:
                 rng=self.rng,
                 args=self.params,
             )
+
+        elif self.method == 'rk4':
+            if not self.uses_post_history():
+                raise ValueError(
+                    "method='rk4' requires a conformant dydt with no side effects. "
+                    "Override uses_post_history() to return True and remove any "
+                    "state-appending from dydt before using this method."
+                )
+            if 'dt' not in kwargs:
+                raise ValueError("kwargs must include 'dt' for method='rk4'.")
+            dt = float(kwargs['dt'])
+            si = float(kwargs.get('si', dt))
+            t0, t1 = float(t_span[0]), float(t_span[1])
+            total_time = t1 - t0
+            if total_time <= 0:
+                raise ValueError("t_span must have t_span[1] > t_span[0].")
+            if si < dt:
+                dt = si
+                ns = 1
+            else:
+                ns = int(round(si / dt))
+                if abs(ns * dt - si) > 1e-10 * max(1.0, abs(si)):
+                    raise ValueError("si must be an integer multiple of dt for method='rk4'.")
+            nt = int(round(total_time / si))
+            if abs(nt * si - total_time) > 1e-10 * max(1.0, abs(total_time)):
+                raise ValueError("t_span length must be an integer multiple of si for method='rk4'.")
+            y = np.asarray(y0[:len(self.integrated_state_vars)], dtype=float)
+            history = np.zeros((nt + 1, y.size), dtype=float)
+            times = np.zeros(nt + 1, dtype=float)
+            history[0] = y
+            times[0] = t0
+            for step in range(nt):
+                base_t = t0 + step * si
+                for s in range(ns):
+                    t_curr = base_t + s * dt
+                    k1 = np.asarray(self.dydt(t_curr, y), dtype=float)
+                    k2 = np.asarray(self.dydt(t_curr + 0.5 * dt, y + 0.5 * dt * k1), dtype=float)
+                    k3 = np.asarray(self.dydt(t_curr + 0.5 * dt, y + 0.5 * dt * k2), dtype=float)
+                    k4 = np.asarray(self.dydt(t_curr + dt, y + dt * k3), dtype=float)
+                    y = y + (dt / 6.0) * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
+                history[step + 1] = y
+                times[step + 1] = t0 + (step + 1) * si
+            solution = Solution(times, history)
 
         else:
             solution = solve_ivp(self.dydt, self.t_span,
