@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import numpy as np
 
 from ..core.pbmodel import PBModel
@@ -81,6 +83,9 @@ class Stommel(PBModel):
         k = self.get_param('k', t, x)
         return k * (alpha * T - beta * S)
 
+    def uses_post_history(self):
+        return True
+
     def dydt(self, t, x):
         T, S = x[0], x[1]
         q = self.overturning(t, x)
@@ -96,10 +101,12 @@ class Stommel(PBModel):
         dTdt = -lambda_T * (T - T_star) - adv * T + f_vec[0]
         dSdt = E - lambda_S * (S - S_star) - adv * S + f_vec[1]
 
-        new_row = np.array([(T, S)], dtype=self.dtypes)
-        self.state_variables = np.concatenate([self.state_variables, new_row], axis=0)
-        if t > 0:
-            self.time.append(t)
-
-        self.diagnostic_variables['q'].append(q)
         return [dTdt, dSdt]
+
+    def populate_diagnostics_from_history(self, time, history):
+        time = np.asarray(time, dtype=float)
+        history = np.asarray(history, dtype=float)
+        q_vals = np.empty(len(time))
+        for i, (t, row) in enumerate(zip(time, history)):
+            q_vals[i] = self.overturning(t, row)
+        self.diagnostic_variables = {'q': q_vals}
