@@ -13,8 +13,7 @@ __all__ = [
 import warnings
 
 import numpy as np
-import pyleoclim as pyleo
-                
+
 def from_series(target_series,method,number=1,seed=None,label=None):
     '''
     Fashion the SurrogateSeries object after a target series. 
@@ -55,7 +54,8 @@ def from_series(target_series,method,number=1,seed=None,label=None):
     SOI = pyleo.utils.load_dataset('SOI')
     noise = from_series(SOI,method='ar1sim')
 
-    '''    
+    '''
+    import pyleoclim as pyleo
     surr = pyleo.SurrogateSeries(method=method,number=number,seed=seed,label=label)
     surr.from_series(target_series=target_series)
     return surr
@@ -156,8 +156,8 @@ def from_param(method = 'uar1',noise_param=[1,1],length=50, number = 1, time_pat
 
     noise = from_param(method='ar1sim',noise_param=[1,1])
 
-    '''    
-
+    '''
+    import pyleoclim as pyleo
     surr = pyleo.SurrogateSeries(method=method,number=number,seed=seed,label=label)
     surr.from_param(param=noise_param,length=length,time_pattern=time_pattern,settings=settings)
     return surr

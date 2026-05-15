@@ -3,8 +3,6 @@ import inspect
 from types import MethodType
 import warnings
 import numpy as np
-from pyleoclim.core import Series, MultipleSeries
-
 from ..utils.solver import euler_method, euler_maruyama_method, Solution
 class PBModel:
     '''The overarching model structure for Paleobeasts. 
@@ -518,12 +516,14 @@ class PBModel:
 
     def to_pyleo(self,var_names=None):
         '''Function to create a pyleoclim Series object from a state variable.
-        
+
         Parameters
         ----------
-        
+
         var_names : str or list
             The name(s) of the state or diagnostic variable(s) to be converted.'''
+
+        from pyleoclim.core import Series, MultipleSeries
 
         if self.time is None:
             raise ValueError("Time axis not found. Please integrate the model first.")
