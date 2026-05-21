@@ -97,15 +97,15 @@ class PBModel:
                           inspect.Parameter.POSITIONAL_OR_KEYWORD)
         ]
 
-    def _is_strict_compatible_callable(self, param):
-        try:
-            params = self._strict_positional_params(param)
-        except (TypeError, ValueError):
-            return False
-        n_positional = len(params)
-        if n_positional not in (1, 2, 3):
-            return False
-        return params[0].name.lower() in ('t', 'time')
+    # def _is_strict_compatible_callable(self, param):
+    #     try:
+    #         params = self._strict_positional_params(param)
+    #     except (TypeError, ValueError):
+    #         return False
+    #     n_positional = len(params)
+    #     if n_positional not in (1, 2, 3):
+    #         return False
+    #     return params[0].name.lower() in ('t', 'time')
 
     def _call_param_strict(self, param, t, state):
         try:
@@ -323,6 +323,7 @@ class PBModel:
             return np.asarray(self.diagnostic_variables[var_name], dtype=float), "diagnostic"
         raise ValueError(f"{var_name} not found in state variables or diagnostics.")
 
+    # noise related functions
     def add_noise(self, var_name, noise_ts):
         """Add externally provided noise to an emitted variable.
 
