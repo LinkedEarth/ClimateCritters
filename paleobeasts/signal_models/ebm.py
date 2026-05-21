@@ -35,7 +35,7 @@ class EBM(PBModel):
 
     OLR : float or function or pb.Forcing
         Function that calculates the outgoing longwave radiation as a function of temperature. Default is the Stefan-Boltzmann law with prad=650, ps=1000.
-        To specify different values, pass OLR_func(pRad, ps) where pRad is the radiative forcing and ps is the surface pressure.
+        To specify different values, pass OLR_func(pRad, ps) where pRad is the radiative pressure and ps is the surface pressure.
 
     C : float or callable or pb.Forcing
         Heat capacity of the Earth's surface. Default is 4.
