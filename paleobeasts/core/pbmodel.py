@@ -6,6 +6,9 @@ import numpy as np
 from ..utils.solver import (euler_method, euler_maruyama_method, Solution,
                             validate_initial_state as _validate_initial_state,
                             build_state_from_history as _build_state_from_history)
+from .pboutput import PBOutput
+
+
 class PBModel:
     '''The overarching model structure for Paleobeasts. 
     
@@ -57,8 +60,6 @@ class PBModel:
         self.run_name = None
         self.time_util = lambda t: t
         self.rng = None
-        self._noise_originals = {}
-        self._noisy_vars = set()
 
     def __setattr__(self, name, value):
         """Keep ``param_values`` in sync when attributes are set directly.
@@ -143,7 +144,18 @@ class PBModel:
             return param(t, state)
         return param(t, state, self)
 
-    def get_param(self, name, t, state):
+    def get_series_by_name(self, var_name):
+        """Return a variable's array and storage location from the latest output.
+
+        Delegates to ``self.output.get_series_by_name``; raises if the model
+        has not yet been integrated.
+        """
+        if self.output is None:
+            raise RuntimeError("No output available. Call integrate() first.")
+        return self.output.get_series_by_name(var_name)
+
+
+    def get_param_value(self, name, t, state):
         """Resolve a named parameter to its value at the current time and state.
 
         This is the standard way to access parameters inside ``dydt``.  It looks
@@ -155,7 +167,7 @@ class PBModel:
             raise KeyError(f"Parameter '{name}' not found in param_values.")
         return self._resolve_param(self.param_values[name], t, state)
 
-    def set_param(self, name, value):
+    def set_param_value(self, name, value):
         """Add or update a parameter and keep the attribute and ``param_values`` in sync.
 
         ``__setattr__`` syncs the direction ``model.alpha = v → param_values``,
@@ -165,6 +177,27 @@ class PBModel:
         """
         self.param_values[name] = value
         setattr(self, name, value)
+
+
+    def get_param_vector(self, name, t, state, size):
+        """Resolve a parameter and broadcast it to a fixed-length vector.
+
+        Spatial models often allow parameters to be either a single scalar
+        (applied uniformly) or a full grid-length array.  This method resolves
+        the parameter via ``get_param`` and then either broadcasts a scalar or
+        validates that an array has the expected size, eliminating that boilerplate
+        from every ``dydt`` that works on a spatial grid.
+        """
+        value = self.get_param_value(name, t, state)
+        if np.isscalar(value):
+            return np.full(int(size), float(value), dtype=float)
+        arr = np.asarray(value, dtype=float).reshape(-1)
+        if arr.size != int(size):
+            raise ValueError(
+                f"Parameter '{name}' resolved to size {arr.size}, expected size {int(size)}."
+            )
+        return arr
+
 
     def set_function(self, name, function, bind=None):
         """Swap out a model calculation function on a single instance.
@@ -223,145 +256,23 @@ class PBModel:
         """
         pass
 
-    uses_post_history = False  #: Set to True in subclasses that derive output from the full solved trajectory.
 
-
-
-    def populate_diagnostics_from_history(self, time, history):
-        """Compute diagnostic variables from the full solved trajectory.
-
-        Called by ``post_integrate`` for models where ``uses_post_history = True``.
-        The base implementation does nothing because diagnostics are model-specific;
-        subclasses override this to derive any quantities that can only be computed
-        once the complete trajectory is available (e.g. derived fields, fluxes).
-        """
-        return None
-
-    def validate_initial_state(self, y0):
-        """Validate and normalize the initial state vector.
-
-        Exists as a method so that subclasses with non-standard initial state
-        requirements (e.g. a spatially discretised model that accepts a scalar
-        and broadcasts it to the grid) can override it.  The base implementation
-        delegates to the utility in ``utils/solver``.
-        """
-        return _validate_initial_state(y0, self.integrated_state_vars, self.state_variables_names)
-
-    def get_param_vector(self, name, t, state, size):
-        """Resolve a parameter and broadcast it to a fixed-length vector.
-
-        Spatial models often allow parameters to be either a single scalar
-        (applied uniformly) or a full grid-length array.  This method resolves
-        the parameter via ``get_param`` and then either broadcasts a scalar or
-        validates that an array has the expected size, eliminating that boilerplate
-        from every ``dydt`` that works on a spatial grid.
-        """
-        value = self.get_param(name, t, state)
-        if np.isscalar(value):
-            return np.full(int(size), float(value), dtype=float)
-        arr = np.asarray(value, dtype=float).reshape(-1)
-        if arr.size != int(size):
-            raise ValueError(
-                f"Parameter '{name}' resolved to size {arr.size}, expected size {int(size)}."
-            )
-        return arr
-
-    def post_integrate(self, time, history):
-        """Orchestrate post-solve output construction for ``uses_post_history`` models.
-
-        Some models (e.g. spatial PDEs) cannot accumulate state during the solve
-        without side effects; instead they store the full trajectory and derive
-        all outputs here.  This method sequences the required steps in the correct
-        order: build the structured state array, set the time axis, populate
-        diagnostics, and convert diagnostic lists to arrays.  It is called
-        automatically by ``integrate`` when ``uses_post_history = True``.
-        """
-        self.state_variables = _build_state_from_history(time, history, self.state_variables_names)
-        self.time = np.asarray(time, dtype=float)
-        self.populate_diagnostics_from_history(time, history)
-        self.diagnostic_variables = {var: np.asarray(vals)
-                                     for var, vals in self.diagnostic_variables.items()}
-
-    def get_series_by_name(self, var_name):
-        """Return a variable's array and its storage location ('state' or 'diagnostic').
-
-        State variables live in a structured numpy array; diagnostic variables
-        live in a dict.  This method provides a single lookup that works for
-        both, returning the location string so callers (e.g. ``add_noise``) know
-        where to write back a modified array.
-        """
-        if self.state_variables is not None and self.state_variables_names and var_name in self.state_variables_names:
-            return np.asarray(self.state_variables[var_name], dtype=float), "state"
-        if var_name in self.diagnostic_variables:
-            return np.asarray(self.diagnostic_variables[var_name], dtype=float), "diagnostic"
-        raise ValueError(f"{var_name} not found in state variables or diagnostics.")
-
-    # noise related functions
-    def add_noise(self, var_name, noise_ts):
-        """Add externally provided noise to an emitted variable.
-
-        Parameters
-        ----------
-        var_name : str
-            Name of a state or diagnostic variable.
-        noise_ts : array-like
-            Noise series with the same shape as the target variable.
-        """
-        values, location = self.get_series_by_name(var_name)
-        noise_arr = np.asarray(noise_ts, dtype=float)
-        if noise_arr.shape != values.shape:
-            raise ValueError(
-                f"Noise shape {noise_arr.shape} does not match variable shape {values.shape} for '{var_name}'."
-            )
-
-        if var_name not in self._noise_originals:
-            self._noise_originals[var_name] = values.copy()
-
-        noisy = values + noise_arr
-        if location == "state":
-            self.state_variables[var_name] = noisy
-        else:
-            self.diagnostic_variables[var_name] = noisy
-        self._noisy_vars.add(var_name)
-
-    def remove_noise(self, var_name):
-        """Restore a variable to its pre-noise state.
-
-        Paired with ``add_noise`` to allow reversible noise experiments: the
-        clean array is saved on the first ``add_noise`` call and restored here.
-        """
-        if var_name not in self._noise_originals:
-            raise ValueError(f"No stored clean version for '{var_name}'.")
-        original = self._noise_originals[var_name]
-        _, location = self.get_series_by_name(var_name)
-        if location == "state":
-            self.state_variables[var_name] = original
-        else:
-            self.diagnostic_variables[var_name] = original
-        self._noise_originals.pop(var_name, None)
-        self._noisy_vars.discard(var_name)
-
-    def _reset_noise_overlays(self):
-        """Clear noise state at the start of each integration.
-
-        Called by ``integrate`` before the solve so that noise added to a
-        previous run's output doesn't carry over into the new one.
-        """
-        self._noise_originals = {}
-        self._noisy_vars = set()
-
-    def integrate(self, t_span=None, y0=None, method='RK45', kwargs=None, run_name=None):
-        """Integrate the model over a time span and store the results.
+    def integrate(self, t_span=None, y0=None, method='RK45', kwargs=None,
+                  output_time=None, run_name=None):
+        """Integrate the model over a time span and return a PBOutput.
 
         This is the main entry point for running the model.  It validates the
         initial state, selects the requested solver, runs the integration, and
-        then either calls ``post_integrate`` (for ``uses_post_history`` models)
-        or finalises state variables and diagnostics in-place.
+        assembles the result into a :class:`PBOutput`.  The full solver
+        trajectory is always retained inside the output (via ``solution`` and
+        ``model_time``); ``output_time`` optionally places the front-line
+        result on a different grid immediately, e.g. to exclude a spin-up
+        period or coarsen the time axis.
 
         Parameters
         ----------
         t_span : tuple of float
-            ``(t0, tf)`` integration bounds.
+            ``(t0, tf)`` integration bounds for the solver.
         y0 : array-like
             Initial conditions.  Length must match the number of integrated
             state variables.
@@ -370,8 +281,14 @@ class PBModel:
             ``'rk4'``, or any method accepted by ``scipy.integrate.solve_ivp``.
         kwargs : dict, optional
             Solver-specific options.  ``'dt'`` is required for fixed-step methods.
+        output_time : array-like, optional
+            If provided, the returned ``PBOutput`` is immediately reframed onto
+            this time axis.  ``output_time`` may be any subset of ``t_span``
+            (e.g. post-spinup) or a coarser uniform grid.  ``output.model_time``
+            always retains the raw solver grid regardless.  The window can be
+            changed later by calling ``output.reframe_time_axis`` again.
         run_name : str, optional
-            Label stored on the model for bookkeeping.  Defaults to a string
+            Label stored on the output for bookkeeping.  Defaults to a string
             describing the method and timestep.
         """
 
@@ -380,7 +297,7 @@ class PBModel:
         self.solution = None
         self.method = method
         self.time = [0]
-        self._reset_noise_overlays()
+        self.diagnostic_variables = {var: [] for var in self.diagnostic_variables}
         # self.t_eval = None
         self.kwargs = kwargs if kwargs is not None else {}
         if self.method in ('euler', 'euler_maruyama'):
@@ -415,6 +332,7 @@ class PBModel:
         if self.method == 'euler':
             solution = euler_method(self.dydt, self.t_span,self.y0[:len(self.integrated_state_vars)],  kwargs['dt'],
                                     args=self.params)
+
         elif self.method == 'euler_maruyama':
             seed = kwargs.get('random_seed', None)
             self.rng = np.random.default_rng(seed) if seed is not None else np.random.default_rng()
@@ -500,111 +418,128 @@ class PBModel:
             self.diagnostic_variables = {var: np.asarray(vals)
                                          for var, vals in self.diagnostic_variables.items()}
 
-    def to_pyleo(self, var_names=None):
-        """Export one or more model variables as pyleoclim Series objects.
+        output = PBOutput(
+            time=self.time,
+            state_variables=self.state_variables,
+            state_variable_names=list(self.state_variables_names),
+            diagnostic_variables=self.diagnostic_variables,
+            solution=self.solution,
+            run_name=self.run_name,
+        )
+        if output_time is not None:
+            output.reframe_time_axis(output_time)
+        return output
 
-        Bridges model output to the pyleoclim ecosystem for downstream
-        analysis and visualisation.  Returns a single ``Series`` for one
-        variable or a ``MultipleSeries`` for several.
 
-        Parameters
-        ----------
-        var_names : str or list of str
-            Name(s) of state or diagnostic variable(s) to export.
+    uses_post_history = False  #: Set to True in subclasses that derive output from the full solved trajectory.
+
+
+
+    def populate_diagnostics_from_history(self, time, history):
+        """Compute diagnostic variables from the full solved trajectory.
+
+        Called by ``post_integrate`` for models where ``uses_post_history = True``.
+        The base implementation does nothing because diagnostics are model-specific;
+        subclasses override this to derive any quantities that can only be computed
+        once the complete trajectory is available (e.g. derived fields, fluxes).
         """
+        return None
 
-        from pyleoclim.core import Series, MultipleSeries
+    def validate_initial_state(self, y0):
+        """Validate and normalize the initial state vector.
 
-        if self.time is None:
-            raise ValueError("Time axis not found. Please integrate the model first.")
-
-        if isinstance(var_names, str):
-            var_names= [var_names]
-
-
-        pyleo_series = []
-        for var_name in var_names:
-            if var_name in self.state_variables_names:
-                value = self.state_variables[var_name]
-            elif var_name in self.diagnostic_variables.keys():
-                value = self.diagnostic_variables[var_name]
-            else:
-                raise ValueError(f"{var_name} not found. Please check the state variables or diagnostics.")
-
-            time = np.asarray(self.time)
-            value = np.asarray(value)
-            if len(time) != len(value):
-                n = min(len(time), len(value))
-                time = time[:n]
-                value = value[:n]
-                        
-            series = Series(
-                time = time,
-                value = value,
-                value_name = var_name,
-                verbose=False,
-                auto_time_params=True
-                )
-
-            pyleo_series.append(series)
-        if len(pyleo_series) == 1:
-            return pyleo_series[0]
-        else:
-            return MultipleSeries(pyleo_series)
-
-    def reframe_time_axis(self, t_eval, update_state=True):
-        """Resample the solution onto a target time axis.
-
-        Useful for comparing model output to proxy records at specific time
-        points, or for aligning two model runs on a common grid.  Uses the
-        dense output from ``solve_ivp`` when available (accurate); falls back
-        to linear interpolation for fixed-step solvers.
-
-        Parameters
-        ----------
-        t_eval : array-like
-            Target time axis.
-        update_state : bool
-            If ``True``, overwrite ``self.time`` and ``self.state_variables``
-            with the resampled values.  If ``False``, return the resampled
-            array without modifying the model.
-
-        Returns
-        -------
-        reframed : structured ndarray or ndarray
-            Resampled state variables on ``t_eval``.
+        Exists as a method so that subclasses with non-standard initial state
+        requirements (e.g. a spatially discretised model that accepts a scalar
+        and broadcasts it to the grid) can override it.  The base implementation
+        delegates to the utility in ``utils/solver``.
         """
+        return _validate_initial_state(y0, self.integrated_state_vars, self.state_variables_names)
 
-        if self.solution is None:
-            raise ValueError("No solution found. Please integrate the model first.")
 
-        t_eval = np.asarray(t_eval, dtype=float)
 
-        # Prefer solve_ivp dense output when available
-        if hasattr(self.solution, 'sol') and self.solution.sol is not None:
-            y_eval = self.solution.sol(t_eval).T
-        else:
-            # Fallback to linear interpolation (Euler / no dense output)
-            t_src = np.asarray(self.solution.t, dtype=float)
-            y_src = np.asarray(self.solution.y, dtype=float)
-            if y_src.ndim == 1:
-                y_src = y_src.reshape(-1, 1)
+    def post_integrate(self, time, history):
+        """Orchestrate post-solve output construction for ``uses_post_history`` models.
 
-            y_eval = np.column_stack([
-                np.interp(t_eval, t_src, y_src[:, i])
-                for i in range(y_src.shape[1])
-            ])
+        Some models (e.g. spatial PDEs) cannot accumulate state during the solve
+        without side effects; instead they store the full trajectory and derive
+        all outputs here.  This method sequences the required steps in the correct
+        order: build the structured state array, set the time axis, populate
+        diagnostics, and convert diagnostic lists to arrays.  It is called
+        automatically by ``integrate`` when ``uses_post_history = True``.
+        """
+        self.state_variables = _build_state_from_history(time, history, self.state_variables_names)
+        self.time = np.asarray(time, dtype=float)
+        self.populate_diagnostics_from_history(time, history)
+        self.diagnostic_variables = {var: np.asarray(vals)
+                                     for var, vals in self.diagnostic_variables.items()}
 
-        if self.state_variables_names:
-            dtype = [(var, float) for var in self.state_variables_names]
-            reframed = np.zeros(len(t_eval), dtype=dtype)
-            for i, var in enumerate(self.state_variables_names):
-                reframed[var] = y_eval[:, i]
-        else:
-            reframed = y_eval
 
-        if update_state:
-            self.time = t_eval
-            self.state_variables = reframed
+    # def add_noise(self, var_name, noise_ts):
+    #     """Add noise to a variable in the latest output.
+    #
+    #     Delegates to ``self.output.add_noise``.  The clean values are saved
+    #     inside the output so that ``remove_noise`` can restore them.  To
+    #     generate multiple stochastic realizations from the same deterministic
+    #     run, capture the return value of ``integrate()`` and call
+    #     ``output.add_noise`` on each copy independently.
+    #     """
+    #     if self.output is None:
+    #         raise RuntimeError("No output available. Call integrate() first.")
+    #     self.output.add_noise(var_name, noise_ts)
 
-        return reframed
+    # def remove_noise(self, var_name):
+    #     """Restore a variable in the latest output to its pre-noise values.
+    #
+    #     Delegates to ``self.output.remove_noise``.
+    #     """
+    #     if self.output is None:
+    #         raise RuntimeError("No output available. Call integrate() first.")
+    #     self.output.remove_noise(var_name)
+
+
+    #
+    # def to_pyleo(self, var_names=None):
+    #     """Export one or more variables from the latest output as pyleoclim Series.
+    #
+    #     Delegates to ``self.output.to_pyleo``.  Returns a single ``Series``
+    #     for one variable or a ``MultipleSeries`` for several.
+    #
+    #     Parameters
+    #     ----------
+    #     var_names : str or list of str
+    #         Name(s) of state or diagnostic variable(s) to export.
+    #     """
+    #     if self.output is None:
+    #         raise RuntimeError("No output available. Call integrate() first.")
+    #     return self.output.to_pyleo(var_names)
+    #
+    # def reframe_time_axis(self, t_eval, update_state=True):
+    #     """Resample the solution onto a target time axis.
+    #
+    #     Delegates to ``self.output.reframe_time_axis``, which updates
+    #     ``output.time`` and ``output.state_variables`` to the resampled grid
+    #     while leaving ``output.model_time`` intact.  When ``update_state=True``
+    #     (the default), ``self.time`` and ``self.state_variables`` are also
+    #     synced to keep backward-compatible attribute access working.
+    #
+    #     Parameters
+    #     ----------
+    #     t_eval : array-like
+    #         Target time axis.
+    #     update_state : bool
+    #         If ``True`` (default), sync ``self.time`` and
+    #         ``self.state_variables`` to the reframed values after updating
+    #         the output.
+    #
+    #     Returns
+    #     -------
+    #     reframed : structured ndarray or ndarray
+    #         Resampled state variables on ``t_eval``.
+    #     """
+    #     if self.output is None:
+    #         raise RuntimeError("No output available. Call integrate() first.")
+    #     reframed = self.output.reframe_time_axis(t_eval)
+    #     if update_state:
+    #         self.time = self.output.time
+    #         self.state_variables = self.output.state_variables
+    #     return reframed
