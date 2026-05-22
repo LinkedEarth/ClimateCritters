@@ -365,7 +365,7 @@ class GenericBoxModel(PBModel):
 
     def __init__(self, spec, forcing=None, var_name=None, *args, **kwargs):
         self.spec = spec
-        parameter_contract = kwargs.pop("parameter_contract", "legacy")
+        kwargs.pop("parameter_contract", None)
         param_values = dict(spec.parameter_defaults)
         param_values.update(kwargs)
 
@@ -374,7 +374,6 @@ class GenericBoxModel(PBModel):
             variable_name=var_name if var_name is not None else spec.name,
             state_variables=list(spec.state_variables),
             diagnostic_variables=list(spec.diagnostic_variables),
-            parameter_contract=parameter_contract,
             *args,
         )
 
