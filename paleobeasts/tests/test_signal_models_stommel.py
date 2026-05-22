@@ -37,12 +37,12 @@ class TestSignalModelsStommelTimeVaryingParams:
             forcing=forcing,
             alpha=lambda t, x, m: 1.0,
             beta=lambda t: 1.0,
-            k=lambda x, t: 1.0,
-            E=lambda model, x: 0.05,
-            lambda_T=lambda x: 1.0,
+            k=lambda t, x: 1.0,
+            E=lambda t, x: 0.05,
+            lambda_T=lambda t: 1.0,
             lambda_S=lambda t, x: 1.0,
-            T_star=lambda: 1.0,
-            S_star=lambda x: 0.0,
+            T_star=lambda t: 1.0,
+            S_star=lambda t: 0.0,
         )
 
         t_span = (0, 0.05)

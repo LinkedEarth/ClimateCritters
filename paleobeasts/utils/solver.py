@@ -108,6 +108,67 @@ def define_t_eval(t_span, delta_t=None, num_points=None):
         raise ValueError("Either 'delta_t' or 'num_points' must be provided. Function will return None")
     return t_eval
 
+def validate_initial_state(y0, integrated_state_vars, state_variables_names):
+    """Validate and normalize the initial state vector.
+
+    Parameters
+    ----------
+    y0 : array-like
+        Proposed initial state.
+    integrated_state_vars : list
+        Names of integrated (ODE) state variables.
+    state_variables_names : list
+        All declared state variable names.
+
+    Returns
+    -------
+    y0_arr : ndarray
+        Validated, flattened float array.
+    """
+    y0_arr = np.asarray(y0, dtype=float).reshape(-1)
+    n_integrated = len(integrated_state_vars)
+    if n_integrated > 0 and y0_arr.size < n_integrated:
+        raise ValueError(
+            f"Initial state length {y0_arr.size} is smaller than the number of integrated "
+            f"state variables ({n_integrated})."
+        )
+    if len(state_variables_names) > 0 and y0_arr.size != len(state_variables_names):
+        raise ValueError(
+            f"Initial state length {y0_arr.size} does not match declared state variable "
+            f"count ({len(state_variables_names)})."
+        )
+    return y0_arr
+
+
+def build_state_from_history(time, history, state_variables_names):
+    """Build a structured state array from a solved trajectory.
+
+    Parameters
+    ----------
+    time : array-like
+        Time axis of the solution.
+    history : array-like
+        Solution array of shape (n_times, n_vars).
+    state_variables_names : list of str
+        Names of state variables, used to build a structured dtype.
+
+    Returns
+    -------
+    state : structured ndarray or ndarray
+        Structured array with named fields if state_variables_names is non-empty,
+        otherwise the raw history array.
+    """
+    time = np.asarray(time, dtype=float)
+    history = np.asarray(history, dtype=float)
+    if state_variables_names:
+        dtype = [(var, float) for var in state_variables_names]
+        state = np.zeros(len(time), dtype=dtype)
+        for i, var in enumerate(state_variables_names):
+            state[var] = history[:, i]
+        return state
+    return history
+
+
 def euler_method(f, t_span, y0, dt, args=()):
     """
     Solves an ODE using the Euler method with a fixed timestep.

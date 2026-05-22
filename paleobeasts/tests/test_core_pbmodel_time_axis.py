@@ -48,8 +48,7 @@ class _PostHistoryModel(PBModel):
         super().__init__(forcing=None, variable_name='post_history', state_variables=['x'],
                          diagnostic_variables=['x_squared'])
 
-    def uses_post_history(self):
-        return True
+    uses_post_history = True
 
     def dydt(self, t, x):
         return [-x[0]]
@@ -69,13 +68,12 @@ class TestCorePBModelPostHistoryHooks:
 
 
 class _ParamContractModel(PBModel):
-    def __init__(self, parameter_contract='legacy', coeff=1.0):
+    def __init__(self, coeff=1.0):
         super().__init__(
             forcing=None,
             variable_name='param_contract',
             state_variables=['x'],
             diagnostic_variables=[],
-            parameter_contract=parameter_contract,
         )
         self.coeff = coeff
         self.param_values = {'coeff': coeff}
@@ -86,32 +84,22 @@ class _ParamContractModel(PBModel):
 
 
 class TestCorePBModelParameterContract:
-    def test_parameter_contract_validation_t0(self):
-        with pytest.raises(ValueError):
-            _ParamContractModel(parameter_contract='not-a-mode')
-
-    def test_strict_contract_accepts_supported_signatures_t0(self):
-        model_t = _ParamContractModel(parameter_contract='strict', coeff=lambda t: 2.0)
-        model_ts = _ParamContractModel(parameter_contract='strict', coeff=lambda t, state: 2.0)
-        model_tsm = _ParamContractModel(parameter_contract='strict', coeff=lambda t, state, model: 2.0)
+    def test_callable_accepts_supported_signatures_t0(self):
+        model_t = _ParamContractModel(coeff=lambda t: 2.0)
+        model_ts = _ParamContractModel(coeff=lambda t, state: 2.0)
+        model_tsm = _ParamContractModel(coeff=lambda t, state, model: 2.0)
 
         assert model_t.get_param('coeff', 0.0, [1.0]) == 2.0
         assert model_ts.get_param('coeff', 0.0, [1.0]) == 2.0
         assert model_tsm.get_param('coeff', 0.0, [1.0]) == 2.0
 
-    def test_strict_contract_rejects_legacy_signature_t0(self):
-        model = _ParamContractModel(parameter_contract='strict', coeff=lambda model, state: 2.0)
+    def test_non_compliant_callable_raises_t0(self):
+        model = _ParamContractModel(coeff=lambda model, state: 2.0)
         with pytest.raises(TypeError):
             model.get_param('coeff', 0.0, [1.0])
 
-    def test_legacy_contract_warns_on_non_strict_signature_t0(self):
-        model = _ParamContractModel(parameter_contract='legacy', coeff=lambda model, state: 2.0)
-        with pytest.warns(DeprecationWarning):
-            out = model.get_param('coeff', 0.0, [1.0])
-        assert out == 2.0
-
     def test_attribute_assignment_syncs_param_values_t0(self):
-        model = _ParamContractModel(parameter_contract='legacy', coeff=1.0)
+        model = _ParamContractModel(coeff=1.0)
         model.coeff = lambda t: 3.0
         assert model.param_values['coeff'](0.0) == 3.0
 

@@ -53,8 +53,8 @@ class TestSignalModelsG24TimeVaryingParams:
             forcing=forcing,
             f1=lambda t: -16,
             f2=lambda t, x: 16,
-            t1=lambda model, x: 30,
-            t2=lambda x, t: 10,
+            t1=lambda t, x: 30,
+            t2=lambda t, x: 10,
             vc=lambda t, x, m: 1.4,
         )
 
@@ -79,7 +79,6 @@ class TestSignalModelsG24TimeVaryingParams:
             t1=lambda t, x, m: 30,
             t2=lambda t: 10,
             vc=lambda t, x: 1.4,
-            parameter_contract='strict',
         )
 
         model_tv.integrate(t_span=(0, 10), y0=[1, 1], method='euler', kwargs={'dt': 1})

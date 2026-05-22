@@ -57,7 +57,7 @@ class TestSignalModelsLorenz63TimeVaryingParams:
             forcing=forcing,
             sigma=lambda t, x, m: 10.0,
             rho=lambda t: 28.0,
-            beta=lambda x, t: 8 / 3,
+            beta=lambda t, x: 8 / 3,
         )
 
         t_span = (0, 0.05)

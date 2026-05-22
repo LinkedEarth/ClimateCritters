@@ -29,9 +29,9 @@ class TestSignalModelsDaisyworldTimeVaryingParams:
             forcing=None,
             alpha_w=lambda t, x, m: 0.75,
             alpha_b=lambda t: 0.25,
-            gamma=lambda x, t: 0.3,
-            L=lambda model, x: 1.0,
-            C=lambda x: 10.0,
+            gamma=lambda t, x: 0.3,
+            L=lambda t, x: 1.0,
+            C=lambda t: 10.0,
         )
 
         t_span = (0, 0.05)

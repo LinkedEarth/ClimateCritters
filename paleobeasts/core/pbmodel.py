@@ -1,9 +1,11 @@
 from scipy.integrate import solve_ivp
 import inspect
 from types import MethodType
-import warnings
 import numpy as np
-from ..utils.solver import euler_method, euler_maruyama_method, Solution
+
+from ..utils.solver import (euler_method, euler_maruyama_method, Solution,
+                            validate_initial_state as _validate_initial_state,
+                            build_state_from_history as _build_state_from_history)
 class PBModel:
     '''The overarching model structure for Paleobeasts. 
     
@@ -22,14 +24,9 @@ class PBModel:
     '''
 
     def __init__(self, forcing, variable_name, state_variables=None, non_integrated_state_vars=None,
-                 diagnostic_variables=None, parameter_contract='legacy'):
-        if parameter_contract not in ('legacy', 'strict'):
-            raise ValueError(
-                "parameter_contract must be either 'legacy' or 'strict'."
-            )
+                 diagnostic_variables=None):
         self.variable_name = variable_name
         self.forcing = forcing
-        self.parameter_contract = parameter_contract
 
         if state_variables is None:
             state_variables = []
@@ -49,7 +46,6 @@ class PBModel:
         self.diagnostic_variables = {var:[] for var in diagnostic_variables}
         self.params = ()
         self.param_values = {}
-        self._warned_legacy_params = set()
 
         self.t_span = None
         self.y0 = None
@@ -65,157 +61,130 @@ class PBModel:
         self._noisy_vars = set()
 
     def __setattr__(self, name, value):
+        """Keep ``param_values`` in sync when attributes are set directly.
+
+        Without this, ``model.alpha = 2.0`` would update the attribute but leave
+        ``param_values['alpha']`` stale, causing the solver to use the old value.
+        The sync only fires when the name already exists in ``param_values``, so
+        ordinary attribute assignments are unaffected.
+        """
         object.__setattr__(self, name, value)
         param_values = self.__dict__.get('param_values', None)
         if isinstance(param_values, dict) and name in param_values:
             param_values[name] = value
 
-    def resolve_param(self, param, t, state):
-        """Resolve a parameter value at time t for the given state.
+    def __copy__(self):
+        """Shallow copy with diagnostic variables reset to empty lists.
 
-        Supports constants, callables, and objects with ``get_forcing``.
+        A plain shallow copy would share the ``diagnostic_variables`` lists
+        between the original and the copy, so appends during integration would
+        corrupt both.  Resetting them here ensures a copied model starts with
+        no accumulated output from the original's run.
+        """
+        new_obj = type(self)(self.forcing, self.variable_name)
+        new_obj.__dict__.update(self.__dict__)
+        new_obj.diagnostic_variables = {var: [] for var in self.diagnostic_variables}
+        return new_obj
+
+    def _resolve_param(self, param, t, state):
+        """Turn a raw parameter value into a number at the current time and state.
+
+        Parameters can be stored as constants, callables, or Forcing objects.
+        This method is the single place that handles all three cases, so that
+        ``get_param`` and any future callers don't need to repeat the type logic.
+        It is private because callers should always go through ``get_param``
+        rather than resolving values directly.
         """
         if param is None:
             return None
         if hasattr(param, 'get_forcing'):
             return param.get_forcing(self.time_util(t))
         if callable(param):
-            if self.parameter_contract == 'strict':
-                return self._call_param_strict(param, t, state)
-            return self._call_param(param, t, state)
+            return self._dispatch_callable(param, t, state)
         return param
 
-    def _strict_positional_params(self, param):
-        sig = inspect.signature(param)
-        if any(p.kind == inspect.Parameter.VAR_POSITIONAL for p in sig.parameters.values()):
-            raise TypeError(
-                "Strict parameter contract does not allow var-positional (*args) callables."
-            )
-        return [
-            p for p in sig.parameters.values()
-            if p.kind in (inspect.Parameter.POSITIONAL_ONLY,
-                          inspect.Parameter.POSITIONAL_OR_KEYWORD)
-        ]
+    def _dispatch_callable(self, param, t, state):
+        """Call a callable parameter with the right arguments for its signature.
 
-    # def _is_strict_compatible_callable(self, param):
-    #     try:
-    #         params = self._strict_positional_params(param)
-    #     except (TypeError, ValueError):
-    #         return False
-    #     n_positional = len(params)
-    #     if n_positional not in (1, 2, 3):
-    #         return False
-    #     return params[0].name.lower() in ('t', 'time')
-
-    def _call_param_strict(self, param, t, state):
-        try:
-            params = self._strict_positional_params(param)
-        except (TypeError, ValueError) as exc:
-            raise TypeError(
-                "Strict parameter contract requires inspectable callables with signature "
-                "(t), (t, state), or (t, state, model)."
-            ) from exc
-
-        n_positional = len(params)
-        if n_positional in (1, 2, 3) and params[0].name.lower() not in ('t', 'time'):
-            raise TypeError(
-                "Strict parameter contract requires the first argument to be time "
-                "(e.g., `t` or `time`)."
-            )
-
-        if n_positional == 1:
-            return param(t)
-        if n_positional == 2:
-            return param(t, state)
-        if n_positional == 3:
-            return param(t, state, self)
-        raise TypeError(
-            "Strict parameter contract only supports signatures "
-            "(t), (t, state), or (t, state, model)."
-        )
-
-    def _warn_legacy_param_callable(self, param):
-        key = id(param)
-        if key in self._warned_legacy_params:
-            return
-        self._warned_legacy_params.add(key)
-        warnings.warn(
-            "Legacy parameter-callable dispatch is deprecated. "
-            "Use strict signatures: (t), (t, state), or (t, state, model).",
-            DeprecationWarning,
-            stacklevel=3,
-        )
-
-    def _call_param(self, param, t, state):
-        """Call a parameter function using a flexible signature heuristic."""
-        if not self._is_strict_compatible_callable(param):
-            self._warn_legacy_param_callable(param)
-
+        Callable parameters can request different amounts of context: time only,
+        time and state, or time, state, and the model instance.  Inspecting
+        arity here means the caller (``_resolve_param``) doesn't need to know
+        which variant a given callable uses — it just passes everything and lets
+        this method sort it out.  The first-argument name check enforces the
+        contract defined in ``contracts/signal_model_contract.md``.
+        """
         try:
             sig = inspect.signature(param)
-        except (TypeError, ValueError):
-            return param(t, state, self)
+        except (TypeError, ValueError) as exc:
+            raise TypeError(
+                "Parameter callable must be inspectable. "
+                "Supported signatures: (t), (t, state), (t, state, model)."
+            ) from exc
 
-        params = [
+        if any(p.kind == inspect.Parameter.VAR_POSITIONAL
+               for p in sig.parameters.values()):
+            raise TypeError("Parameter callables may not use *args.")
+
+        positional = [
             p for p in sig.parameters.values()
             if p.kind in (inspect.Parameter.POSITIONAL_ONLY,
                           inspect.Parameter.POSITIONAL_OR_KEYWORD)
         ]
-        if not params:
-            return param()
+        n = len(positional)
+        if n not in (1, 2, 3) or positional[0].name.lower() not in ('t', 'time'):
+            raise TypeError(
+                "Parameter callable must have signature (t), (t, state), or "
+                "(t, state, model) where the first argument is named 't' or 'time'."
+            )
 
-        first_name = params[0].name.lower()
-
-        if first_name in ('t', 'time'):
-            if len(params) >= 3:
-                return param(t, state, self)
-            if len(params) == 2:
-                return param(t, state)
+        if n == 1:
             return param(t)
-
-        if first_name in ('model', 'self', 'ebm_model'):
-            if len(params) >= 2:
-                return param(self, state)
-            return param(self)
-
-        if len(params) >= 2:
-            second_name = params[1].name.lower()
-            if second_name in ('t', 'time'):
-                return param(state, t)
-            if second_name in ('model', 'self', 'ebm_model'):
-                return param(state, self)
-
-        return param(state)
+        if n == 2:
+            return param(t, state)
+        return param(t, state, self)
 
     def get_param(self, name, t, state):
-        """Fetch a named parameter from ``param_values`` and resolve it."""
+        """Resolve a named parameter to its value at the current time and state.
+
+        This is the standard way to access parameters inside ``dydt``.  It looks
+        up the value from ``param_values`` by name and delegates resolution to
+        ``_resolve_param``, so callers in ``dydt`` don't need to know whether a
+        parameter is stored as a constant, a callable, or a Forcing object.
+        """
         if name not in self.param_values:
             raise KeyError(f"Parameter '{name}' not found in param_values.")
-        return self.resolve_param(self.param_values[name], t, state)
+        return self._resolve_param(self.param_values[name], t, state)
 
     def set_param(self, name, value):
-        """Set a parameter value and keep ``param_values`` in sync.
+        """Add or update a parameter and keep the attribute and ``param_values`` in sync.
 
-        This is a convenience for users who update parameters after model
-        initialization. The solver always reads from ``param_values``, so
-        this avoids subtle mismatches when mutating attributes directly.
+        ``__setattr__`` syncs the direction ``model.alpha = v → param_values``,
+        but only for names already in ``param_values``.  This method handles
+        the reverse and covers inserting new parameters that weren't declared
+        at initialization.
         """
         self.param_values[name] = value
         setattr(self, name, value)
 
     def set_function(self, name, function, bind=None):
-        """Replace a model function on this instance.
+        """Swap out a model calculation function on a single instance.
+
+        Subclassing is the right approach when a different formulation should
+        apply everywhere, but for one-off experiments (e.g. testing an
+        alternative albedo scheme without writing a new class) it is useful to
+        replace a single method on one instance.  The ``bind`` parameter handles
+        whether the replacement expects ``self`` as its first argument.
 
         Parameters
         ----------
         name : str
-            Existing function attribute name (e.g., ``calc_k``).
+            Name of an existing callable attribute (e.g., ``calc_k``).
         function : callable
             Replacement callable.
         bind : bool or None
-            - ``True``: bind as instance method (expects ``self`` first)
-            - ``False``: assign as plain callable
-            - ``None``: infer from first argument name (``self``/``model`` => bind)
+            ``True``: bind as instance method (expects ``self`` as first arg).
+            ``False``: assign as a plain callable.
+            ``None``: infer from whether the first argument is named ``self`` or ``model``.
         """
         if not isinstance(name, str) or not name:
             raise ValueError("Function name must be a non-empty string.")
@@ -242,63 +211,59 @@ class PBModel:
         setattr(self, name, replacement)
         return getattr(self, name)
 
-    def __copy__(self):
-        new_obj = type(self)(self.forcing, self.variable_name)  # create a new instance of the same class
-        new_obj.__dict__.update(self.__dict__)  # copy instance attributes
 
-        new_obj.diagnostic_variables = {var: [] for var in self.diagnostic_variables}
-        return new_obj
 
-    def dydt(self):
-        '''The differential equation of the model. 
-        
-        This method should be implemented and used from the child class.'''
+    def dydt(self, t, y):
+        """Define the system of differential equations.
+
+        Must be overridden by every subclass.  The solver calls this at each
+        timestep with the current time ``t`` and state vector ``y``, and expects
+        a list of derivatives of the same length as ``y``.  Use ``get_param``
+        inside the implementation to access parameters.
+        """
         pass
 
-    def uses_post_history(self):
-        """Whether solved trajectories should populate state/diagnostics post-solve."""
-        return False
+    uses_post_history = False  #: Set to True in subclasses that derive output from the full solved trajectory.
 
     def build_state_from_history(self, time, history):
-        """Build structured state output from a solved trajectory."""
-        time = np.asarray(time, dtype=float)
-        history = np.asarray(history, dtype=float)
+        """Convert raw solver output into a named structured array.
 
-        if self.state_variables_names:
-            dtype = [(var, float) for var in self.state_variables_names]
-            state = np.zeros(len(time), dtype=dtype)
-            for i, var in enumerate(self.state_variables_names):
-                state[var] = history[:, i]
-            return state
-        return history
+        Exists as a method (rather than a direct utility call in ``post_integrate``)
+        so that subclasses can override it to apply model-specific post-processing
+        — for example, clipping a variable to a physically valid range after the
+        solve.  The base implementation delegates to the utility in ``utils/solver``.
+        """
+        return _build_state_from_history(time, history, self.state_variables_names)
 
     def populate_diagnostics_from_history(self, time, history):
-        """Populate diagnostic arrays from a solved trajectory."""
+        """Compute diagnostic variables from the full solved trajectory.
+
+        Called by ``post_integrate`` for models where ``uses_post_history = True``.
+        The base implementation does nothing because diagnostics are model-specific;
+        subclasses override this to derive any quantities that can only be computed
+        once the complete trajectory is available (e.g. derived fields, fluxes).
+        """
         return None
 
-    def finalize_diagnostics(self):
-        """Convert diagnostic containers to NumPy arrays."""
-        for var in self.diagnostic_variables.keys():
-            self.diagnostic_variables[var] = np.asarray(self.diagnostic_variables[var])
-
     def validate_initial_state(self, y0):
-        """Validate and normalize the initial state vector."""
-        y0_arr = np.asarray(y0, dtype=float).reshape(-1)
-        n_integrated = len(self.integrated_state_vars)
-        if n_integrated > 0 and y0_arr.size < n_integrated:
-            raise ValueError(
-                f"Initial state length {y0_arr.size} is smaller than the number of integrated "
-                f"state variables ({n_integrated})."
-            )
-        if len(self.state_variables_names) > 0 and y0_arr.size != len(self.state_variables_names):
-            raise ValueError(
-                f"Initial state length {y0_arr.size} does not match declared state variable "
-                f"count ({len(self.state_variables_names)})."
-            )
-        return y0_arr
+        """Validate and normalize the initial state vector.
+
+        Exists as a method so that subclasses with non-standard initial state
+        requirements (e.g. a spatially discretised model that accepts a scalar
+        and broadcasts it to the grid) can override it.  The base implementation
+        delegates to the utility in ``utils/solver``.
+        """
+        return _validate_initial_state(y0, self.integrated_state_vars, self.state_variables_names)
 
     def get_param_vector(self, name, t, state, size):
-        """Resolve a parameter and broadcast it to a fixed vector length."""
+        """Resolve a parameter and broadcast it to a fixed-length vector.
+
+        Spatial models often allow parameters to be either a single scalar
+        (applied uniformly) or a full grid-length array.  This method resolves
+        the parameter via ``get_param`` and then either broadcasts a scalar or
+        validates that an array has the expected size, eliminating that boilerplate
+        from every ``dydt`` that works on a spatial grid.
+        """
         value = self.get_param(name, t, state)
         if np.isscalar(value):
             return np.full(int(size), float(value), dtype=float)
@@ -310,13 +275,29 @@ class PBModel:
         return arr
 
     def post_integrate(self, time, history):
-        """Post-solve hook for models that derive outputs from solved histories."""
+        """Orchestrate post-solve output construction for ``uses_post_history`` models.
+
+        Some models (e.g. spatial PDEs) cannot accumulate state during the solve
+        without side effects; instead they store the full trajectory and derive
+        all outputs here.  This method sequences the required steps in the correct
+        order: build the structured state array, set the time axis, populate
+        diagnostics, and convert diagnostic lists to arrays.  It is called
+        automatically by ``integrate`` when ``uses_post_history = True``.
+        """
         self.state_variables = self.build_state_from_history(time, history)
         self.time = np.asarray(time, dtype=float)
         self.populate_diagnostics_from_history(time, history)
-        self.finalize_diagnostics()
+        self.diagnostic_variables = {var: np.asarray(vals)
+                                     for var, vals in self.diagnostic_variables.items()}
 
     def get_series_by_name(self, var_name):
+        """Return a variable's array and its storage location ('state' or 'diagnostic').
+
+        State variables live in a structured numpy array; diagnostic variables
+        live in a dict.  This method provides a single lookup that works for
+        both, returning the location string so callers (e.g. ``add_noise``) know
+        where to write back a modified array.
+        """
         if self.state_variables is not None and self.state_variables_names and var_name in self.state_variables_names:
             return np.asarray(self.state_variables[var_name], dtype=float), "state"
         if var_name in self.diagnostic_variables:
@@ -352,7 +333,11 @@ class PBModel:
         self._noisy_vars.add(var_name)
 
     def remove_noise(self, var_name):
-        """Restore a variable previously modified with ``add_noise``."""
+        """Restore a variable to its pre-noise state.
+
+        Paired with ``add_noise`` to allow reversible noise experiments: the
+        clean array is saved on the first ``add_noise`` call and restored here.
+        """
         if var_name not in self._noise_originals:
             raise ValueError(f"No stored clean version for '{var_name}'.")
         original = self._noise_originals[var_name]
@@ -365,30 +350,38 @@ class PBModel:
         self._noisy_vars.discard(var_name)
 
     def _reset_noise_overlays(self):
+        """Clear noise state at the start of each integration.
+
+        Called by ``integrate`` before the solve so that noise added to a
+        previous run's output doesn't carry over into the new one.
+        """
         self._noise_originals = {}
         self._noisy_vars = set()
 
     def integrate(self, t_span=None, y0=None, method='RK45', kwargs=None, run_name=None):
-        '''Integrates the model over a given time span.
-        
+        """Integrate the model over a time span and store the results.
+
+        This is the main entry point for running the model.  It validates the
+        initial state, selects the requested solver, runs the integration, and
+        then either calls ``post_integrate`` (for ``uses_post_history`` models)
+        or finalises state variables and diagnostics in-place.
+
         Parameters
         ----------
-        
-        t_span : tuple, list
-            The time span over which the model will be integrated.
-            
-        y0 : list
-            Initial conditions for the model. The length of this list should be equal to the number of model state variables.
-        
+        t_span : tuple of float
+            ``(t0, tf)`` integration bounds.
+        y0 : array-like
+            Initial conditions.  Length must match the number of integrated
+            state variables.
         method : str
-            The integration method to be use; options include 'RK45' (Runge Kutta),
-            'euler', and 'euler_maruyama'. Default is 'RK45'.
-
-        kwargs : dict
-            Additional keyword arguments to be passed to the solver.
-
-
-        '''
+            Solver to use: ``'RK45'`` (default), ``'euler'``, ``'euler_maruyama'``,
+            ``'rk4'``, or any method accepted by ``scipy.integrate.solve_ivp``.
+        kwargs : dict, optional
+            Solver-specific options.  ``'dt'`` is required for fixed-step methods.
+        run_name : str, optional
+            Label stored on the model for bookkeeping.  Defaults to a string
+            describing the method and timestep.
+        """
 
         self.t_span = t_span
         self.y0 = y0
@@ -450,10 +443,10 @@ class PBModel:
             )
 
         elif self.method == 'rk4':
-            if not self.uses_post_history():
+            if not self.uses_post_history:
                 raise ValueError(
                     "method='rk4' requires a conformant dydt with no side effects. "
-                    "Override uses_post_history() to return True and remove any "
+                    "Set uses_post_history = True on the subclass and remove any "
                     "state-appending from dydt before using this method."
                 )
             if 'dt' not in kwargs:
@@ -504,7 +497,7 @@ class PBModel:
 
         self.run_name = run_name if run_name is not None else f'{self.method}, dt={self.kwargs["dt"]}'
         self.solution = solution
-        if self.uses_post_history():
+        if self.uses_post_history:
             history = np.asarray(solution.y, dtype=float)
             if history.ndim == 1:
                 history = history.reshape(-1, 1)
@@ -512,17 +505,21 @@ class PBModel:
         else:
             self.state_variables = self.state_variables[1:]
             self.time = np.array(self.time)
+            self.diagnostic_variables = {var: np.asarray(vals)
+                                         for var, vals in self.diagnostic_variables.items()}
 
-            self.finalize_diagnostics()
+    def to_pyleo(self, var_names=None):
+        """Export one or more model variables as pyleoclim Series objects.
 
-    def to_pyleo(self,var_names=None):
-        '''Function to create a pyleoclim Series object from a state variable.
+        Bridges model output to the pyleoclim ecosystem for downstream
+        analysis and visualisation.  Returns a single ``Series`` for one
+        variable or a ``MultipleSeries`` for several.
 
         Parameters
         ----------
-
-        var_names : str or list
-            The name(s) of the state or diagnostic variable(s) to be converted.'''
+        var_names : str or list of str
+            Name(s) of state or diagnostic variable(s) to export.
+        """
 
         from pyleoclim.core import Series, MultipleSeries
 
@@ -564,23 +561,27 @@ class PBModel:
             return MultipleSeries(pyleo_series)
 
     def reframe_time_axis(self, t_eval, update_state=True):
-        '''Reframe the solution onto a specified time axis.
+        """Resample the solution onto a target time axis.
+
+        Useful for comparing model output to proxy records at specific time
+        points, or for aligning two model runs on a common grid.  Uses the
+        dense output from ``solve_ivp`` when available (accurate); falls back
+        to linear interpolation for fixed-step solvers.
 
         Parameters
         ----------
         t_eval : array-like
-            Target time axis for resampling.
-
+            Target time axis.
         update_state : bool
-            If True, update self.time and self.state_variables to the reframed values.
-            If False, leave the model state intact and return the reframed values only.
+            If ``True``, overwrite ``self.time`` and ``self.state_variables``
+            with the resampled values.  If ``False``, return the resampled
+            array without modifying the model.
 
         Returns
         -------
-        reframed : structured array or ndarray
-            The reframed state variables on t_eval. Structured array if the model
-            has named state variables, otherwise a 2D ndarray.
-        '''
+        reframed : structured ndarray or ndarray
+            Resampled state variables on ``t_eval``.
+        """
 
         if self.solution is None:
             raise ValueError("No solution found. Please integrate the model first.")
