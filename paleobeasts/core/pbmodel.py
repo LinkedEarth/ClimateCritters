@@ -225,15 +225,7 @@ class PBModel:
 
     uses_post_history = False  #: Set to True in subclasses that derive output from the full solved trajectory.
 
-    def build_state_from_history(self, time, history):
-        """Convert raw solver output into a named structured array.
 
-        Exists as a method (rather than a direct utility call in ``post_integrate``)
-        so that subclasses can override it to apply model-specific post-processing
-        — for example, clipping a variable to a physically valid range after the
-        solve.  The base implementation delegates to the utility in ``utils/solver``.
-        """
-        return _build_state_from_history(time, history, self.state_variables_names)
 
     def populate_diagnostics_from_history(self, time, history):
         """Compute diagnostic variables from the full solved trajectory.
@@ -284,7 +276,7 @@ class PBModel:
         diagnostics, and convert diagnostic lists to arrays.  It is called
         automatically by ``integrate`` when ``uses_post_history = True``.
         """
-        self.state_variables = self.build_state_from_history(time, history)
+        self.state_variables = _build_state_from_history(time, history, self.state_variables_names)
         self.time = np.asarray(time, dtype=float)
         self.populate_diagnostics_from_history(time, history)
         self.diagnostic_variables = {var: np.asarray(vals)
