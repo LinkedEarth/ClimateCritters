@@ -44,8 +44,8 @@ class TestSignalModelsLorenz63toPyleo:
 
         forcing = pb.core.Forcing(func)
         model = lorenz.Lorenz63(forcing=forcing)
-        model.integrate(t_span=(0, 10), y0=[1, 1, 1], method=method, kwargs=kwargs)
-        model.to_pyleo(var_names=var_names)
+        output = model.integrate(t_span=(0, 10), y0=[1, 1, 1], method=method, kwargs=kwargs)
+        output.to_pyleo(var_names=var_names)
 
 
 class TestSignalModelsLorenz63TimeVaryingParams:

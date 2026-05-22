@@ -40,8 +40,8 @@ class TestSignalModelsG24toPyleo:
             return 1
         forcing = pb.core.Forcing(func)
         model3 = g24.Model3(forcing=forcing)
-        model3.integrate(t_span=(0,10),y0=[1,1],method=method,kwargs=kwargs)
-        model3.to_pyleo(var_names=var_names)
+        output = model3.integrate(t_span=(0,10),y0=[1,1],method=method,kwargs=kwargs)
+        output.to_pyleo(var_names=var_names)
 
 
 class TestSignalModelsG24TimeVaryingParams:
