@@ -20,10 +20,10 @@ class TestCorePBModelReframeTimeAxis:
 
         forcing = pb.core.Forcing(func)
         model = lorenz.Lorenz63(forcing=forcing)
-        model.integrate(t_span=(0, 5), y0=[1, 1, 1], method='RK45')
+        output = model.integrate(t_span=(0, 5), y0=[1, 1, 1], method='RK45')
 
         t_eval = np.linspace(0, 5, 51)
-        reframed = model.reframe_time_axis(t_eval, update_state=False)
+        reframed = output.reframe_time_axis(t_eval)
 
         assert len(reframed) == len(t_eval)
         assert set(reframed.dtype.names) == {'x', 'y', 'z'}
@@ -34,13 +34,13 @@ class TestCorePBModelReframeTimeAxis:
 
         forcing = pb.core.Forcing(func)
         model = lorenz.Lorenz63(forcing=forcing)
-        model.integrate(t_span=(0, 5), y0=[1, 1, 1], method='euler', kwargs={'dt': 0.1})
+        output = model.integrate(t_span=(0, 5), y0=[1, 1, 1], method='euler', kwargs={'dt': 0.1})
 
         t_eval = np.linspace(0, 5, 26)
-        reframed = model.reframe_time_axis(t_eval, update_state=True)
+        output.reframe_time_axis(t_eval)
 
-        assert len(reframed) == len(t_eval)
-        assert np.allclose(model.time, t_eval)
+        assert len(output.time) == len(t_eval)
+        assert np.allclose(output.time, t_eval)
 
 
 class _PostHistoryModel(PBModel):
@@ -79,7 +79,7 @@ class _ParamContractModel(PBModel):
         self.param_values = {'coeff': coeff}
 
     def dydt(self, t, x):
-        coeff = self.get_param('coeff', t, x)
+        coeff = self.get_param_value('coeff', t, x)
         return [coeff * x[0]]
 
 
@@ -89,14 +89,14 @@ class TestCorePBModelParameterContract:
         model_ts = _ParamContractModel(coeff=lambda t, state: 2.0)
         model_tsm = _ParamContractModel(coeff=lambda t, state, model: 2.0)
 
-        assert model_t.get_param('coeff', 0.0, [1.0]) == 2.0
-        assert model_ts.get_param('coeff', 0.0, [1.0]) == 2.0
-        assert model_tsm.get_param('coeff', 0.0, [1.0]) == 2.0
+        assert model_t.get_param_value('coeff', 0.0, [1.0]) == 2.0
+        assert model_ts.get_param_value('coeff', 0.0, [1.0]) == 2.0
+        assert model_tsm.get_param_value('coeff', 0.0, [1.0]) == 2.0
 
     def test_non_compliant_callable_raises_t0(self):
         model = _ParamContractModel(coeff=lambda model, state: 2.0)
         with pytest.raises(TypeError):
-            model.get_param('coeff', 0.0, [1.0])
+            model.get_param_value('coeff', 0.0, [1.0])
 
     def test_attribute_assignment_syncs_param_values_t0(self):
         model = _ParamContractModel(coeff=1.0)
