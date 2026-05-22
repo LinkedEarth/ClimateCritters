@@ -53,8 +53,7 @@ class Stocker2003BipolarSeesaw(PBModel):
         }
         self.params = ()
 
-    def uses_post_history(self):
-        return True
+    uses_post_history = True
 
     def dydt(self, t, x):
         Ts = float(np.asarray(x, dtype=float)[0])
@@ -92,9 +91,8 @@ class Stocker2003ExtendedSeaIceSeesaw(PBModel):
         tau_A * dA/dt     = -beta*(T_S - T_S0) - gamma*A*(1-A)*(T_S - T_c) + epsilon_A
         tau_ANT * dT_ANT/dt = delta*(T_S - T_ANT) + eta*(1-A) + epsilon_ANT
 
-    Sea-ice area fraction ``A`` is physically constrained to [0, 1] via:
-    - outward-derivative suppression at boundaries in ``dydt``
-    - post-solve clipping in ``build_state_from_history``
+    Sea-ice area fraction ``A`` is physically constrained to [0, 1] by
+    suppressing the outward derivative at the boundaries inside ``dydt``.
     """
 
     def __init__(
@@ -179,8 +177,7 @@ class Stocker2003ExtendedSeaIceSeesaw(PBModel):
         }
         self.params = ()
 
-    def uses_post_history(self):
-        return True
+    uses_post_history = True
 
     def resolve_north(self, t, state):
         if self.forcing is not None:
@@ -226,12 +223,6 @@ class Stocker2003ExtendedSeaIceSeesaw(PBModel):
             dA = 0.0
 
         return [dT_R, dT_S, dA, dT_ANT]
-
-    def build_state_from_history(self, time, history):
-        state = super().build_state_from_history(time, history)
-        if isinstance(state, np.ndarray) and state.dtype.names is not None and "A" in state.dtype.names:
-            state["A"] = np.clip(state["A"], 0.0, 1.0)
-        return state
 
     def populate_diagnostics_from_history(self, time, history):
         time = np.asarray(time, dtype=float)
