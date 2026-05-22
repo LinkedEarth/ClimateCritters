@@ -61,15 +61,15 @@ class TwoBoxCarbon(PBModel):
     def source_flux(self, t, state):
         if self.forcing is not None:
             return float(self.forcing.get_forcing(self.time_util(t)))
-        return float(self.get_param("R", t, state))
+        return float(self.get_param_value("R", t, state))
 
     def tendencies(self, t, state):
         A_mass, S_mass = [float(v) for v in np.asarray(state, dtype=float).reshape(-1)]
-        k = float(self.get_param("k", t, state))
+        k = float(self.get_param_value("k", t, state))
         R = self.source_flux(t, state)
-        l_s = float(self.get_param("l_s", t, state))
-        V_atm = float(self.get_param("V_atm", t, state))
-        V_surf = float(self.get_param("V_surf", t, state))
+        l_s = float(self.get_param_value("l_s", t, state))
+        V_atm = float(self.get_param_value("V_atm", t, state))
+        V_surf = float(self.get_param_value("V_surf", t, state))
 
         if V_atm <= 0.0 or V_surf <= 0.0:
             raise ValueError("V_atm and V_surf must be > 0.")

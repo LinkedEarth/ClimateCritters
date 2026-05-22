@@ -98,16 +98,16 @@ class Model3(PBModel):
         if isinstance(v, np.ndarray):
             v = v[-1]
 
-        f1 = self.get_param('f1', t, x)
-        f2 = self.get_param('f2', t, x)
-        t1 = self.get_param('t1', t, x)
-        t2 = self.get_param('t2', t, x)
+        f1 = self.get_param_value('f1', t, x)
+        f2 = self.get_param_value('f2', t, x)
+        t1 = self.get_param_value('t1', t, x)
+        t2 = self.get_param_value('t2', t, x)
 
         k = int(self.state_variables['k'][-1])
         f = self.forcing.get_forcing(self.time_util(t))
         dfdt = self.calc_dfdt(self.time_util(t), x)
 
-        vc = self.get_param('vc', t, x)
+        vc = self.get_param_value('vc', t, x)
 
         k = self.calc_k(k, dfdt, f, v, vc, f1)
 
@@ -203,7 +203,7 @@ class Model3(PBModel):
         """
         if x is None:
             x = self.state_variables[-1] if self.state_variables is not None else None
-        return self.get_param('vc', t, x)
+        return self.get_param_value('vc', t, x)
 
     def calc_dfdt(self, t, x=None):
         """

@@ -58,9 +58,9 @@ class Roessler(PBModel):
 
     def dydt(self, t, state):
         x_val, y_val, z_val = state[0], state[1], state[2]
-        a = self.get_param('a', t, state)
-        b = self.get_param('b', t, state)
-        c = self.get_param('c', t, state)
+        a = self.get_param_value('a', t, state)
+        b = self.get_param_value('b', t, state)
+        c = self.get_param_value('c', t, state)
 
         dxdt = -y_val - z_val
         dydt = x_val + a * y_val

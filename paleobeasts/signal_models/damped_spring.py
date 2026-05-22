@@ -106,9 +106,9 @@ class DampedSpring(PBModel):
         state = np.asarray(x, dtype=float).reshape(-1)
         pos, vel = float(state[0]), float(state[1])
 
-        m = float(self.get_param("m", t, state))
-        k = float(self.get_param("k", t, state))
-        c = float(self.get_param("c", t, state))
+        m = float(self.get_param_value("m", t, state))
+        k = float(self.get_param_value("k", t, state))
+        c = float(self.get_param_value("c", t, state))
         if m <= 0.0:
             raise ValueError("m must be > 0.")
         if k <= 0.0:
@@ -131,8 +131,8 @@ class DampedSpring(PBModel):
 
         for i, (t, row) in enumerate(zip(time, history)):
             pos, vel = float(row[0]), float(row[1])
-            m = float(self.get_param("m", t, row))
-            k = float(self.get_param("k", t, row))
+            m = float(self.get_param_value("m", t, row))
+            k = float(self.get_param_value("k", t, row))
             energy_vals[i] = 0.5 * m * vel ** 2 + 0.5 * k * pos ** 2
             omega0_vals[i] = np.sqrt(k / m)
 

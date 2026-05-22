@@ -73,15 +73,15 @@ class ENSORechargeOscillator(PBModel):
 
     def recharge_components(self, t, state):
         T, h = [float(v) for v in np.asarray(state, dtype=float).reshape(-1)]
-        mu = float(self.get_param("mu", t, state))
-        en = float(self.get_param("en", t, state))
-        c = float(self.get_param("c", t, state))
-        r = float(self.get_param("r", t, state))
-        alpha = float(self.get_param("alpha", t, state))
-        b0 = float(self.get_param("b0", t, state))
-        gamma = float(self.get_param("gamma", t, state))
-        Af = float(self.get_param("Af", t, state))
-        Pf = float(self.get_param("Pf", t, state))
+        mu = float(self.get_param_value("mu", t, state))
+        en = float(self.get_param_value("en", t, state))
+        c = float(self.get_param_value("c", t, state))
+        r = float(self.get_param_value("r", t, state))
+        alpha = float(self.get_param_value("alpha", t, state))
+        b0 = float(self.get_param_value("b0", t, state))
+        gamma = float(self.get_param_value("gamma", t, state))
+        Af = float(self.get_param_value("Af", t, state))
+        Pf = float(self.get_param_value("Pf", t, state))
 
         if Pf == 0.0:
             raise ValueError("Pf must be non-zero.")

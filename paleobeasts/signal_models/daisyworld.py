@@ -52,14 +52,14 @@ class Daisyworld(PBModel):
         self.params = ()
 
     def _luminosity(self, t, x):
-        L_base = self.get_param('L', t, x)
+        L_base = self.get_param_value('L', t, x)
         if self.forcing is None:
             return L_base
         return L_base + self.forcing.get_forcing(self.time_util(t))
 
     def _growth(self, T_local, t, x):
-        T_opt = self.get_param('T_opt', t, x)
-        beta_width = self.get_param('beta_width', t, x)
+        T_opt = self.get_param_value('T_opt', t, x)
+        beta_width = self.get_param_value('beta_width', t, x)
         growth = 1.0 - beta_width * (T_opt - T_local) ** 2
         return np.maximum(0.0, growth)
 
@@ -78,14 +78,14 @@ class Daisyworld(PBModel):
             total = 1.0
         A_bare = 1.0 - total
 
-        alpha_w = self.get_param('alpha_w', t, x)
-        alpha_b = self.get_param('alpha_b', t, x)
-        alpha_g = self.get_param('alpha_g', t, x)
-        gamma = self.get_param('gamma', t, x)
-        q = self.get_param('q', t, x)
-        S0 = self.get_param('S0', t, x)
-        C = self.get_param('C', t, x)
-        sigma = self.get_param('sigma', t, x)
+        alpha_w = self.get_param_value('alpha_w', t, x)
+        alpha_b = self.get_param_value('alpha_b', t, x)
+        alpha_g = self.get_param_value('alpha_g', t, x)
+        gamma = self.get_param_value('gamma', t, x)
+        q = self.get_param_value('q', t, x)
+        S0 = self.get_param_value('S0', t, x)
+        C = self.get_param_value('C', t, x)
+        sigma = self.get_param_value('sigma', t, x)
         L_eff = self._luminosity(t, x)
 
         A_planet = Aw_eff * alpha_w + Ab_eff * alpha_b + A_bare * alpha_g

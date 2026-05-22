@@ -107,7 +107,7 @@ class BoxModelContext:
         return self._state_map.get(name, default)
 
     def param(self, name):
-        return self.model.get_param(name, self.t, self.state)
+        return self.model.get_param_value(name, self.t, self.state)
 
     def input(self, name):
         return self.model.resolve_input(name, self.t, self.state)
@@ -406,13 +406,13 @@ class GenericBoxModel(PBModel):
 
         if input_spec.fallback_param is None:
             raise ValueError(f"Input '{name}' has no forcing and no fallback parameter.")
-        return self.get_param(input_spec.fallback_param, t, state)
+        return self.get_param_value(input_spec.fallback_param, t, state)
 
     def resolve_box_volume(self, name, t, state):
         """Resolve the explicit volume of a registered box."""
         if name not in self.spec.volume_params:
             raise KeyError(f"No registered volume for box '{name}'.")
-        value = float(self.get_param(self.spec.volume_params[name], t, state))
+        value = float(self.get_param_value(self.spec.volume_params[name], t, state))
         if value <= 0.0:
             raise ValueError(f"Volume for box '{name}' must be > 0.")
         return value
@@ -424,12 +424,12 @@ class GenericBoxModel(PBModel):
         """Assemble one box tendency from sources, losses, exchange, and transport."""
         total = 0.0
         if box_name in self.spec.source_params:
-            total += float(self.get_param(self.spec.source_params[box_name], ctx.t, ctx.state))
+            total += float(self.get_param_value(self.spec.source_params[box_name], ctx.t, ctx.state))
         if box_name in self.spec.loss_params:
-            total -= float(self.get_param(self.spec.loss_params[box_name], ctx.t, ctx.state)) * ctx[box_name]
+            total -= float(self.get_param_value(self.spec.loss_params[box_name], ctx.t, ctx.state)) * ctx[box_name]
 
         for rel in self.spec.exchange_relations:
-            rate = float(self.get_param(rel.rate_param, ctx.t, ctx.state))
+            rate = float(self.get_param_value(rel.rate_param, ctx.t, ctx.state))
             flux = rate * (ctx.concentration(rel.left) - ctx.concentration(rel.right))
             if box_name == rel.left:
                 total -= flux
@@ -437,7 +437,7 @@ class GenericBoxModel(PBModel):
                 total += flux
 
         for rel in self.spec.transport_relations:
-            rate = float(self.get_param(rel.rate_param, ctx.t, ctx.state))
+            rate = float(self.get_param_value(rel.rate_param, ctx.t, ctx.state))
             flux = rate * ctx.concentration(rel.source)
             if box_name == rel.source:
                 total -= flux

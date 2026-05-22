@@ -78,7 +78,7 @@ class LatitudinalEBM(PBModel):
     def annual_mean_insolation(self, t, state):
         sin_phi = self.x
         s = 1.0 - 0.482 * (3.0 * sin_phi ** 2 - 1.0) / 2.0
-        S0 = self.get_param('S0', t, state)
+        S0 = self.get_param_value('S0', t, state)
         return 0.25 * S0 * s
 
     def calc_albedo(self, temperature):
@@ -94,7 +94,7 @@ class LatitudinalEBM(PBModel):
         return albedo
 
     def calc_diffusion(self, temperature, t, state):
-        D = self.get_param('D', t, state) * self._transport_scale
+        D = self.get_param_value('D', t, state) * self._transport_scale
         x = self.x
         dTdx = np.gradient(temperature, x, edge_order=2)
         flux = (1.0 - x ** 2) * dTdx
@@ -140,10 +140,10 @@ class LatitudinalEBM(PBModel):
 
     def dydt(self, t, state):
         temperature = np.asarray(state, dtype=float)
-        C = self.get_param('C', t, state)
-        A = self.get_param('A', t, state)
-        B = self.get_param('B', t, state)
-        CO2_forcing = self.get_param('CO2_forcing', t, state)
+        C = self.get_param_value('C', t, state)
+        A = self.get_param_value('A', t, state)
+        B = self.get_param_value('B', t, state)
+        CO2_forcing = self.get_param_value('CO2_forcing', t, state)
 
         insolation = self.annual_mean_insolation(t, state)
         albedo = self.calc_albedo(temperature)

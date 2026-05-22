@@ -57,14 +57,14 @@ class Stocker2003BipolarSeesaw(PBModel):
 
     def dydt(self, t, x):
         Ts = float(np.asarray(x, dtype=float)[0])
-        tau = float(self.get_param("tau", t, x))
+        tau = float(self.get_param_value("tau", t, x))
         if tau <= 0:
             raise ValueError("tau must be > 0.")
-        beta = float(self.get_param("beta", t, x))
+        beta = float(self.get_param_value("beta", t, x))
         if self.forcing is not None:
             Tn_t = float(self.forcing.get_forcing(self.time_util(t)))
         else:
-            Tn_t = float(self.get_param("Tn", t, x))
+            Tn_t = float(self.get_param_value("Tn", t, x))
         dTsdt = (beta * Tn_t - Ts) / tau
         return [dTsdt]
 
@@ -76,7 +76,7 @@ class Stocker2003BipolarSeesaw(PBModel):
             if self.forcing is not None:
                 Tn_vals.append(float(self.forcing.get_forcing(self.time_util(t))))
             else:
-                Tn_vals.append(float(self.get_param("Tn", t, row)))
+                Tn_vals.append(float(self.get_param_value("Tn", t, row)))
         Tn_vals = np.asarray(Tn_vals, dtype=float)
         self.diagnostic_variables = {"Tn": Tn_vals}
 
@@ -182,35 +182,35 @@ class Stocker2003ExtendedSeaIceSeesaw(PBModel):
     def resolve_north(self, t, state):
         if self.forcing is not None:
             return float(self.forcing.get_forcing(self.time_util(t)))
-        return float(self.get_param("T_N", t, state))
+        return float(self.get_param_value("T_N", t, state))
 
     def dydt(self, t, x):
         state = np.asarray(x, dtype=float).reshape(-1)
         T_R, T_S, A, T_ANT = [float(v) for v in state]
         A_eff = float(np.clip(A, 0.0, 1.0))
 
-        tau_R = float(self.get_param("tau_R", t, state))
-        tau_S = float(self.get_param("tau_S", t, state))
-        tau_A = float(self.get_param("tau_A", t, state))
-        tau_ANT = float(self.get_param("tau_ANT", t, state))
+        tau_R = float(self.get_param_value("tau_R", t, state))
+        tau_S = float(self.get_param_value("tau_S", t, state))
+        tau_A = float(self.get_param_value("tau_A", t, state))
+        tau_ANT = float(self.get_param_value("tau_ANT", t, state))
         for name, value in (("tau_R", tau_R), ("tau_S", tau_S), ("tau_A", tau_A), ("tau_ANT", tau_ANT)):
             if value <= 0.0:
                 raise ValueError(f"{name} must be > 0.")
 
-        kappa = float(self.get_param("kappa", t, state))
-        lambda_s = float(self.get_param("lambda_S", t, state))
-        alpha = float(self.get_param("alpha", t, state))
-        beta = float(self.get_param("beta", t, state))
-        gamma = float(self.get_param("gamma", t, state))
-        delta = float(self.get_param("delta", t, state))
-        eta = float(self.get_param("eta", t, state))
-        T_S0 = float(self.get_param("T_S0", t, state))
-        T_c = float(self.get_param("T_c", t, state))
+        kappa = float(self.get_param_value("kappa", t, state))
+        lambda_s = float(self.get_param_value("lambda_S", t, state))
+        alpha = float(self.get_param_value("alpha", t, state))
+        beta = float(self.get_param_value("beta", t, state))
+        gamma = float(self.get_param_value("gamma", t, state))
+        delta = float(self.get_param_value("delta", t, state))
+        eta = float(self.get_param_value("eta", t, state))
+        T_S0 = float(self.get_param_value("T_S0", t, state))
+        T_c = float(self.get_param_value("T_c", t, state))
         T_N = self.resolve_north(t, state)
-        eps_R = float(self.get_param("epsilon_R", t, state))
-        eps_S = float(self.get_param("epsilon_S", t, state))
-        eps_A = float(self.get_param("epsilon_A", t, state))
-        eps_ANT = float(self.get_param("epsilon_ANT", t, state))
+        eps_R = float(self.get_param_value("epsilon_R", t, state))
+        eps_S = float(self.get_param_value("epsilon_S", t, state))
+        eps_A = float(self.get_param_value("epsilon_A", t, state))
+        eps_ANT = float(self.get_param_value("epsilon_ANT", t, state))
 
         dT_R = (-(T_R - T_N) + eps_R) / tau_R
         dT_S = (kappa * (T_R - T_S) - lambda_s * (T_S - T_S0) + alpha * (1.0 - A_eff) + eps_S) / tau_S

@@ -101,16 +101,16 @@ class EBM(PBModel):
         return [dTdt]
 
     def calc_OLR(self, T, t):
-        return self.get_param('OLR', t, T)
+        return self.get_param_value('OLR', t, T)
 
     def calc_albedo(self, T, t):
-        return self.get_param('albedo', t, T)
+        return self.get_param_value('albedo', t, T)
 
     def calc_merid_diff(self, T, t):
-        return self.get_param('merid_diff', t, T)
+        return self.get_param_value('merid_diff', t, T)
 
     def calc_C(self, T, t):
-        return self.get_param('C', t, T)
+        return self.get_param_value('C', t, T)
 
 
 

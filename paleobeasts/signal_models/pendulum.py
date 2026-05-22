@@ -101,9 +101,9 @@ class SimplePendulum(PBModel):
         state = np.asarray(x, dtype=float).reshape(-1)
         theta, omega = float(state[0]), float(state[1])
 
-        L = float(self.get_param("L", t, state))
-        g = float(self.get_param("g", t, state))
-        lam = float(self.get_param("damping", t, state))
+        L = float(self.get_param_value("L", t, state))
+        g = float(self.get_param_value("g", t, state))
+        lam = float(self.get_param_value("damping", t, state))
         if L <= 0.0:
             raise ValueError("L must be > 0.")
         if g <= 0.0:
@@ -123,8 +123,8 @@ class SimplePendulum(PBModel):
 
         for i, (t, row) in enumerate(zip(time, history)):
             theta, omega = float(row[0]), float(row[1])
-            L = float(self.get_param("L", t, row))
-            g = float(self.get_param("g", t, row))
+            L = float(self.get_param_value("L", t, row))
+            g = float(self.get_param_value("g", t, row))
             energy_vals[i] = 0.5 * (L * omega) ** 2 + g * L * (1.0 - np.cos(theta))
             omega0_vals[i] = np.sqrt(g / L)
 
@@ -231,7 +231,7 @@ class DrivenPendulum(PBModel):
         state = np.asarray(x, dtype=float).reshape(-1)
         theta, omega = float(state[0]), float(state[1])
 
-        q = float(self.get_param("q", t, state))
+        q = float(self.get_param_value("q", t, state))
         drive = self._drive(t)
 
         dtheta = omega
@@ -353,13 +353,13 @@ class DoublePendulum(PBModel):
         state = np.asarray(x, dtype=float).reshape(-1)
         theta1, omega1, theta2, omega2 = [float(v) for v in state]
 
-        m1 = float(self.get_param("m1", t, state))
-        m2 = float(self.get_param("m2", t, state))
-        L1 = float(self.get_param("L1", t, state))
-        L2 = float(self.get_param("L2", t, state))
-        g  = float(self.get_param("g",  t, state))
-        d1 = float(self.get_param("d1", t, state))
-        d2 = float(self.get_param("d2", t, state))
+        m1 = float(self.get_param_value("m1", t, state))
+        m2 = float(self.get_param_value("m2", t, state))
+        L1 = float(self.get_param_value("L1", t, state))
+        L2 = float(self.get_param_value("L2", t, state))
+        g  = float(self.get_param_value("g", t, state))
+        d1 = float(self.get_param_value("d1", t, state))
+        d2 = float(self.get_param_value("d2", t, state))
 
         delta = theta1 - theta2
         sin_d = np.sin(delta)

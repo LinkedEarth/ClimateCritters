@@ -74,7 +74,7 @@ class Lorenz96(PBModel):
 
     def _forcing_value(self, t, x):
         if self.forcing is None:
-            return self.get_param('F', t, x)
+            return self.get_param_value('F', t, x)
         return self.forcing.get_forcing(self.time_util(t))
 
     def dydt(self, t, x):
@@ -103,9 +103,9 @@ class Lorenz96(PBModel):
         X, Y = x[:K], x[K:]
 
         F_t = self._forcing_value(t, x)
-        h = self.get_param('h', t, x)
-        b = self.get_param('b', t, x)
-        c = self.get_param('c', t, x)
+        h = self.get_param_value('h', t, x)
+        b = self.get_param_value('b', t, x)
+        c = self.get_param_value('c', t, x)
 
         dX = np.zeros(K, dtype=float)
         dY = np.zeros(K * J, dtype=float)
@@ -202,9 +202,9 @@ class Lorenz63(PBModel):
 
     def dydt(self, t, x):
         x_val, y_val, z_val = x[0], x[1], x[2]
-        sigma = self.get_param('sigma', t, x)
-        rho = self.get_param('rho', t, x)
-        beta = self.get_param('beta', t, x)
+        sigma = self.get_param_value('sigma', t, x)
+        rho = self.get_param_value('rho', t, x)
+        beta = self.get_param_value('beta', t, x)
         f_vec = self._forcing_vector(t)
 
         dxdt = sigma * (y_val - x_val) + f_vec[0]

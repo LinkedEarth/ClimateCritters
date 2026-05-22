@@ -78,9 +78,9 @@ class Stommel(PBModel):
 
     def overturning(self, t, x):
         T, S = x[0], x[1]
-        alpha = self.get_param('alpha', t, x)
-        beta = self.get_param('beta', t, x)
-        k = self.get_param('k', t, x)
+        alpha = self.get_param_value('alpha', t, x)
+        beta = self.get_param_value('beta', t, x)
+        k = self.get_param_value('k', t, x)
         return k * (alpha * T - beta * S)
 
     def uses_post_history(self):
@@ -91,11 +91,11 @@ class Stommel(PBModel):
         q = self.overturning(t, x)
         adv = np.abs(q)
 
-        E = self.get_param('E', t, x)
-        lambda_T = self.get_param('lambda_T', t, x)
-        lambda_S = self.get_param('lambda_S', t, x)
-        T_star = self.get_param('T_star', t, x)
-        S_star = self.get_param('S_star', t, x)
+        E = self.get_param_value('E', t, x)
+        lambda_T = self.get_param_value('lambda_T', t, x)
+        lambda_S = self.get_param_value('lambda_S', t, x)
+        T_star = self.get_param_value('T_star', t, x)
+        S_star = self.get_param_value('S_star', t, x)
         f_vec = self._forcing_vector(t)
 
         dTdt = -lambda_T * (T - T_star) - adv * T + f_vec[0]
