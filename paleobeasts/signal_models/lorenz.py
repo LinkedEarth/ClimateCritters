@@ -188,9 +188,10 @@ class Lorenz63(PBModel):
     Parameters
     ----------
     forcing : pb.core.Forcing or None
-        Optional external forcing.  If the forcing value ``f(t)`` is scalar
-        it is added to ``dx/dt``; if it is array-like with 3 entries it is
-        added to ``(dx/dt, dy/dt, dz/dt)``.
+        External forcing, which must be provided explicitly but may be
+        ``None``. If the forcing value ``f(t)`` is scalar it is added to
+        ``dx/dt``; if it is array-like with 3 entries it is added to
+        ``(dx/dt, dy/dt, dz/dt)``.
     var_name : str
         Label for the model output.  Default ``'lorenz63'``.
     sigma : float or callable or pb.core.Forcing
