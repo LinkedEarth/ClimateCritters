@@ -8,7 +8,7 @@ Naming rules:
 import numpy as np
 import paleobeasts as pb
 
-from paleobeasts.signal_models import lorenz96
+from paleobeasts.signal_models.lorenz import Lorenz96
 
 
 class TestSignalModelsLorenz96Integrate:

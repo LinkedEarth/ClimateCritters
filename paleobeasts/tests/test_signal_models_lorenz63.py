@@ -17,7 +17,7 @@ import numpy as np
 import pytest
 import paleobeasts as pb
 
-from paleobeasts.signal_models import lorenz
+from paleobeasts.signal_models.lorenz import Lorenz63
 
 
 class TestSignalModelsLorenz63Integrate:
