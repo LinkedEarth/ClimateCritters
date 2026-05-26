@@ -19,62 +19,60 @@ import paleobeasts as pb
 
 from paleobeasts.signal_models import ebm
 
-class TestSignalModelsEBMIntegrate:
-    @pytest.mark.parametrize('y0', [[1],[10]])
-    @pytest.mark.parametrize('t_span', [(0,10),(0,100)])
-    @pytest.mark.parametrize('OLR', [(None),(ebm.OLR_func(1000, 1000))])
-    @pytest.mark.parametrize('method, dt', [('euler', 1), ('RK45', None)])
-    def test_integrate_t0(self,t_span,y0,method,OLR,dt):
-        '''Test integrate method'''
-        def func(x):
-            return 1
-        forcing = pb.core.Forcing(func)
-        model = ebm.EBM(forcing=forcing)
-        model.integrate(t_span=t_span,y0=y0,method=method,dt=dt)
 
-class TestSignalModelsEBMtoPyleo:
+class TestSignalModelsEBM0DIntegrate:
+    @pytest.mark.parametrize('y0', [[1], [10]])
+    @pytest.mark.parametrize('t_span', [(0, 10), (0, 100)])
+    @pytest.mark.parametrize('OLR', [None, ebm.OLR_func(1000, 1000)])
+    @pytest.mark.parametrize('method, dt', [('euler', 1), ('RK45', None)])
+    def test_integrate_t0(self, t_span, y0, method, OLR, dt):
+        '''Test integrate method'''
+        forcing = pb.core.Forcing(lambda x: 1)
+        model = ebm.EBM0D(forcing=forcing, OLR=OLR)
+        model.integrate(t_span=t_span, y0=y0, method=method, dt=dt)
+
+
+class TestSignalModelsEBM0DtoPyleo:
     @pytest.mark.parametrize('method, dt', [('euler', 1), ('RK45', None)])
     @pytest.mark.parametrize('var_names', [
-                                    'T',
-                                    'albedo',
-                                    'absorbed_SW',
-                                    'OLR',
-                                    'solar_incoming',
-                                    ['T','albedo'],
-                                    ['T','albedo','absorbed_SW','OLR','solar_incoming'],
-                                ])
-    def test_topyleo_t0(self,method,dt,var_names):
+        'T',
+        'albedo',
+        'absorbed_SW',
+        'OLR',
+        'solar_incoming',
+        ['T', 'albedo'],
+        ['T', 'albedo', 'absorbed_SW', 'OLR', 'solar_incoming'],
+    ])
+    def test_topyleo_t0(self, method, dt, var_names):
         '''Test to_pyleo method'''
-        def func(x):
-            return 1
-        forcing = pb.core.Forcing(func)
-        model = ebm.EBM(forcing=forcing)
-        output = model.integrate(t_span=(0,10),y0=[100],method=method,dt=dt)
+        forcing = pb.core.Forcing(lambda x: 1)
+        model = ebm.EBM0D(forcing=forcing)
+        output = model.integrate(t_span=(0, 10), y0=[100], method=method, dt=dt)
         output.to_pyleo(var_names=var_names)
 
 
-class TestSignalModelsEBMTimeVaryingParams:
+class TestSignalModelsEBM0DTimeVaryingParams:
     def test_time_varying_params_match_constants_t0(self):
         forcing = pb.core.Forcing(lambda t: 1360.0)
 
-        model_const = ebm.EBM(forcing=forcing, C=4.0, albedo=0.3)
-        model_tv = ebm.EBM(
+        model_const = ebm.EBM0D(forcing=forcing, C=4.0, albedo=0.3)
+        model_tv = ebm.EBM0D(
             forcing=forcing,
-            C=lambda t, T, m: 4.0,
-            albedo=lambda model, T: 0.3,
+            C=lambda t, state, model: 4.0,
+            albedo=lambda t, state: 0.3,
         )
 
         t_span = (0, 10)
-        model_const.integrate(t_span=t_span, y0=[280], method='euler', dt=1)
-        model_tv.integrate(t_span=t_span, y0=[280], method='euler', dt=1)
+        output_const = model_const.integrate(t_span=t_span, y0=[280], method='euler', dt=1)
+        output_tv = model_tv.integrate(t_span=t_span, y0=[280], method='euler', dt=1)
 
-        const_last = model_const.state_variables['T'][-1]
-        tv_last = model_tv.state_variables['T'][-1]
+        const_last = output_const.state_variables['T'][-1]
+        tv_last = output_tv.state_variables['T'][-1]
 
         assert np.isclose(const_last, tv_last, rtol=1e-8, atol=1e-10)
 
 
-class TestSignalModelsEBMSequenceForcing:
+class TestSignalModelsEBM0DSequenceForcing:
     def test_sequence_forcing_integrates_t0(self):
         forcing = pb.core.Forcing.from_sequence(
             [
@@ -83,7 +81,16 @@ class TestSignalModelsEBMSequenceForcing:
             ],
             label='ebm_sequence',
         )
-        model = ebm.EBM(forcing=forcing)
-        model.integrate(t_span=(0, 10), y0=[280], method='euler', dt=1)
-        assert len(model.time) > 1
-        assert np.isfinite(model.state_variables['T'][-1])
+        model = ebm.EBM0D(forcing=forcing)
+        output = model.integrate(t_span=(0, 10), y0=[280], method='euler', dt=1)
+        assert len(output.time) > 1
+        assert np.isfinite(output.state_variables['T'][-1])
+
+
+class TestSignalModelsEBM1DLatSmoke:
+    def test_ebm1dlat_integrates_t0(self):
+        '''EBM1DLat is importable, integrates, and produces expected diagnostics.'''
+        model = ebm.EBM1DLat(forcing=None, S0=1365.0)
+        output = model.integrate(t_span=(0, 50), y0=[15.0])
+        assert len(output.diagnostic_variables['Tglobal']) == len(output.time)
+        assert np.isfinite(output.diagnostic_variables['Tglobal'][-1])

@@ -1,165 +1,401 @@
 import numpy as np
-from functools import partial
+
 from ..utils import constants as phys
 from ..core.pbmodel import PBModel
 
+__all__ = [
+    'EBMBase', 'EBM0D', 'EBM1DLat',
+    'OLR_func', 'albedo_func', 'albedo_func1D',
+]
 
-class EBM(PBModel):
-    """Energy Balance Model (EBM) class
 
-    A simple model that describes the evolution of the temperature of the Earth's surface
-    as a function of the radiative balance between incoming solar radiation and outgoing longwave radiation. The model
-    is described by the following ordinary differential equation:
+# ---------------------------------------------------------------------------
+# Module-level physics helpers
+# All callables comply with the PBModel contract: (t), (t, state), or
+# (t, state, model) with the first positional arg named 't' or 'time'.
+# ---------------------------------------------------------------------------
 
-    $C \frac{dT}{dt} = (1 - \alpha) \frac{S_0}{4} - OLR$
+def _scalar_albedo(T, alpha_ice=0.6, alpha_0=0.3, T1=260., T2=290.):
+    """Ice-albedo feedback for a single temperature value (internal helper)."""
+    if T < T1:
+        return alpha_ice
+    if T <= T2:
+        r = (T - T2) ** 2 / (T2 - T1) ** 2
+        return alpha_0 + (alpha_ice - alpha_0) * r
+    return alpha_0
 
-    where $C$ is the heat capacity of the Earth's surface, $\alpha$ is the albedo, $S_0$ is the incoming solar radiation,
-    $OLR$ is the outgoing longwave radiation.
 
-    #TODO: implement meridional heat transport; currently limited to 0D
+def _olr_stefan_boltzmann(t, state, pRad=650, ps=1000):
+    """Stefan-Boltzmann OLR assuming a dry-adiabatic lapse rate.
 
+    Compliant callable: (t, state).
+    """
+    Ts = float(np.asarray(state).reshape(-1)[0])
+    Te = (pRad / ps) ** (2. / 7.) * Ts
+    return phys.sigma * Te ** 4.
+
+
+def OLR_func(pRad=650, ps=1000):
+    """Return a compliant (t, state) callable for Stefan-Boltzmann OLR.
+
+    Parameters
+    ----------
+    pRad : float
+        Radiative pressure level (hPa).
+    ps : float
+        Surface pressure (hPa).
+    """
+    def _olr(t, state):
+        return _olr_stefan_boltzmann(t, state, pRad, ps)
+    return _olr
+
+
+def albedo_func(t, state, alpha_ice=0.6, alpha_0=0.3, T1=260., T2=290.):
+    """Temperature-dependent albedo with smooth ice-line transition.
+
+    Compliant callable: (t, state).
+
+    Parameters
+    ----------
+    t : float
+        Current time (unused; required for contract compliance).
+    state : float or array-like
+        Current temperature. The first element is used if array-like.
+    alpha_ice : float
+        Albedo for cold (ice-covered) state.
+    alpha_0 : float
+        Albedo for warm (ice-free) state.
+    T1 : float
+        Temperature below which full ice albedo applies.
+    T2 : float
+        Temperature above which full warm albedo applies.
+    """
+    Ts = float(np.asarray(state).reshape(-1)[0])
+    return _scalar_albedo(Ts, alpha_ice, alpha_0, T1, T2)
+
+
+def albedo_func1D(t, state, model, a2=0.25, alpha_ice=0.6, alpha_0=0.1, T1=260., T2=290.):
+    """P2-corrected latitudinal albedo (Legendre polynomial parameterization).
+
+    Compliant callable: (t, state, model).
+
+    Uses the global-mean temperature to set the base albedo, then adds a
+    second Legendre polynomial correction to capture the equator-to-pole
+    gradient. Requires the model to expose a ``phi`` attribute (degrees).
+
+    Parameters
+    ----------
+    t : float
+        Current time (unused; required for contract compliance).
+    state : array-like
+        Full temperature array (grid-length). Global mean is taken internally.
+    model : EBMBase subclass
+        Model instance; must have a ``phi`` attribute (latitude in degrees).
+    a2 : float
+        Amplitude of the P2 Legendre polynomial correction.
+    """
+    phi = model.phi
+    Ts = float(np.mean(np.asarray(state, dtype=float)))
+    a0 = _scalar_albedo(Ts, alpha_ice, alpha_0, T1, T2)
+    P2 = 0.5 * (3 * np.sin(np.deg2rad(phi)) ** 2 - 1)
+    return a0 + a2 * P2
+
+
+# ---------------------------------------------------------------------------
+# Base class
+# ---------------------------------------------------------------------------
+
+class EBMBase(PBModel):
+    """Shared energy balance physics for all EBM variants.
+
+    Provides default implementations of ``calc_OLR``, ``calc_albedo``, and
+    ``calc_C`` that delegate to ``param_values`` via ``get_param_value``.
+
+    Subclasses with different OLR or albedo formulations (e.g. ``EBM1DLat``
+    with Budyko linear OLR and an array ice-line albedo) override the relevant
+    ``calc_*`` methods. The external signature ``(self, T, t)`` is shared across
+    all variants so that user code can call these helpers uniformly.
+    """
+
+    def calc_OLR(self, T, t):
+        """Return OLR at state T and time t (delegates to param_values['OLR'])."""
+        return self.get_param_value('OLR', t, T)
+
+    def calc_albedo(self, T, t):
+        """Return albedo at state T and time t (delegates to param_values['albedo'])."""
+        return self.get_param_value('albedo', t, T)
+
+    def calc_C(self, T, t):
+        """Return heat capacity at state T and time t (delegates to param_values['C'])."""
+        return self.get_param_value('C', t, T)
+
+
+# ---------------------------------------------------------------------------
+# 0D variant
+# ---------------------------------------------------------------------------
+
+class EBM0D(EBMBase):
+    """Zero-dimensional energy balance model.
+
+    Evolves global-mean surface temperature T according to:
+
+        C dT/dt = (1 - alpha) * S0/4 - OLR
+
+    where S0 is supplied by ``forcing``, ``alpha`` is the planetary albedo,
+    and OLR is the outgoing longwave radiation.
 
     Parameters
     ----------
     forcing : pb.Forcing
-        Object that provides the forcing at time t.
-
-    state_variables : list
-        List of state variables for the model. Default is ['T'].
-
-    diagnostic_variables : list
-        List of diagnostic variables for the model. Default is ['albedo', 'absorbed_SW', 'OLR', 'solar_incoming'].
-
+        Provides solar constant S0 at time t.
+    state_variables : list of str, optional
+        Default ``['T']``.
+    diagnostic_variables : list of str, optional
+        Default ``['albedo', 'absorbed_SW', 'OLR', 'solar_incoming']``.
     var_name : str
-        Name of the variable being modeled. Default is 'temperature'.
-
-    OLR : float or function or pb.Forcing
-        Function that calculates the outgoing longwave radiation as a function of temperature. Default is the Stefan-Boltzmann law with prad=650, ps=1000.
-        To specify different values, pass OLR_func(pRad, ps) where pRad is the radiative pressure and ps is the surface pressure.
-
+        Label for the modeled quantity. Default ``'temperature'``.
+    OLR : callable or None
+        Outgoing longwave radiation. Must have a compliant signature:
+        ``(t)``, ``(t, state)``, or ``(t, state, model)``.
+        Default is Stefan-Boltzmann via ``OLR_func(pRad=650, ps=1000)``.
     C : float or callable or pb.Forcing
-        Heat capacity of the Earth's surface. Default is 4.
-
-    albedo : float or function or pb.Forcing
-        Albedo of the Earth's surface. Default is 0.3.
+        Heat capacity. Default 4.
+    albedo : float or callable or pb.Forcing
+        Planetary albedo. Default 0.3.
 
     Notes
     -----
-    Parameters may be constants, callables, or ``pb.Forcing`` objects. Callables can use
-    common signatures such as ``(t)``, ``(t, state)``, ``(t, state, model)``,
-    ``(model, state)``, or ``(state)``.
-
+    Parameters may be constants, callables, or ``pb.Forcing`` objects.
+    Callables must follow the contract documented in
+    ``contracts/signal_model_contract.md``.
     """
-    def __init__(self, forcing, state_variables= ['T'],
-                 diagnostic_variables = ['albedo', 'absorbed_SW', 'OLR', 'solar_incoming'],
-                 var_name='temperature', OLR=None, C=4, merid_diff=0, albedo=.3):
-        super().__init__(forcing, var_name, state_variables=state_variables,
-                         diagnostic_variables=diagnostic_variables )
 
-        self.forcing = forcing
-        self.variable_name = var_name
+    def __init__(self, forcing, state_variables=None, diagnostic_variables=None,
+                 var_name='temperature', OLR=None, C=4, albedo=0.3):
+        if state_variables is None:
+            state_variables = ['T']
+        if diagnostic_variables is None:
+            diagnostic_variables = ['albedo', 'absorbed_SW', 'OLR', 'solar_incoming']
+
+        super().__init__(forcing, var_name, state_variables=state_variables,
+                         diagnostic_variables=diagnostic_variables)
+
         self.C = C
-        self.params = ()
         self.albedo = albedo
         self.OLR = OLR if OLR is not None else OLR_func()
-        self.merid_diff = merid_diff
-        self.phi = np.linspace(-np.pi / 2, np.pi / 2, 100)
         self.param_values = {
             'C': self.C,
             'albedo': self.albedo,
             'OLR': self.OLR,
-            'merid_diff': self.merid_diff,
         }
+        self.params = ()
 
     def dydt(self, t, x):
+        T = float(x[0])
 
-        T =x
-        if isinstance(T, np.ndarray):
-            T = T[-1]
-
-        # assumes forcing is S0
-        # 1/4 factor because Earth emits radiation over full surface (4πR2)
-        # but at any given time only receives incoming (solar) radiation over its cross-sectional area, πR2
         f_solar_incoming = self.forcing.get_forcing(t)
         albedo = self.calc_albedo(T, t)
-        absorbed_SW = (1 - albedo) * f_solar_incoming/4
+        absorbed_SW = (1 - albedo) * f_solar_incoming / 4
         OLR = self.calc_OLR(T, t)
-
         C = self.calc_C(T, t)
-        dTdt = 1 / C * (absorbed_SW - OLR + self.calc_merid_diff(T, t))
+        dTdt = (absorbed_SW - OLR) / C
 
-        new_row = np.array([(T)], dtype=self.dtypes)
+        new_row = np.array([(T,)], dtype=self.dtypes)
         self.state_variables = np.concatenate([self.state_variables, new_row], axis=0)
         self.diagnostic_variables['albedo'].append(albedo)
         self.diagnostic_variables['absorbed_SW'].append(absorbed_SW)
         self.diagnostic_variables['OLR'].append(OLR)
         self.diagnostic_variables['solar_incoming'].append(f_solar_incoming)
-        
-        if t>0:
+
+        if t > 0:
             self.time.append(t)
 
         return [dTdt]
 
-    def calc_OLR(self, T, t):
-        return self.get_param_value('OLR', t, T)
+
+# ---------------------------------------------------------------------------
+# 1D latitudinal variant
+# ---------------------------------------------------------------------------
+
+class EBM1DLat(EBMBase):
+    """Diffusive annual-mean latitudinal energy balance model.
+
+    Budyko-Sellers type 1D EBM on a latitude grid:
+
+        C dT/dt = S(x)(1 - alpha(T)) - OLR(T) + D * div(grad T)
+
+    where ``x = sin(phi)``, OLR is the Budyko linear form ``(A - CO2_forcing) + B*T``,
+    and diffusion is computed in x-coordinates with no-flux polar boundaries.
+
+    Overrides ``calc_OLR`` and ``calc_albedo`` from ``EBMBase`` with
+    grid-aware array implementations.
+
+    Parameters
+    ----------
+    forcing : pb.Forcing or None
+        Optional external forcing (reserved for future use).
+    var_name : str
+        Label for the modeled quantity. Default ``'ebm1d_lat'``.
+    grid_n : int
+        Number of latitude grid points (≥ 3). Default 50.
+    C : float or callable or pb.Forcing
+        Heat capacity (W yr m⁻² K⁻¹).
+    D : float or callable or pb.Forcing
+        Meridional diffusion coefficient.
+    A : float or callable or pb.Forcing
+        Budyko OLR intercept (W m⁻²).
+    B : float or callable or pb.Forcing
+        Budyko OLR slope (W m⁻² K⁻¹).
+    S0 : float or callable or pb.Forcing
+        Solar constant (W m⁻²).
+    CO2_forcing : float or callable or pb.Forcing
+        Radiative forcing from CO2; shifts OLR intercept down.
+
+    Notes
+    -----
+    ``uses_post_history = True``: diagnostics are populated from the full
+    solved trajectory via ``populate_diagnostics_from_history``.
+    ``validate_initial_state`` accepts a scalar and broadcasts it to the grid.
+    """
+
+    uses_post_history = True
+
+    def __init__(self, forcing=None, var_name='ebm1d_lat', grid_n=50, C=10.0, D=0.55,
+                 A=210.0, B=2.0, S0=1365.0, CO2_forcing=0.0,
+                 state_variables=None, diagnostic_variables=None):
+        self.grid_n = int(grid_n)
+        if self.grid_n < 3:
+            raise ValueError("grid_n must be at least 3.")
+
+        self.phi = np.linspace(-90.0, 90.0, self.grid_n)
+        self.x = np.sin(np.deg2rad(self.phi))
+
+        if state_variables is None:
+            state_variables = [f'T_{i}' for i in range(self.grid_n)]
+        if diagnostic_variables is None:
+            diagnostic_variables = ['ice_line_lat', 'Tglobal']
+
+        super().__init__(forcing, var_name, state_variables=state_variables,
+                         diagnostic_variables=diagnostic_variables)
+
+        self.C = C
+        self.D = D
+        self.A = A
+        self.B = B
+        self.S0 = S0
+        self.CO2_forcing = CO2_forcing
+        self._transport_scale = np.pi / 2.0
+        self.param_values = {
+            'C': C, 'D': D, 'A': A, 'B': B, 'S0': S0, 'CO2_forcing': CO2_forcing,
+        }
+        self.params = ()
+
+    def validate_initial_state(self, y0):
+        """Accept a scalar (broadcast to full grid) or a grid-length array."""
+        y0_arr = np.asarray(y0, dtype=float).reshape(-1)
+        if y0_arr.size == 1:
+            return np.full(self.grid_n, float(y0_arr[0]), dtype=float)
+        if y0_arr.size != self.grid_n:
+            raise ValueError(
+                f"Initial state length {y0_arr.size} does not match grid_n ({self.grid_n})."
+            )
+        return y0_arr
 
     def calc_albedo(self, T, t):
-        return self.get_param_value('albedo', t, T)
+        """Array ice-albedo: step function with linear -10 °C to 0 °C transition.
 
-    def calc_merid_diff(self, T, t):
-        return self.get_param_value('merid_diff', t, T)
+        Overrides ``EBMBase.calc_albedo``. The ``t`` argument is unused but
+        kept for a consistent external signature.
+        """
+        temperature = np.asarray(T, dtype=float)
+        albedo = np.empty_like(temperature)
+        cold = temperature < -10.0
+        warm = temperature > 0.0
+        transition = (~cold) & (~warm)
+        albedo[cold] = 0.6
+        albedo[warm] = 0.3
+        albedo[transition] = 0.6 - 0.3 * ((temperature[transition] + 10.0) / 10.0)
+        return albedo
 
-    def calc_C(self, T, t):
-        return self.get_param_value('C', t, T)
+    def calc_OLR(self, T, t):
+        """Budyko linear OLR: ``(A - CO2_forcing) + B * T``.
 
+        Overrides ``EBMBase.calc_OLR``. Parameters are resolved through
+        ``get_param_value`` so they can be time-varying or Forcing objects.
+        """
+        A = self.get_param_value('A', t, T)
+        CO2_forcing = self.get_param_value('CO2_forcing', t, T)
+        B = self.get_param_value('B', t, T)
+        return (A - CO2_forcing) + B * T
 
+    def annual_mean_insolation(self, t, state):
+        """Annual-mean insolation with P2 latitudinal distribution."""
+        sin_phi = self.x
+        s = 1.0 - 0.482 * (3.0 * sin_phi ** 2 - 1.0) / 2.0
+        S0 = self.get_param_value('S0', t, state)
+        return 0.25 * S0 * s
 
-def albedo_func(ebm_model, Ts, alpha_ice=.6, alpha_0=.3, T1=260., T2=290.):
-    if isinstance(Ts, np.ndarray):
-        Ts = Ts[-1]
-    if Ts < T1:
-        a0 = alpha_ice
-    elif (Ts >= T1) & (Ts <= T2):
-        r = (Ts - T2) ** 2 / (T2 - T1) ** 2
-        a0 = alpha_0 + (alpha_ice - alpha_0) * r
-    else:
-        a0 = alpha_0
+    def calc_diffusion(self, temperature, t, state):
+        """Meridional diffusion in x = sin(phi) coordinates, no-flux at poles."""
+        D = self.get_param_value('D', t, state) * self._transport_scale
+        x = self.x
+        dTdx = np.gradient(temperature, x, edge_order=2)
+        flux = (1.0 - x ** 2) * dTdx
+        flux[0] = 0.0
+        flux[-1] = 0.0
+        return D * np.gradient(flux, x, edge_order=2)
 
-    return a0
+    def calc_global_mean(self, temperature):
+        """Cosine-weighted global mean temperature."""
+        weights = np.cos(np.deg2rad(self.phi))
+        return float(np.average(np.asarray(temperature, dtype=float), weights=weights))
 
+    def calc_ice_line_lat(self, temperature):
+        """Interpolated ice-line latitude (average of NH and SH edges at -10 °C)."""
+        temperature = np.asarray(temperature, dtype=float)
+        threshold = -10.0
+        abs_phi = np.abs(self.phi)
+        hemi_edges = []
 
-def albedo_func1D(ebm_model, Ts, a2=.25, alpha_ice=.6, alpha_0=.1, T1=260., T2=290.):
-    phi = ebm_model.phi
-    a0 = albedo_func(Ts, alpha_ice, alpha_0, T1, T2)
-    P2 = .5 * (3 * np.sin(phi) ** 2 - 1)
-    return a0 + a2 * P2
+        for mask in (self.phi >= 0.0, self.phi <= 0.0):
+            phi_side = abs_phi[mask]
+            temp_side = temperature[mask]
+            order = np.argsort(phi_side)
+            phi_side = phi_side[order]
+            temp_side = temp_side[order]
 
+            if np.all(temp_side > threshold):
+                hemi_edges.append(90.0)
+                continue
+            if np.all(temp_side <= threshold):
+                hemi_edges.append(0.0)
+                continue
 
-def _OLR_func(Ts, pRad=650, ps=1000):
-    if isinstance(Ts, np.ndarray):
-        Ts = Ts[-1]
-        # print(Ts)
-    Te = (pRad / ps) ** (2. / 7.) * Ts  # emission temperature assuming dry adiabat
-    # print('Te', Te)
-    return phys.sigma * (Te ** 4.)
+            cold_idx = np.where(temp_side <= threshold)[0][0]
+            warm_idx = cold_idx - 1
+            t_warm = temp_side[warm_idx]
+            t_cold = temp_side[cold_idx]
+            phi_warm = phi_side[warm_idx]
+            phi_cold = phi_side[cold_idx]
+            frac = (threshold - t_warm) / (t_cold - t_warm)
+            hemi_edges.append(float(phi_warm + frac * (phi_cold - phi_warm)))
 
-def OLR_func(pRad=650, ps=1000):
-    return partial(_OLR_func, pRad=pRad, ps=ps)
-    # if isinstance(Ts, np.ndarray):
-    #     Ts = Ts[-1]
-    #     # print(Ts)
-    # Te = (pRad / ps) ** (2. / 7.) * Ts  # emission temperature assuming dry adiabat
-    # # print('Te', Te)
-    # return phys.sigma * (Te ** 4.)
+        return float(np.mean(hemi_edges))
 
+    def dydt(self, t, state):
+        temperature = np.asarray(state, dtype=float)
+        C = self.calc_C(temperature, t)
+        insolation = self.annual_mean_insolation(t, state)
+        albedo = self.calc_albedo(temperature, t)
+        absorbed_sw = insolation * (1.0 - albedo)
+        olr = self.calc_OLR(temperature, t)
+        diffusion = self.calc_diffusion(temperature, t, state)
+        return (absorbed_sw - olr + diffusion) / C
 
-### Future support for 1D models
-def incoming_SW_func(t, S_0=1360.8):
-    return np.ones(np.array(t).shape)*S_0
-
-# def advection_diffusion(ebm_model, T, D):
-#     phi = ebm_model.phi
-#     return D / np.cos(phi) * (np.gradient(phi, T) * -np.sin(phi) + np.gradient(T, phi) * np.cos(phi))
-
-def calc_f(t, S_0=1360.8, T1=11):
-    return S_0+ np.sin(t*(2 * np.pi)/T1)
+    def populate_diagnostics_from_history(self, time, history):
+        self.diagnostic_variables['Tglobal'] = np.array(
+            [self.calc_global_mean(row) for row in history], dtype=float,
+        )
+        self.diagnostic_variables['ice_line_lat'] = np.array(
+            [self.calc_ice_line_lat(row) for row in history], dtype=float,
+        )
