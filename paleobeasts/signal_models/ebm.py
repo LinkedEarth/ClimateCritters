@@ -58,7 +58,7 @@ def OLR_func(pRad=650, ps=1000):
     return _olr
 
 
-def albedo_func(t, state, alpha_ice=0.6, alpha_0=0.3, T1=260., T2=290.):
+def albedo_func(t, state, *, alpha_ice=0.6, alpha_0=0.3, T1=260., T2=290.):
     """Temperature-dependent albedo with a smooth ice-line transition.
 
     Returns a single albedo value based on the global-mean (or scalar)
@@ -89,7 +89,7 @@ def albedo_func(t, state, alpha_ice=0.6, alpha_0=0.3, T1=260., T2=290.):
     return _scalar_albedo(Ts, alpha_ice, alpha_0, T1, T2)
 
 
-def albedo_func1D(t, state, model, a2=0.25, alpha_ice=0.6, alpha_0=0.1, T1=260., T2=290.):
+def albedo_func1D(t, state, model, *, a2=0.25, alpha_ice=0.6, alpha_0=0.1, T1=260., T2=290.):
     """P2-corrected latitudinal albedo using a Legendre polynomial parameterization.
 
     Uses the global-mean temperature to set the base albedo via the same
@@ -247,8 +247,8 @@ class EBM0D(EBMBase):
 
     """
 
-    def __init__(self, forcing, state_variables=None, diagnostic_variables=None,
-                 var_name='temperature', OLR=None, C=4, albedo=0.3):
+    def __init__(self, forcing, var_name='temperature', state_variables=None,
+                 diagnostic_variables=None, OLR=None, C=4, albedo=0.3):
         if state_variables is None:
             state_variables = ['T']
         if diagnostic_variables is None:
