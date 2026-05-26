@@ -205,8 +205,7 @@ class Lorenz63(PBModel):
     -----
     The classic strange attractor exists for ``sigma=10``, ``rho=28``,
     ``beta=8/3``.  Time-varying parameters are supported as callables with
-    signatures ``(t)``, ``(t, state)``, ``(t, state, model)``,
-    ``(model, state)``, or ``(state)``.
+    signatures ``(t)``, ``(t, state)``, or ``(t, state, model)``.
 
     State variables are ``x``, ``y``, ``z`` in that order.
 

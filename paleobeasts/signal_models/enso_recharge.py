@@ -19,8 +19,10 @@ class ENSORechargeOscillator(PBModel):
     Parameters
     ----------
     forcing : pb.core.Forcing or None
-        External forcing added to ``dT/dt``.  If provided it overrides the
-        internal seasonal term ``Af*sin(2*pi*t/Pf)``.  Default ``None``.
+        Optional forcing object accepted by ``PBModel`` and forwarded to the
+        base class constructor. In this implementation it is not used by
+        ``recharge_components``/``dydt``; the SST tendency retains the
+        internal seasonal term ``Af*sin(2*pi*t/Pf)``. Default ``None``.
     var_name : str
         Label for the model output.  Default ``'enso_recharge_oscillator'``.
     mu : float or callable or pb.core.Forcing
