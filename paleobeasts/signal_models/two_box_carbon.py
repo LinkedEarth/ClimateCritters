@@ -8,9 +8,55 @@ from paleobeasts.core.pbmodel import PBModel
 class TwoBoxCarbon(PBModel):
     """Two-box carbon exchange model with explicit box volumes.
 
-    State variables ``A`` and ``S`` are carbon inventories in the atmospheric
-    and surface-ocean boxes. Air-sea exchange is driven by the difference in
-    box concentrations, computed from the explicit box volumes.
+    State variables ``A`` and ``S`` are carbon inventories (mass units) in the
+    atmospheric and surface-ocean boxes respectively.  Air-sea exchange is
+    driven by the concentration gradient:
+
+        exchange = k * (A/V_atm - S/V_surf)
+        dA/dt = -exchange + R - l_s*A
+        dS/dt = exchange
+
+    Parameters
+    ----------
+    forcing : pb.core.Forcing or None
+        Optional prescribed carbon source flux ``R(t)`` (same units as
+        ``R``).  If provided it overrides the constant ``R`` parameter.
+        Default ``None``.
+    var_name : str
+        Label for the model output.  Default ``'two_box_carbon'``.
+    k : float or callable or pb.core.Forcing
+        Air-sea gas exchange rate constant (volume units per time).
+        Default 0.2.
+    R : float or callable or pb.core.Forcing
+        Constant carbon source flux into the atmosphere (mass per time).
+        Default 0.0.
+    l_s : float or callable or pb.core.Forcing
+        First-order atmospheric loss coefficient.  Default 0.0.
+    V_atm : float or callable or pb.core.Forcing
+        Volume of the atmospheric box (must be > 0).  Default 1.0.
+    V_surf : float or callable or pb.core.Forcing
+        Volume of the surface-ocean box (must be > 0).  Default 1.0.
+
+    Notes
+    -----
+    Diagnostic variable ``net_flux`` (the atmospheric tendency ``dA/dt``)
+    is computed in ``populate_diagnostics_from_history`` after integration.
+
+    ``V_atm`` and ``V_surf`` must be positive; ``ValueError`` is raised if
+    either is ≤ 0.
+
+    Examples
+    --------
+    .. code-block:: python
+
+        import paleobeasts as pb
+        from paleobeasts.signal_models.two_box_carbon import TwoBoxCarbon
+
+        model = TwoBoxCarbon(forcing=None, k=0.1, V_atm=1.0, V_surf=50.0)
+        output = model.integrate(
+            t_span=(0, 200), y0=[800.0, 38000.0], method='RK45'
+        )
+        ts = output.to_pyleo(var_names=['A', 'S'])
     """
 
     def __init__(

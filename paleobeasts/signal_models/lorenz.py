@@ -6,45 +6,82 @@ from ..core.pbmodel import PBModel
 class Lorenz96(PBModel):
     """Lorenz (1996) single-scale and two-scale atmospheric model.
 
-    A periodic ring of *n* variables with quadratic advection and constant
-    forcing. When *J* > 0 a second, faster layer of *n* × *J* variables is
-    coupled to the slow layer (the two-scale system of Lorenz & Emanuel 1998).
+    A periodic ring of *n* slow-scale variables with quadratic advection and
+    constant forcing:
+
+        dX_k/dt = (X_{k+1} - X_{k-2}) * X_{k-1} - X_k + F
+
+    When *J* > 0 a second, faster Y layer of *n* × *J* variables is coupled
+    to the slow layer (the two-scale system of Lorenz & Emanuel 1998):
+
+        dX_k/dt = ... - (h*c/b) * sum_j Y_{j,k}
+        dY_{j,k}/dt = -c*b * Y_{j+1,k} * (Y_{j+2,k} - Y_{j-1,k}) - c*Y_{j,k} + (h*c/b)*X_k
 
     Parameters
     ----------
-    forcing : pb.Forcing or None
-        Forcing object providing F(t). If None, the constant ``F`` parameter
-        is used.
+    forcing : pb.core.Forcing or None
+        Optional forcing object providing F(t).  If ``None``, the constant
+        ``F`` parameter is used as the slow-scale forcing.
     var_name : str
-        Default ``'lorenz96'``.
+        Label for the model output.  Default ``'lorenz96'``.
     n : int
-        Number of slow-scale variables. Default 40.
+        Number of slow-scale variables.  Default 40.
     J : int
-        Fast variables per slow variable. ``J=0`` (default) gives the
-        single-scale system; ``J>0`` gives the two-scale system.
-    F : float or callable or pb.Forcing
-        Slow-scale forcing. Default 8.
+        Fast variables per slow variable.  ``J=0`` (default) gives the
+        single-scale system; ``J>0`` activates the two-scale system.
+    F : float or callable or pb.core.Forcing
+        Slow-scale forcing amplitude.  Default 8.0.
     h : float
-        Coupling coefficient between X and Y (two-scale only). Default 1.
+        Coupling coefficient between X and Y layers (two-scale only).
+        Default 1.0.
     b : float
-        Amplitude ratio Y/X (two-scale only). Default 10.
+        Amplitude ratio Y/X (two-scale only).  Default 10.0.
     c : float
-        Timescale ratio Y/X (two-scale only). Default 10.
+        Timescale ratio Y/X (two-scale only).  Default 10.0.
     exact_rhs : bool
-        If True, use global ``np.roll`` on the flattened Y vector, matching
-        the original L96_model.py. Default False (per-block loop).
+        If ``True``, use global ``np.roll`` on the flattened Y vector,
+        matching the original L96_model.py reference implementation.
+        Default ``False`` (per-block loop, identical results).
 
     Notes
     -----
-    For the two-scale system (``J>0``) use ``method='rk4'`` with
-    ``kwargs={'dt': dt, 'si': si}``. Adaptive solvers (RK45) call ``dydt``
-    at intermediate sub-steps; the fixed-step RK4 in PBModel avoids this
-    problem. Plain Euler is too coarse to resolve the Y dynamics.
+    For the two-scale system (``J>0``) use ``method='rk4'`` with a small
+    fixed time step passed directly to ``integrate``::
+
+        output = model.integrate(t_span=..., y0=..., method='rk4',
+                                 dt=0.005, kwargs={'si': 0.05})
+
+    Adaptive solvers (RK45) call ``dydt`` at unpredictable sub-steps; the
+    fixed-step RK4 avoids this problem.  Plain Euler is too coarse to
+    resolve the fast Y dynamics.
 
     References
     ----------
-    Lorenz (1996). Predictability: A problem partly solved.
-    Lorenz & Emanuel (1998). J. Atmos. Sci., 55, 399–414.
+    Lorenz, E. N. (1996). Predictability: A problem partly solved.
+    Lorenz, E. N., & Emanuel, K. A. (1998). J. Atmos. Sci., 55, 399–414.
+
+    Examples
+    --------
+    .. code-block:: python
+
+        import numpy as np
+        import paleobeasts as pb
+        from paleobeasts.signal_models.lorenz import Lorenz96
+
+        # Single-scale system
+        model = Lorenz96(forcing=None, n=40, F=8.0)
+        y0 = np.random.randn(40) + 8.0
+        output = model.integrate(t_span=(0, 10), y0=y0, method='rk4', dt=0.01)
+        ts = output.to_pyleo(var_names=['x0'])
+
+        # Two-scale system
+        K, J = 36, 10
+        model2 = Lorenz96(forcing=None, n=K, J=J, F=10.0)
+        y0_2 = np.concatenate([np.random.randn(K) + 10.0,
+                                np.random.randn(K * J) * 0.01])
+        output2 = model2.integrate(t_span=(0, 10), y0=y0_2,
+                                   method='rk4', dt=0.005,
+                                   kwargs={'si': 0.05})
     """
 
     def __init__(self, forcing=None, var_name='lorenz96', n=40, J=0,
@@ -73,9 +110,7 @@ class Lorenz96(PBModel):
         self.params = ()
 
     def _forcing_value(self, t, x):
-        if self.forcing is None:
-            return self.get_param_value('F', t, x)
-        return self.forcing.get_forcing(self.time_util(t))
+        return self.resolve_forcing(t, default=self.get_param_value('F', t, x))
 
     def dydt(self, t, x):
         x = np.asarray(x, dtype=float)
@@ -141,31 +176,57 @@ class Lorenz96(PBModel):
 class Lorenz63(PBModel):
     """Lorenz (1963) system.
 
+    A minimal three-variable convection model exhibiting sensitive dependence
+    on initial conditions and a strange attractor:
+
+        dx/dt = sigma * (y - x)
+        dy/dt = x * (rho - z) - y
+        dz/dt = x * y - beta * z
+
     Parameters
     ----------
-    forcing : pb.Forcing
-        Forcing object providing f(t). If f(t) is a scalar, it is added to dx/dt.
-        If f(t) is array-like with 3 entries, it is added to (dx/dt, dy/dt, dz/dt).
-
+    forcing : pb.core.Forcing or None
+        External forcing, which must be provided explicitly but may be
+        ``None``. If the forcing value ``f(t)`` is scalar it is added to
+        ``dx/dt``; if it is array-like with 3 entries it is added to
+        ``(dx/dt, dy/dt, dz/dt)``.
     var_name : str
-        Name of the variable being modeled. Default is 'lorenz63'.
-
-    sigma : float or callable or pb.Forcing
-        Prandtl number. Default is 10.
-
-    rho : float or callable or pb.Forcing
-        Rayleigh number. Default is 28.
-
-    beta : float or callable or pb.Forcing
-        Geometric factor. Default is 8/3.
+        Label for the model output.  Default ``'lorenz63'``.
+    sigma : float or callable or pb.core.Forcing
+        Prandtl number controlling rotation of convective rolls.  Default 10.
+    rho : float or callable or pb.core.Forcing
+        Rayleigh number (reduced) controlling the buoyancy forcing.
+        Default 28.
+    beta : float or callable or pb.core.Forcing
+        Geometric factor controlling the spatial structure.  Default 8/3.
 
     Notes
     -----
-    Time-varying parameters can be provided as callables with common signatures such as
-    ``(t)``, ``(t, state)``, ``(t, state, model)``, ``(model, state)``, or ``(state)``.
+    The classic strange attractor exists for ``sigma=10``, ``rho=28``,
+    ``beta=8/3``.  Time-varying parameters are supported as callables with
+    signatures ``(t)``, ``(t, state)``, or ``(t, state, model)``.
+
+    State variables are ``x``, ``y``, ``z`` in that order.
+
+    References
+    ----------
+    Lorenz, E. N. (1963). J. Atmos. Sci., 20, 130–141.
+
+    Examples
+    --------
+    .. code-block:: python
+
+        import paleobeasts as pb
+        from paleobeasts.signal_models.lorenz import Lorenz63
+
+        model = Lorenz63(forcing=pb.core.Forcing(lambda t: 0.0))
+        output = model.integrate(
+            t_span=(0, 100), y0=[-8.0, 8.0, 27.0], method='RK45'
+        )
+        ts = output.to_pyleo(var_names=['x', 'y', 'z'])
     """
 
-    def __init__(self, forcing, var_name='lorenz63', sigma=10.0, rho=28.0, beta=8 / 3,
+    def __init__(self, forcing=None, var_name='lorenz63', sigma=10.0, rho=28.0, beta=8 / 3,
                  state_variables=None, diagnostic_variables=None, *args, **kwargs):
         if state_variables is None:
             state_variables = ['x', 'y', 'z']
@@ -186,10 +247,7 @@ class Lorenz63(PBModel):
         self.params = ()
 
     def _forcing_vector(self, t):
-        if self.forcing is None:
-            return np.zeros(3)
-
-        f_val = self.forcing.get_forcing(self.time_util(t))
+        f_val = self.resolve_forcing(t)
 
         if np.isscalar(f_val):
             return np.array([f_val, 0.0, 0.0])

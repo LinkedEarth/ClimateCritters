@@ -47,7 +47,9 @@ class SimplePendulum(PBModel):
     Parameters
     ----------
     forcing:
-        Not used by default; reserved for subclassing.
+        Optional external torque applied additively to ``dω/dt``.  A scalar
+        ``Forcing`` value is added directly; if ``None``, the unforced
+        dynamics are used.
     var_name:
         Human-readable label.
     L:
@@ -111,7 +113,7 @@ class SimplePendulum(PBModel):
 
         omega0_sq = g / L
         dtheta = omega
-        domega = -lam * omega - omega0_sq * np.sin(theta)
+        domega = -lam * omega - omega0_sq * np.sin(theta) + self.resolve_forcing(t)
         return [dtheta, domega]
 
     def populate_diagnostics_from_history(self, time, history):
@@ -168,8 +170,9 @@ class DrivenPendulum(PBModel):
     Parameters
     ----------
     forcing:
-        Optional.  If provided, ``forcing.get_forcing(t)`` replaces the
-        cosine drive term entirely (allows arbitrary drive waveforms).
+        Optional external drive.  If provided, ``forcing.get_forcing(t)``
+        replaces the built-in cosine term entirely, allowing arbitrary drive
+        waveforms.  When ``None``, the cosine drive ``A cos(Ω t)`` is used.
     var_name:
         Human-readable label.
     q:
@@ -221,11 +224,9 @@ class DrivenPendulum(PBModel):
         return True
 
     def _drive(self, t):
-        if self.forcing is not None:
-            return float(self.forcing.get_forcing(self.time_util(t)))
         A = float(self.param_values["A"])
         Omega = float(self.param_values["Omega"])
-        return A * np.cos(Omega * t)
+        return float(self.resolve_forcing(t, default=A * np.cos(Omega * t)))
 
     def dydt(self, t, x):
         state = np.asarray(x, dtype=float).reshape(-1)
@@ -276,7 +277,9 @@ class DoublePendulum(PBModel):
     Parameters
     ----------
     forcing:
-        Not used; included for interface consistency.
+        Optional external torque applied additively to ``dω₁/dt`` (the first
+        bob).  A scalar ``Forcing`` value is added directly; if ``None``, the
+        unforced dynamics are used.
     var_name:
         Human-readable label.
     m1, m2:
@@ -370,7 +373,7 @@ class DoublePendulum(PBModel):
             -g * (2.0 * m1 + m2) * np.sin(theta1)
             - m2 * g * np.sin(theta1 - 2.0 * theta2)
             - 2.0 * sin_d * m2 * (omega2 ** 2 * L2 + omega1 ** 2 * L1 * cos_d)
-        ) / denom - d1 * omega1
+        ) / denom - d1 * omega1 + self.resolve_forcing(t)
 
         domega2 = (
             2.0 * sin_d * (

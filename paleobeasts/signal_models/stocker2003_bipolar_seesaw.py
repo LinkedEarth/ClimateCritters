@@ -15,7 +15,59 @@ from ..core.pbmodel import PBModel
 
 
 class Stocker2003BipolarSeesaw(PBModel):
-    """Minimum thermodynamic model for the thermal bipolar seesaw."""
+    """Minimum thermodynamic model for the thermal bipolar seesaw.
+
+    A single prognostic southern temperature anomaly ``Ts`` relaxes toward
+    a northern temperature signal ``Tn(t)`` scaled by ``beta``:
+
+        dTs/dt = (beta*Tn(t) - Ts) / tau
+
+    Parameters
+    ----------
+    forcing : pb.core.Forcing or None
+        Optional time-varying northern temperature anomaly ``Tn(t)``
+        (model units).  If ``None``, the constant ``Tn`` parameter is used.
+        Default ``None``.
+    var_name : str
+        Label for the model output.  Default ``'stocker2003_bipolar_seesaw'``.
+    tau : float or callable or pb.core.Forcing
+        Thermal equilibration timescale (years).  Must be > 0.  Default 1000.
+    beta : float or callable or pb.core.Forcing
+        Amplitude ratio relating southern to northern anomaly.  Default -1.0
+        (antiphase seesaw).
+    Tn : float or callable or pb.core.Forcing
+        Constant northern temperature anomaly used when no forcing is
+        provided.  Default 0.0.
+
+    Notes
+    -----
+    The diagnostic variable ``Tn`` (northern temperature) is written by
+    ``populate_diagnostics_from_history`` after integration.  State variable
+    is ``Ts``.
+
+    References
+    ----------
+    Stocker, T. F., & Johnsen, S. J. (2003). A minimum thermodynamic model
+    for the bipolar seesaw. Paleoceanography, 18(4), 1087.
+
+    Examples
+    --------
+    .. code-block:: python
+
+        import numpy as np
+        import paleobeasts as pb
+        from paleobeasts.signal_models.stocker2003_bipolar_seesaw import (
+            Stocker2003BipolarSeesaw,
+        )
+
+        # Square-wave northern forcing
+        Tn = pb.core.Forcing(lambda t: 1.0 if (t % 2000) < 1000 else -1.0)
+        model = Stocker2003BipolarSeesaw(forcing=Tn, tau=500.0, beta=-1.0)
+        output = model.integrate(
+            t_span=(0, 8000), y0=[0.0], method='RK45'
+        )
+        ts = output.to_pyleo(var_names=['Ts'])
+    """
 
     def __init__(
         self,
@@ -61,10 +113,7 @@ class Stocker2003BipolarSeesaw(PBModel):
         if tau <= 0:
             raise ValueError("tau must be > 0.")
         beta = float(self.get_param_value("beta", t, x))
-        if self.forcing is not None:
-            Tn_t = float(self.forcing.get_forcing(self.time_util(t)))
-        else:
-            Tn_t = float(self.get_param_value("Tn", t, x))
+        Tn_t = float(self.resolve_forcing(t, default=self.get_param_value("Tn", t, x)))
         dTsdt = (beta * Tn_t - Ts) / tau
         return [dTsdt]
 
@@ -73,10 +122,7 @@ class Stocker2003BipolarSeesaw(PBModel):
         history = np.asarray(history, dtype=float)
         Tn_vals = []
         for t, row in zip(time, history):
-            if self.forcing is not None:
-                Tn_vals.append(float(self.forcing.get_forcing(self.time_util(t))))
-            else:
-                Tn_vals.append(float(self.get_param_value("Tn", t, row)))
+            Tn_vals.append(float(self.resolve_forcing(t, default=self.get_param_value("Tn", t, row))))
         Tn_vals = np.asarray(Tn_vals, dtype=float)
         self.diagnostic_variables = {"Tn": Tn_vals}
 
@@ -84,15 +130,81 @@ class Stocker2003BipolarSeesaw(PBModel):
 class Stocker2003ExtendedSeaIceSeesaw(PBModel):
     """Extended Stocker-style model with reservoir, Southern Ocean, sea-ice, and Antarctic states.
 
-    The model integrates four coupled ODEs with prescribed northern forcing T_N(t):
+    The model integrates four coupled ODEs with prescribed northern forcing
+    ``T_N(t)``:
 
-        tau_R * dT_R/dt   = -(T_R - T_N) + epsilon_R
-        tau_S * dT_S/dt   = kappa*(T_R - T_S) - lambda_S*(T_S - T_S0) + alpha*(1 - A) + epsilon_S
-        tau_A * dA/dt     = -beta*(T_S - T_S0) - gamma*A*(1-A)*(T_S - T_c) + epsilon_A
-        tau_ANT * dT_ANT/dt = delta*(T_S - T_ANT) + eta*(1-A) + epsilon_ANT
+        tau_R * dT_R/dt     = -(T_R - T_N) + eps_R
+        tau_S * dT_S/dt     = kappa*(T_R - T_S) - lambda_S*(T_S - T_S0)
+                              + alpha*(1 - A) + eps_S
+        tau_A * dA/dt       = -beta*(T_S - T_S0)
+                              - gamma*A*(1-A)*(T_S - T_c) + eps_A
+        tau_ANT * dT_ANT/dt = delta*(T_S - T_ANT) + eta*(1 - A) + eps_ANT
 
-    Sea-ice area fraction ``A`` is physically constrained to [0, 1] by
-    suppressing the outward derivative at the boundaries inside ``dydt``.
+    Sea-ice area fraction ``A`` is constrained to [0, 1] by suppressing
+    the outward derivative at the physical boundaries inside ``dydt``.
+
+    Parameters
+    ----------
+    forcing : pb.core.Forcing or None
+        Optional time-varying northern temperature anomaly ``T_N(t)``.  If
+        ``None``, the constant ``T_N`` parameter is used.  Default ``None``.
+    var_name : str
+        Label for the model output.  Default
+        ``'stocker2003_extended_seaice_seesaw'``.
+    tau_R : float
+        Oceanic reservoir relaxation timescale (years).  Default 300.
+    tau_S : float
+        Southern Ocean relaxation timescale (years).  Default 1200.
+    tau_A : float
+        Sea-ice adjustment timescale (years).  Default 100.
+    tau_ANT : float
+        Antarctic temperature adjustment timescale (years).  Default 20.
+    kappa : float
+        Advective heat exchange between reservoir and Southern Ocean.
+        Default 1.0.
+    lambda_S : float
+        Linear restoring rate for Southern Ocean temperature.  Default 0.2.
+    alpha : float
+        Sea-ice insulation effect on Southern Ocean heat flux.  Default 0.3.
+    beta : float
+        Temperature-driven sea-ice melt rate.  Default 0.2.
+    gamma : float
+        Nonlinear sea-ice feedback strength.  Default 4.0.
+    delta : float
+        Southern Ocean to Antarctic heat coupling.  Default 1.0.
+    eta : float
+        Sea-ice insulation effect on Antarctic temperature.  Default 0.2.
+    T_S0 : float
+        Reference Southern Ocean temperature.  Default 0.0.
+    T_c : float
+        Critical temperature for the sea-ice feedback.  Default 0.0.
+    T_N : float
+        Constant northern temperature when no forcing is provided.
+        Default 0.0.
+    epsilon_R, epsilon_S, epsilon_A, epsilon_ANT : float
+        Constant additive noise / bias terms.  All default to 0.0.
+
+    Notes
+    -----
+    State variables are ``T_R``, ``T_S``, ``A``, ``T_ANT`` in that order.
+    The diagnostic variable ``T_N`` is populated by
+    ``populate_diagnostics_from_history``.  All timescales must be > 0.
+
+    Examples
+    --------
+    .. code-block:: python
+
+        import paleobeasts as pb
+        from paleobeasts.signal_models.stocker2003_bipolar_seesaw import (
+            Stocker2003ExtendedSeaIceSeesaw,
+        )
+
+        T_N = pb.core.Forcing(lambda t: 1.0 if (t % 2000) < 1000 else 0.0)
+        model = Stocker2003ExtendedSeaIceSeesaw(forcing=T_N)
+        output = model.integrate(
+            t_span=(0, 10000), y0=[0.0, 0.0, 0.3, 0.0], method='RK45'
+        )
+        ts = output.to_pyleo(var_names=['T_ANT'])
     """
 
     def __init__(
@@ -180,9 +292,7 @@ class Stocker2003ExtendedSeaIceSeesaw(PBModel):
     uses_post_history = True
 
     def resolve_north(self, t, state):
-        if self.forcing is not None:
-            return float(self.forcing.get_forcing(self.time_util(t)))
-        return float(self.get_param_value("T_N", t, state))
+        return float(self.resolve_forcing(t, default=self.get_param_value("T_N", t, state)))
 
     def dydt(self, t, x):
         state = np.asarray(x, dtype=float).reshape(-1)
