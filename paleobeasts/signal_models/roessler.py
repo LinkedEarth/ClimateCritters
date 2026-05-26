@@ -6,23 +6,55 @@ from paleobeasts.core.pbmodel import PBModel
 class Roessler(PBModel):
     """Roessler chaotic oscillator.
 
+    A three-variable continuous-time system with a single scroll attractor:
+
+        dx/dt = -y - z
+        dy/dt = x + a*y
+        dz/dt = b + z*(x - c)
+
     Parameters
     ----------
-    forcing : optional
-        Included for consistency with other signal models. The base dynamics do
-        not use forcing directly.
-
+    forcing : pb.core.Forcing or None
+        Included for API consistency; the base dynamics do not use forcing.
+        Default ``None``.
     var_name : str
-        Name of the variable being modeled. Default is ``'roessler'``.
+        Label for the model output.  Default ``'roessler'``.
+    a : float or callable or pb.core.Forcing
+        Controls the strength of the y-feedback.  Default 0.2.
+    b : float or callable or pb.core.Forcing
+        Offset in the z equation.  Default 0.2.
+    c : float or callable or pb.core.Forcing
+        Nonlinear threshold in the z equation.  Default 5.7.
 
-    a, b, c : float or callable or object with ``get_forcing``
-        Model parameters. Each parameter is resolved through ``get_param`` so
-        time-varying callables and ``Forcing`` objects are supported.
+    Notes
+    -----
+    The canonical chaotic attractor exists near ``a=b=0.2``, ``c=5.7``.
+    State variables are ``x``, ``y``, ``z`` in that order.
+    Time-varying parameters are resolved through ``get_param_value`` and
+    support callables with signatures ``(t)``, ``(t, state)``, or
+    ``(t, state, model)``.
+
+    References
+    ----------
+    Rössler, O. E. (1976). Phys. Lett. A, 57(5), 397–398.
+
+    Examples
+    --------
+    .. code-block:: python
+
+        import paleobeasts as pb
+        from paleobeasts.signal_models.roessler import Roessler
+
+        model = Roessler(forcing=None)
+        output = model.integrate(
+            t_span=(0, 200), y0=[0.1, 0.0, 0.0], method='RK45'
+        )
+        ts = output.to_pyleo(var_names=['x', 'y', 'z'])
     """
 
     def __init__(
         self,
-        forcing,
+        forcing=None,
         var_name='roessler',
         a=0.2,
         b=0.2,

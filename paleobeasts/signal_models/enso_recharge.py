@@ -8,9 +8,68 @@ from paleobeasts.core.pbmodel import PBModel
 class ENSORechargeOscillator(PBModel):
     """Jin-style ENSO recharge oscillator.
 
-    The implementation follows the lab09 recharge-oscillator worksheet, but
-    uses the Paleobeasts ``dydt(self, t, state)`` convention instead of the
-    worksheet's ``odeint`` state-first convention.
+    Couples the eastern Pacific SST anomaly ``T`` to the thermocline depth
+    anomaly ``h`` via a nonlinear recharge-discharge mechanism:
+
+        dT/dt = R*T + gamma*h - en*(h + b*T)^3 + Af*sin(2*pi*t/Pf)
+        dh/dt = -r*h - alpha*b*T
+
+    where ``b = b0*mu`` and ``R = gamma*b - c``.
+
+    Parameters
+    ----------
+    forcing : pb.core.Forcing or None
+        Optional forcing object accepted by ``PBModel`` and forwarded to the
+        base class constructor. In this implementation it is not used by
+        ``recharge_components``/``dydt``; the SST tendency retains the
+        internal seasonal term ``Af*sin(2*pi*t/Pf)``. Default ``None``.
+    var_name : str
+        Label for the model output.  Default ``'enso_recharge_oscillator'``.
+    mu : float or callable or pb.core.Forcing
+        Bjerknes coupling coefficient.  Default 0.7.
+    en : float or callable or pb.core.Forcing
+        Nonlinear damping coefficient.  Default 0.0 (linear limit).
+    Af : float or callable or pb.core.Forcing
+        Seasonal forcing amplitude.  Default 0.0.
+    Pf : float or callable or pb.core.Forcing
+        Seasonal forcing period (model time units).  Default 6.0.
+    c : float or callable or pb.core.Forcing
+        Newtonian cooling rate of SST.  Default 1.0.
+    r : float or callable or pb.core.Forcing
+        Thermocline recharge damping rate.  Default 0.25.
+    alpha : float or callable or pb.core.Forcing
+        Wind-stress feedback strength.  Default 0.125.
+    b0 : float or callable or pb.core.Forcing
+        Background thermocline slope sensitivity.  Default 2.5.
+    gamma : float or callable or pb.core.Forcing
+        Thermocline feedback onto SST.  Default 0.75.
+
+    Notes
+    -----
+    The internal time scale is ``tscale = 1/6`` (months to years mapping);
+    this is baked in but does not affect ``t`` directly as the equations are
+    already in the dimensionless form used in the worksheet.
+
+    State variables are ``T`` and ``h`` in that order.  ``Pf`` must be
+    non-zero (raises ``ValueError`` otherwise).
+
+    References
+    ----------
+    Jin, F.-F. (1997). An equatorial ocean recharge paradigm for ENSO.
+    J. Atmos. Sci., 54, 811–829.
+
+    Examples
+    --------
+    .. code-block:: python
+
+        import paleobeasts as pb
+        from paleobeasts.signal_models.enso_recharge import ENSORechargeOscillator
+
+        model = ENSORechargeOscillator(forcing=None, mu=0.75, Af=0.5, Pf=6.0)
+        output = model.integrate(
+            t_span=(0, 120), y0=[0.5, 0.0], method='RK45'
+        )
+        ts = output.to_pyleo(var_names=['T', 'h'])
     """
 
     def __init__(
