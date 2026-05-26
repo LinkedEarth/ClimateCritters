@@ -54,7 +54,7 @@ class Roessler(PBModel):
 
     def __init__(
         self,
-        forcing,
+        forcing=None,
         var_name='roessler',
         a=0.2,
         b=0.2,
