@@ -1,0 +1,51 @@
+# DrivenPendulum { #paleobeasts.DrivenPendulum }
+
+```python
+DrivenPendulum(
+    forcing=None,
+    var_name='driven_pendulum',
+    q=0.5,
+    A=1.2,
+    Omega=2.0 / 3.0,
+    state_variables=None,
+    diagnostic_variables=None,
+    *args,
+    **kwargs,
+)
+```
+
+Driven damped pendulum in dimensionless form.
+
+The standard dimensionless equation (g = L = m = 1):
+
+    dθ/dt = ω
+    dω/dt = −q ω − sin θ + A cos(Ω t)
+
+This system exhibits a rich bifurcation structure: periodic orbits at
+small A, period-doubling, and chaotic strange attractors as A increases.
+
+## Parameters {.doc-section .doc-section-parameters}
+
+| Name                 | Type   | Description                                                                                                                    | Default             |
+|----------------------|--------|--------------------------------------------------------------------------------------------------------------------------------|---------------------|
+| forcing              |        | Optional.  If provided, ``forcing.get_forcing(t)`` replaces the cosine drive term entirely (allows arbitrary drive waveforms). | `None`              |
+| var_name             |        | Human-readable label.                                                                                                          | `'driven_pendulum'` |
+| q                    |        | Damping coefficient (dimensionless).                                                                                           | `0.5`               |
+| A                    |        | Driving amplitude (dimensionless).  Ignored when ``forcing`` is set.                                                           | `1.2`               |
+| Omega                |        | Driving angular frequency (dimensionless rad/time).  Ignored when ``forcing`` is set.                                          | `2.0 / 3.0`         |
+| state_variables      |        | Names for [angle, angular velocity].                                                                                           | `None`              |
+| diagnostic_variables |        | Names for post-integration diagnostics.                                                                                        | `None`              |
+
+## Methods
+
+| Name | Description |
+| --- | --- |
+| [driving_period](#paleobeasts.DrivenPendulum.driving_period) | Return the driving period T_drive = 2π/Ω. |
+
+### driving_period { #paleobeasts.DrivenPendulum.driving_period }
+
+```python
+DrivenPendulum.driving_period()
+```
+
+Return the driving period T_drive = 2π/Ω.

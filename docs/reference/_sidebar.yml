@@ -1,0 +1,36 @@
+website:
+  sidebar:
+  - contents:
+    - docs/reference/index.qmd
+    - contents:
+      - docs/reference/core.PBModel.qmd
+      - docs/reference/core.PBOutput.qmd
+      - docs/reference/core.Forcing.qmd
+      section: Core infrastructure
+    - contents:
+      - docs/reference/EBM.qmd
+      - docs/reference/Stommel.qmd
+      - docs/reference/Stocker2003BipolarSeesaw.qmd
+      - docs/reference/Daisyworld.qmd
+      - docs/reference/ENSORechargeOscillator.qmd
+      - docs/reference/Model3.qmd
+      section: Climate models
+    - contents:
+      - docs/reference/Lorenz63.qmd
+      - docs/reference/Lorenz96.qmd
+      section: 'Dynamical systems: Lorenz'
+    - contents:
+      - docs/reference/SimplePendulum.qmd
+      - docs/reference/DrivenPendulum.qmd
+      - docs/reference/DoublePendulum.qmd
+      - docs/reference/DampedSpring.qmd
+      section: 'Dynamical systems: Pendulums and oscillators'
+    - contents:
+      - docs/reference/Roessler.qmd
+      section: 'Dynamical systems: Other attractors'
+    - contents:
+      - docs/reference/BoxModelSpec.qmd
+      - docs/reference/TwoBoxCarbon.qmd
+      section: Box model framework
+    id: docs/reference
+  - id: dummy-sidebar

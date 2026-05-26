@@ -1,0 +1,228 @@
+# BoxModelSpec { #paleobeasts.BoxModelSpec }
+
+```python
+BoxModelSpec(name)
+```
+
+Declarative specification for simple ODE box models.
+
+A ``BoxModelSpec`` stores state names, parameter defaults, optional
+inputs, diagnostics, and either:
+
+- explicit callable tendencies registered via
+  :meth:`register_tendency` / :meth:`register_relations`, or
+- an automatic box network assembled from volumes, reciprocal exchange,
+  and directed transport terms
+
+## Parameters {.doc-section .doc-section-parameters}
+
+| Name   | Type   | Description                                                                      | Default    |
+|--------|--------|----------------------------------------------------------------------------------|------------|
+| name   | str    | Model name used as the default ``var_name`` of the produced ``GenericBoxModel``. | _required_ |
+
+## Notes {.doc-section .doc-section-notes}
+
+Call :meth:`validate` (or :meth:`make_boxmodel`) before integrating.
+Validation checks that every state variable has a tendency relation
+(explicit mode) or a registered volume (automatic mode).
+
+## See also {.doc-section .doc-section-see-also}
+
+GenericBoxModel : The ``PBModel`` subclass produced by [](:meth:`make_boxmodel`).
+BoxModelContext : Evaluation context passed to callable tendencies.
+
+## Examples {.doc-section .doc-section-examples}
+
+Minimal explicit one-box relaxation model:
+
+.. code-block:: python
+
+    import paleobeasts as pb
+    from paleobeasts.signal_models.box_model import BoxModelSpec
+
+    spec = BoxModelSpec("relaxation")
+    spec.register_state_variables(["x"])
+    spec.register_parameters(tau=10.0, x_eq=1.0)
+    spec.register_tendency(
+        "x", lambda ctx: (ctx.param("x_eq") - ctx["x"]) / ctx.param("tau")
+    )
+    model = spec.make_boxmodel()
+    output = model.integrate(t_span=(0, 100), y0=[0.0], method='RK45')
+
+Automatic two-box exchange model:
+
+.. code-block:: python
+
+    spec = BoxModelSpec("exchange")
+    spec.register_state_variables(["A", "S"])
+    spec.register_box_volumes(A=1.0, S=50.0)
+    spec.register_exchange("A", "S", 0.2)
+    model = spec.make_boxmodel()
+
+## Methods
+
+| Name | Description |
+| --- | --- |
+| [make_model](#paleobeasts.BoxModelSpec.make_model) | Instantiate a :class:`GenericBoxModel` from this spec. |
+| [register_box_volumes](#paleobeasts.BoxModelSpec.register_box_volumes) | Register explicit box volumes for automatic network models. |
+| [register_diagnostic](#paleobeasts.BoxModelSpec.register_diagnostic) | Register a callable diagnostic evaluated from solved history. |
+| [register_diagnostic_variables](#paleobeasts.BoxModelSpec.register_diagnostic_variables) | Register diagnostic variable names. |
+| [register_exchange](#paleobeasts.BoxModelSpec.register_exchange) | Register a reciprocal concentration-gradient exchange pathway. |
+| [register_input](#paleobeasts.BoxModelSpec.register_input) | Register a prescribed input channel. |
+| [register_loss](#paleobeasts.BoxModelSpec.register_loss) | Register a first-order loss coefficient for a box. |
+| [register_parameters](#paleobeasts.BoxModelSpec.register_parameters) | Register default parameter values. |
+| [register_relations](#paleobeasts.BoxModelSpec.register_relations) | Register multiple callable tendencies at once. |
+| [register_source](#paleobeasts.BoxModelSpec.register_source) | Register an external source term for a box in automatic networks. |
+| [register_state_variables](#paleobeasts.BoxModelSpec.register_state_variables) | Register prognostic state variables in integration order. |
+| [register_tendency](#paleobeasts.BoxModelSpec.register_tendency) | Register a callable tendency for one state variable. |
+| [register_transport](#paleobeasts.BoxModelSpec.register_transport) | Register a directed transport pathway. |
+| [validate](#paleobeasts.BoxModelSpec.validate) | Validate that the spec is internally consistent. |
+
+### make_model { #paleobeasts.BoxModelSpec.make_model }
+
+```python
+BoxModelSpec.make_model(forcing=None, var_name=None, **parameter_overrides)
+```
+
+Instantiate a :class:`GenericBoxModel` from this spec.
+
+### register_box_volumes { #paleobeasts.BoxModelSpec.register_box_volumes }
+
+```python
+BoxModelSpec.register_box_volumes(**volumes)
+```
+
+Register explicit box volumes for automatic network models.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+| Name      | Type   | Description                                                                                        | Default   |
+|-----------|--------|----------------------------------------------------------------------------------------------------|-----------|
+| **volumes |        | Mapping from box name to box volume. These are stored internally as parameters named ``V__<box>``. | `{}`      |
+
+### register_diagnostic { #paleobeasts.BoxModelSpec.register_diagnostic }
+
+```python
+BoxModelSpec.register_diagnostic(name, relation)
+```
+
+Register a callable diagnostic evaluated from solved history.
+
+### register_diagnostic_variables { #paleobeasts.BoxModelSpec.register_diagnostic_variables }
+
+```python
+BoxModelSpec.register_diagnostic_variables(names)
+```
+
+Register diagnostic variable names.
+
+### register_exchange { #paleobeasts.BoxModelSpec.register_exchange }
+
+```python
+BoxModelSpec.register_exchange(left, right, rate, rate_param=None)
+```
+
+Register a reciprocal concentration-gradient exchange pathway.
+
+The flux is computed as
+
+``rate * (C_left - C_right)``
+
+and applied with equal magnitude and opposite sign to the two boxes.
+
+### register_input { #paleobeasts.BoxModelSpec.register_input }
+
+```python
+BoxModelSpec.register_input(name, fallback_param=None)
+```
+
+Register a prescribed input channel.
+
+#### Parameters {.doc-section .doc-section-parameters}
+
+| Name           | Type        | Description                                                     | Default    |
+|----------------|-------------|-----------------------------------------------------------------|------------|
+| name           | str         | Input name used by ``ctx.input(name)``.                         | _required_ |
+| fallback_param | str or None | Parameter name to use when the model has no ``forcing`` object. | `None`     |
+
+### register_loss { #paleobeasts.BoxModelSpec.register_loss }
+
+```python
+BoxModelSpec.register_loss(box, value=0.0)
+```
+
+Register a first-order loss coefficient for a box.
+
+In automatic networks the tendency contribution is
+``-loss__box * box_inventory``.
+
+### register_parameters { #paleobeasts.BoxModelSpec.register_parameters }
+
+```python
+BoxModelSpec.register_parameters(**parameters)
+```
+
+Register default parameter values.
+
+Values may be constants, callables, or ``Forcing``-like objects
+compatible with ``PBModel.get_param``.
+
+### register_relations { #paleobeasts.BoxModelSpec.register_relations }
+
+```python
+BoxModelSpec.register_relations(relations)
+```
+
+Register multiple callable tendencies at once.
+
+### register_source { #paleobeasts.BoxModelSpec.register_source }
+
+```python
+BoxModelSpec.register_source(box, value=0.0)
+```
+
+Register an external source term for a box in automatic networks.
+
+The source is added directly to the box tendency. ``value`` may be a
+constant or a time-varying parameter-compatible object.
+
+### register_state_variables { #paleobeasts.BoxModelSpec.register_state_variables }
+
+```python
+BoxModelSpec.register_state_variables(names)
+```
+
+Register prognostic state variables in integration order.
+
+### register_tendency { #paleobeasts.BoxModelSpec.register_tendency }
+
+```python
+BoxModelSpec.register_tendency(state_variable, relation)
+```
+
+Register a callable tendency for one state variable.
+
+``relation`` must accept a :class:`BoxModelContext` and return the
+tendency for ``state_variable``.
+
+### register_transport { #paleobeasts.BoxModelSpec.register_transport }
+
+```python
+BoxModelSpec.register_transport(source, target, rate, rate_param=None)
+```
+
+Register a directed transport pathway.
+
+The transported mass flux is computed as
+
+``rate * concentration(source)``
+
+and removed from ``source`` while being added to ``target``.
+
+### validate { #paleobeasts.BoxModelSpec.validate }
+
+```python
+BoxModelSpec.validate()
+```
+
+Validate that the spec is internally consistent.

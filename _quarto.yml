@@ -1,0 +1,113 @@
+project:
+  type: website
+  output-dir: _site
+  render:
+    - index.qmd
+    - docs/get-started/*.qmd
+    - docs/tutorials/*.qmd
+    - docs/reference/*.qmd
+    - notebooks/model_demos/*.ipynb
+    - notebooks/functionality_demos/*.ipynb
+
+website:
+  title: "PaleoBeasts"
+  description: "Synthetic paleoclimate signal models"
+  favicon: thumbnails/paleobeasts_logo.png
+
+  navbar:
+    left:
+      - text: Get Started
+        href: docs/get-started/installation.qmd
+      - text: Tutorials
+        href: docs/tutorials/index.qmd
+      - text: Reference
+        href: docs/reference/index.qmd
+
+  sidebar:
+    - id: get-started
+      title: Get Started
+      style: docked
+      contents:
+        - docs/get-started/installation.qmd
+        - docs/get-started/quickstart.qmd
+        - docs/get-started/concepts.qmd
+
+    - id: tutorials
+      title: Tutorials
+      style: docked
+      contents:
+        - docs/tutorials/index.qmd
+        - section: "Model demos"
+          contents:
+            - notebooks/model_demos/lorenz63.ipynb
+            - notebooks/model_demos/lorenz96.ipynb
+            - notebooks/model_demos/ebm_demo.ipynb
+            - notebooks/model_demos/Ganopolski2024_demo.ipynb
+        - section: "Functionality demos"
+          contents:
+            - notebooks/functionality_demos/noise_demo.ipynb
+            - notebooks/functionality_demos/model_noise_demo.ipynb
+            - notebooks/functionality_demos/downsample_demo.ipynb
+
+metadata-files:
+  - docs/reference/_sidebar.yml
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-depth: 3
+    css: docs/reference/_styles-quartodoc.css
+
+quartodoc:
+  package: paleobeasts
+  parser: numpy
+  dir: docs/reference
+  sidebar: docs/reference/_sidebar.yml
+  css: docs/reference/_styles-quartodoc.css
+
+  sections:
+
+    - title: Core infrastructure
+      desc: Base classes underlying all models.
+      contents:
+        - core.PBModel
+        - core.PBOutput
+        - core.Forcing
+
+    - title: Climate models
+      desc: >
+        Energy balance, ocean circulation, carbon cycle,
+        and orbital-scale paleoclimate models.
+      contents:
+        - EBM
+        - Stommel
+        - Stocker2003BipolarSeesaw
+        - Daisyworld
+        - ENSORechargeOscillator
+        - Model3
+
+    - title: "Dynamical systems: Lorenz"
+      desc: Single-scale and two-scale Lorenz atmospheric models.
+      contents:
+        - Lorenz63
+        - Lorenz96
+
+    - title: "Dynamical systems: Pendulums and oscillators"
+      desc: Mechanical oscillators ranging from simple SHM to chaotic driven pendulums.
+      contents:
+        - SimplePendulum
+        - DrivenPendulum
+        - DoublePendulum
+        - DampedSpring
+
+    - title: "Dynamical systems: Other attractors"
+      desc: Additional chaotic systems.
+      contents:
+        - Roessler
+
+    - title: Box model framework
+      desc: Composable framework for building custom multi-reservoir models.
+      contents:
+        - BoxModelSpec
+        - TwoBoxCarbon

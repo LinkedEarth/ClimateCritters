@@ -1,0 +1,150 @@
+---
+title: Core Concepts
+sidebar: get-started
+---
+
+This page explains the three building blocks that every PaleoBeasts workflow
+uses: `PBModel`, `Forcing`, and `PBOutput`.
+
+## PBModel
+
+`PBModel` is the abstract base class for all signal models.
+You never instantiate it directly — instead you use one of the concrete
+subclasses (e.g. `Lorenz63`, `EBM`, `Stommel`).
+
+Every subclass shares the same integration interface:
+
+```python
+output = model.integrate(
+    t_span=(t0, tf),   # integration window
+    y0=[...],          # initial conditions (one value per state variable)
+    method='RK45',     # solver: 'RK45', 'euler', 'rk4', 'euler_maruyama'
+    dt=None,           # required for 'euler', 'rk4', 'euler_maruyama'
+)
+```
+
+Internally, each model implements `dydt(t, state)` — the right-hand side
+of the ODE — and optionally `populate_diagnostics_from_history()` for
+quantities computed after the full trajectory is available.
+
+### Parameter handling
+
+Model parameters (e.g. `sigma`, `C`, `D`) can be:
+
+| Type | Example | Resolved as |
+|---|---|---|
+| Constant | `sigma=10.0` | Fixed value at every timestep |
+| Callable `(t)` | `sigma=lambda t: 10.0 + 0.1*t` | Called with current time |
+| Callable `(t, state)` | `sigma=lambda t, x: ...` | Called with time and state vector |
+| Callable `(t, state, model)` | `sigma=lambda t, x, m: ...` | Also receives the model instance |
+| `pb.core.Forcing` | `sigma=pb.core.Forcing(...)` | Evaluated via `get_forcing(t)` |
+
+The first argument of any callable **must** be named `t` or `time`.
+See `contracts/signal_model_contract.md` for the full specification.
+
+---
+
+## Forcing
+
+`Forcing` wraps any time-dependent input signal and provides a uniform
+`get_forcing(t)` interface to the model. It accepts:
+
+**A callable:**
+
+```python
+forcing = pb.core.Forcing(lambda t: 1360.0 + 5.0 * np.sin(2 * np.pi * t / 11.0))
+```
+
+**An array with a time axis:**
+
+```python
+forcing = pb.core.Forcing(data=my_array, time=my_time, interpolation='cubic')
+```
+
+**A CSV dataset** (built-in datasets include TSI reconstructions and insolation):
+
+```python
+forcing = pb.core.Forcing.from_csv(dataset='vieira_tsi')
+```
+
+### Composable sequences
+
+For scenarios with distinct phases (e.g. a spin-up, a ramp, and a perturbation),
+use `Forcing.from_sequence()` with `Hold`, `Ramp`, and `Harmonic` elements:
+
+```python
+forcing = pb.core.Forcing.from_sequence([
+    pb.core.Hold(duration=100, value=1360.0),
+    pb.core.Ramp(duration=50, y0=1360.0, yf=1380.0, shape='linear'),
+    pb.core.Hold(duration=100, value=1380.0),
+])
+```
+
+The sequence is stitched together automatically; `get_forcing(t)` returns
+the correct segment value at any `t`.
+
+---
+
+## PBOutput
+
+`integrate()` always returns a `PBOutput` object. It holds:
+
+| Attribute | Contents |
+|---|---|
+| `output.time` | Solver time axis (1-D array) |
+| `output.state_variables` | Structured NumPy array, one field per state variable |
+| `output.diagnostic_variables` | Dict of derived quantities (e.g. `'energy'`, `'ice_line_lat'`) |
+| `output.solution` | Raw solver solution (scipy or custom) |
+
+### Accessing variables
+
+```python
+x = output.state_variables['x']            # state variable by name
+energy = output.diagnostic_variables['energy']  # diagnostic by name
+```
+
+### Reframing the time axis
+
+To slice off a spin-up period or resample to a regular grid:
+
+```python
+t_out = np.linspace(100, 500, 401)
+output.reframe_time_axis(t_out)
+# output.time and output.state_variables are now on t_out
+```
+
+### Exporting to Pyleoclim
+
+```python
+ts = output.to_pyleo(var_names='x')          # returns a pyleo.Series
+mts = output.to_pyleo(var_names=['x', 'y'])  # returns a pyleo.MultipleSeries
+```
+
+Once in Pyleoclim, the full analysis toolkit is available:
+`ts.spectral()`, `ts.wavelet()`, `ts.dashboard()`, `ts.interp()`, etc.
+
+---
+
+## Putting it together
+
+```python
+import numpy as np
+import paleobeasts as pb
+from paleobeasts.signal_models import EBM
+
+# composable forcing: spin-up then a solar ramp
+forcing = pb.core.Forcing.from_sequence([
+    pb.core.Hold(duration=500, value=1360.0),
+    pb.core.Ramp(duration=200, y0=1360.0, yf=1390.0, shape='linear'),
+])
+
+# time-varying albedo
+model = EBM(forcing=forcing, albedo=lambda t, x: 0.3 + 0.01 * np.sin(t))
+
+output = model.integrate(t_span=(0, 700), y0=[288.0], method='RK45')
+
+# discard spin-up, export to pyleo
+t_analysis = np.linspace(500, 700, 201)
+output.reframe_time_axis(t_analysis)
+output.to_pyleo(var_names='T').plot()
+```

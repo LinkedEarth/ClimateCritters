@@ -1,0 +1,86 @@
+# Lorenz96 { #paleobeasts.Lorenz96 }
+
+```python
+Lorenz96(
+    forcing=None,
+    var_name='lorenz96',
+    n=40,
+    J=0,
+    F=8.0,
+    h=1.0,
+    b=10.0,
+    c=10.0,
+    exact_rhs=False,
+    state_variables=None,
+    diagnostic_variables=None,
+    *args,
+    **kwargs,
+)
+```
+
+Lorenz (1996) single-scale and two-scale atmospheric model.
+
+A periodic ring of *n* slow-scale variables with quadratic advection and
+constant forcing:
+
+    dX_k/dt = (X_{k+1} - X_{k-2}) * X_{k-1} - X_k + F
+
+When *J* > 0 a second, faster Y layer of *n* × *J* variables is coupled
+to the slow layer (the two-scale system of Lorenz & Emanuel 1998):
+
+    dX_k/dt = ... - (h*c/b) * sum_j Y_{j,k}
+    dY_{j,k}/dt = -c*b * Y_{j+1,k} * (Y_{j+2,k} - Y_{j-1,k}) - c*Y_{j,k} + (h*c/b)*X_k
+
+## Parameters {.doc-section .doc-section-parameters}
+
+| Name      | Type                                 | Description                                                                                                                                                                        | Default      |
+|-----------|--------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------|
+| forcing   | pb.core.Forcing or None              | Optional forcing object providing F(t).  If ``None``, the constant ``F`` parameter is used as the slow-scale forcing.                                                              | `None`       |
+| var_name  | str                                  | Label for the model output.  Default ``'lorenz96'``.                                                                                                                               | `'lorenz96'` |
+| n         | int                                  | Number of slow-scale variables.  Default 40.                                                                                                                                       | `40`         |
+| J         | int                                  | Fast variables per slow variable.  ``J=0`` (default) gives the single-scale system; ``J>0`` activates the two-scale system.                                                        | `0`          |
+| F         | float or callable or pb.core.Forcing | Slow-scale forcing amplitude.  Default 8.0.                                                                                                                                        | `8.0`        |
+| h         | float                                | Coupling coefficient between X and Y layers (two-scale only). Default 1.0.                                                                                                         | `1.0`        |
+| b         | float                                | Amplitude ratio Y/X (two-scale only).  Default 10.0.                                                                                                                               | `10.0`       |
+| c         | float                                | Timescale ratio Y/X (two-scale only).  Default 10.0.                                                                                                                               | `10.0`       |
+| exact_rhs | bool                                 | If ``True``, use global ``np.roll`` on the flattened Y vector, matching the original L96_model.py reference implementation. Default ``False`` (per-block loop, identical results). | `False`      |
+
+## Notes {.doc-section .doc-section-notes}
+
+For the two-scale system (``J>0``) use ``method='rk4'`` with a small
+fixed time step passed directly to ``integrate``::
+
+    output = model.integrate(t_span=..., y0=..., method='rk4',
+                             dt=0.005, kwargs={'si': 0.05})
+
+Adaptive solvers (RK45) call ``dydt`` at unpredictable sub-steps; the
+fixed-step RK4 avoids this problem.  Plain Euler is too coarse to
+resolve the fast Y dynamics.
+
+## References {.doc-section .doc-section-references}
+
+Lorenz, E. N. (1996). Predictability: A problem partly solved.
+Lorenz, E. N., & Emanuel, K. A. (1998). J. Atmos. Sci., 55, 399–414.
+
+## Examples {.doc-section .doc-section-examples}
+
+.. code-block:: python
+
+    import numpy as np
+    import paleobeasts as pb
+    from paleobeasts.signal_models.lorenz import Lorenz96
+
+    # Single-scale system
+    model = Lorenz96(forcing=None, n=40, F=8.0)
+    y0 = np.random.randn(40) + 8.0
+    output = model.integrate(t_span=(0, 10), y0=y0, method='rk4', dt=0.01)
+    ts = output.to_pyleo(var_names=['x0'])
+
+    # Two-scale system
+    K, J = 36, 10
+    model2 = Lorenz96(forcing=None, n=K, J=J, F=10.0)
+    y0_2 = np.concatenate([np.random.randn(K) + 10.0,
+                            np.random.randn(K * J) * 0.01])
+    output2 = model2.integrate(t_span=(0, 10), y0=y0_2,
+                               method='rk4', dt=0.005,
+                               kwargs={'si': 0.05})

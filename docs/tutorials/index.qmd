@@ -1,0 +1,25 @@
+---
+title: Tutorials
+sidebar: tutorials
+---
+
+The tutorials below are executable Jupyter notebooks demonstrating PaleoBeasts
+models and utilities. Each notebook can be run locally after
+[installing the package](../get-started/installation.qmd).
+
+## Model demos
+
+| Notebook | Model | What it shows |
+|---|---|---|
+| [Lorenz 63](../../notebooks/model_demos/lorenz63.ipynb) | `Lorenz63` | Chaotic attractor, sensitivity to initial conditions, strange attractor visualization |
+| [Lorenz 96](../../notebooks/model_demos/lorenz96.ipynb) | `Lorenz96` | Single-scale and two-scale atmospheric emulator, multi-variable output |
+| [EBM](../../notebooks/model_demos/ebm_demo.ipynb) | `EBM` | Zero-dimensional energy balance model, ice-albedo feedback, multiple steady states |
+| [Ganopolski 2024](../../notebooks/model_demos/Ganopolski2024_demo.ipynb) | `Model3` | Glacial cycle emulation, orbital forcing, ice volume variability |
+
+## Functionality demos
+
+| Notebook | What it shows |
+|---|---|
+| [Noise](../../notebooks/functionality_demos/noise_demo.ipynb) | Generating colored noise and AR(1) surrogates |
+| [Model noise](../../notebooks/functionality_demos/model_noise_demo.ipynb) | Adding stochastic noise to model output |
+| [Downsampling](../../notebooks/functionality_demos/downsample_demo.ipynb) | Simulating irregular sampling from a model trajectory |

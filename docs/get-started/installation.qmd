@@ -1,0 +1,52 @@
+---
+title: Installation
+sidebar: get-started
+---
+
+## Requirements
+
+PaleoBeasts requires Python ≥ 3.12.
+
+## Install from PyPI
+
+```bash
+pip install paleobeasts
+```
+
+## Install from source
+
+```bash
+git clone https://github.com/your-org/PaleoBeasts.git
+cd PaleoBeasts
+pip install -e .
+```
+
+## Conda environment (recommended)
+
+A pre-configured environment file is provided that includes PaleoBeasts
+and its full scientific stack including [Pyleoclim](https://pyleoclim-util.readthedocs.io/):
+
+```bash
+conda env create -f env_jpl.yml
+conda activate pb_env_jpl
+```
+
+## Verify the installation
+
+```python
+import paleobeasts as pb
+print(pb.__version__)
+```
+
+## Dependencies
+
+Core dependencies installed automatically with pip:
+
+| Package | Purpose |
+|---|---|
+| `numpy`, `scipy` | Numerical integration and linear algebra |
+| `pandas` | Time-series data handling |
+| `matplotlib`, `seaborn` | Plotting |
+| `pyleoclim` | Paleoclimate time-series analysis and export |
+| `xarray` | Multi-dimensional arrays |
+| `statsmodels` | Statistical utilities |

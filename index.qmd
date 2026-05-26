@@ -1,0 +1,46 @@
+---
+title: "PaleoBeasts"
+subtitle: "Synthetic paleoclimate signal models"
+sidebar: false
+---
+
+PaleoBeasts is a Python package for generating synthetic paleoclimate time series
+from dynamical systems models. It provides a unified interface for integrating
+climate models, chaotic systems, and custom box models, with built-in support
+for time-varying parameters, stochastic forcing, and export to
+[Pyleoclim](https://pyleoclim-util.readthedocs.io/) for analysis.
+
+## Features
+
+- **Unified model API** — every model shares the same `integrate()` → `PBOutput` workflow
+- **Flexible forcing** — constants, callables, or composable `Forcing` sequences (Hold, Ramp, Harmonic)
+- **Time-varying parameters** — any parameter can be swapped for a callable or Forcing object at runtime
+- **Multiple solvers** — Euler, RK4, RK45, Euler-Maruyama (SDE), and scipy adaptive methods
+- **Pyleoclim integration** — export directly to `Series` or `MultipleSeries` for spectral analysis and plotting
+
+## Quick install
+
+```bash
+pip install paleobeasts
+```
+
+## Quick example
+
+```python
+import paleobeasts as pb
+from paleobeasts.signal_models import Lorenz63
+
+forcing = pb.core.Forcing(lambda t: 0.0)
+model = Lorenz63(forcing=forcing)
+output = model.integrate(t_span=(0, 50), y0=[1, 1, 1], method='RK45')
+ts = output.to_pyleo(var_names='x')
+ts.plot()
+```
+
+## Where to go next
+
+| | |
+|---|---|
+| [Get Started](docs/get-started/installation.qmd) | Install the package and run your first model |
+| [Tutorials](docs/tutorials/index.qmd) | Worked examples covering climate and dynamical systems models |
+| [Reference](docs/reference/index.qmd) | Full API documentation for every class and function |
