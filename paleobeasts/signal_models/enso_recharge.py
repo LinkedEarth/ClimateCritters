@@ -19,10 +19,9 @@ class ENSORechargeOscillator(PBModel):
     Parameters
     ----------
     forcing : pb.core.Forcing or None
-        Optional forcing object accepted by ``PBModel`` and forwarded to the
-        base class constructor. In this implementation it is not used by
-        ``recharge_components``/``dydt``; the SST tendency retains the
-        internal seasonal term ``Af*sin(2*pi*t/Pf)``. Default ``None``.
+        External forcing used in ``dT/dt``. If provided it replaces the
+        internal seasonal term ``Af*sin(2*pi*t/Pf)`` entirely. Default
+        ``None``.
     var_name : str
         Label for the model output.  Default ``'enso_recharge_oscillator'``.
     mu : float or callable or pb.core.Forcing
@@ -30,9 +29,11 @@ class ENSORechargeOscillator(PBModel):
     en : float or callable or pb.core.Forcing
         Nonlinear damping coefficient.  Default 0.0 (linear limit).
     Af : float or callable or pb.core.Forcing
-        Seasonal forcing amplitude.  Default 0.0.
+        Seasonal forcing amplitude used only when ``forcing`` is ``None``.
+        Default 0.0.
     Pf : float or callable or pb.core.Forcing
-        Seasonal forcing period (model time units).  Default 6.0.
+        Seasonal forcing period (model time units), used only when
+        ``forcing`` is ``None``. Default 6.0.
     c : float or callable or pb.core.Forcing
         Newtonian cooling rate of SST.  Default 1.0.
     r : float or callable or pb.core.Forcing
@@ -50,8 +51,9 @@ class ENSORechargeOscillator(PBModel):
     this is baked in but does not affect ``t`` directly as the equations are
     already in the dimensionless form used in the worksheet.
 
-    State variables are ``T`` and ``h`` in that order.  ``Pf`` must be
-    non-zero (raises ``ValueError`` otherwise).
+    State variables are ``T`` and ``h`` in that order. ``Pf`` must be
+    non-zero when the internal seasonal forcing is used (raises
+    ``ValueError`` otherwise).
 
     References
     ----------
@@ -130,6 +132,14 @@ class ENSORechargeOscillator(PBModel):
     def uses_post_history(self):
         return True
 
+    def _sst_forcing(self, t, state):
+        Af = float(self.get_param_value("Af", t, state))
+        Pf = float(self.get_param_value("Pf", t, state))
+        if Pf == 0.0:
+            raise ValueError("Pf must be non-zero.")
+        seasonal = Af * np.sin(2.0 * np.pi * t / Pf)
+        return float(self.resolve_forcing(t, default=seasonal))
+
     def recharge_components(self, t, state):
         T, h = [float(v) for v in np.asarray(state, dtype=float).reshape(-1)]
         mu = float(self.get_param_value("mu", t, state))
@@ -139,17 +149,12 @@ class ENSORechargeOscillator(PBModel):
         alpha = float(self.get_param_value("alpha", t, state))
         b0 = float(self.get_param_value("b0", t, state))
         gamma = float(self.get_param_value("gamma", t, state))
-        Af = float(self.get_param_value("Af", t, state))
-        Pf = float(self.get_param_value("Pf", t, state))
-
-        if Pf == 0.0:
-            raise ValueError("Pf must be non-zero.")
 
         b = b0 * mu
         R = gamma * b - c
-        seasonal_forcing = Af * np.sin(2.0 * np.pi * t / Pf)
+        forcing_term = self._sst_forcing(t, state)
 
-        dT = R * T + gamma * h - en * (h + b * T) ** 3 + seasonal_forcing
+        dT = R * T + gamma * h - en * (h + b * T) ** 3 + forcing_term
         dh = -r * h - alpha * b * T
         return dT, dh
 

@@ -114,9 +114,7 @@ class DampedSpring(PBModel):
         if k <= 0.0:
             raise ValueError("k must be > 0.")
 
-        F = 0.0
-        if self.forcing is not None:
-            F = float(self.forcing.get_forcing(self.time_util(t)))
+        F = float(self.resolve_forcing(t))
 
         dxdt = vel
         dvdt = -(c / m) * vel - (k / m) * pos + F / m

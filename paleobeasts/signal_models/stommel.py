@@ -101,10 +101,7 @@ class Stommel(PBModel):
         self.params = ()
 
     def _forcing_vector(self, t):
-        if self.forcing is None:
-            return np.zeros(2)
-
-        f_val = self.forcing.get_forcing(self.time_util(t))
+        f_val = self.resolve_forcing(t)
         if np.isscalar(f_val):
             return np.array([0.0, float(f_val)])
 
