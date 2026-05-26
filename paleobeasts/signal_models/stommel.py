@@ -8,28 +8,65 @@ from ..core.pbmodel import PBModel
 class Stommel(PBModel):
     """Minimal two-box Stommel thermohaline circulation model.
 
-    State variables are temperature contrast ``T`` and salinity contrast ``S``.
-    The overturning strength is parameterized as:
+    State variables are the pole-to-equator temperature contrast ``T`` and
+    salinity contrast ``S``.  The overturning strength is parameterized as:
 
-    ``q = k * (alpha * T - beta * S)``
+        q = k * (alpha*T - beta*S)
 
-    and the prognostic system is:
+    and the prognostic equations are:
 
-    ``dT/dt = -lambda_T * (T - T_star) - |q| * T + f_T(t)``
-    ``dS/dt = E - lambda_S * (S - S_star) - |q| * S + f_S(t)``
+        dT/dt = -lambda_T * (T - T_star) - |q|*T + f_T(t)
+        dS/dt =  E - lambda_S * (S - S_star) - |q|*S + f_S(t)
 
     Parameters
     ----------
-    forcing : pb.Forcing or None
-        Optional external forcing. If scalar, it is added to salinity tendency
-        (freshwater forcing term). If array-like with 2 entries, it is added to
-        ``(dT/dt, dS/dt)``.
-
+    forcing : pb.core.Forcing or None
+        Optional external forcing.  If the forcing value is scalar it is
+        applied as a freshwater perturbation added to ``dS/dt``.  If
+        array-like with 2 entries, it is added to ``(dT/dt, dS/dt)``
+        respectively.  Default ``None``.
     var_name : str
-        Name of the modeled quantity. Default is ``'stommel'``.
+        Label for the model output.  Default ``'stommel'``.
+    alpha : float or callable or pb.core.Forcing
+        Thermal expansion coefficient.  Default 1.0.
+    beta : float or callable or pb.core.Forcing
+        Haline contraction coefficient.  Default 1.0.
+    k : float or callable or pb.core.Forcing
+        Hydraulic constant controlling overturning sensitivity.  Default 1.0.
+    E : float or callable or pb.core.Forcing
+        Net evaporation-minus-precipitation freshwater flux.  Default 0.0.
+    lambda_T : float or callable or pb.core.Forcing
+        Thermal restoring rate.  Default 1.0.
+    lambda_S : float or callable or pb.core.Forcing
+        Saline restoring rate.  Default 1.0.
+    T_star : float or callable or pb.core.Forcing
+        Equilibrium temperature contrast.  Default 1.0.
+    S_star : float or callable or pb.core.Forcing
+        Equilibrium salinity contrast.  Default 0.0.
 
-    alpha, beta, k, E, lambda_T, lambda_S, T_star, S_star : float or callable or pb.Forcing
-        Model parameters. Can be constants, callables, or Forcing objects.
+    Notes
+    -----
+    The model uses ``uses_post_history`` to compute the overturning
+    diagnostic ``q`` after integration.  State variables are ``T`` and ``S``;
+    diagnostic variable is ``q``.
+
+    References
+    ----------
+    Stommel, H. (1961). Thermohaline convection with two stable regimes of
+    flow. Tellus, 13(2), 224–230.
+
+    Examples
+    --------
+    .. code-block:: python
+
+        import paleobeasts as pb
+        from paleobeasts.signal_models.stommel import Stommel
+
+        model = Stommel(forcing=None, E=0.3, T_star=1.0, S_star=0.0)
+        output = model.integrate(
+            t_span=(0, 50), y0=[1.0, 0.0], method='RK45'
+        )
+        ts_q = output.to_pyleo(var_names=['q'])
     """
 
     def __init__(self, forcing=None, var_name='stommel', alpha=1.0, beta=1.0, k=1.0, E=0.0,
@@ -64,10 +101,7 @@ class Stommel(PBModel):
         self.params = ()
 
     def _forcing_vector(self, t):
-        if self.forcing is None:
-            return np.zeros(2)
-
-        f_val = self.forcing.get_forcing(self.time_util(t))
+        f_val = self.resolve_forcing(t)
         if np.isscalar(f_val):
             return np.array([0.0, float(f_val)])
 

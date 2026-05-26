@@ -142,6 +142,19 @@ class PBModel:
 
 
 
+    def resolve_forcing(self, t, default=0.0):
+        """Evaluate the model's external forcing at time t.
+
+        If no forcing object is attached (``self.forcing is None``), returns
+        ``default``, which the caller supplies — a fallback parameter value, a
+        zero vector, or a computed internal term.  Keeping the fallback out of
+        this method preserves the distinction between forcings (external drivers)
+        and parameters (intrinsic model properties).
+        """
+        if self.forcing is None:
+            return default
+        return self.forcing.get_forcing(self.time_util(t))
+
     def get_param_value(self, name, t, state):
         """Resolve a named parameter to its value at the current time and state.
 

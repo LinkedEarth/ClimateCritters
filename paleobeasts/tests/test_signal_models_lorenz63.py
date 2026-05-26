@@ -1,4 +1,4 @@
-''' Tests for paleobeasts.signal_models.lorenz
+''' Tests for paleobeasts.signal_models.lorenz (Lorenz63)
 
 Naming rules:
 1. class: Test{filename}{Class}{method} with appropriate camel case
@@ -26,10 +26,7 @@ class TestSignalModelsLorenz63Integrate:
     @pytest.mark.parametrize('method, dt', [('euler', 0.01), ('RK45', None)])
     def test_integrate_t0(self, t_span, y0, method, dt):
         '''Test integrate method'''
-        def func(x):
-            return 0
-
-        forcing = pb.core.Forcing(func)
+        forcing = pb.core.Forcing(lambda t: 0)
         model = lorenz.Lorenz63(forcing=forcing)
         model.integrate(t_span=t_span, y0=y0, method=method, dt=dt)
 
@@ -38,11 +35,8 @@ class TestSignalModelsLorenz63toPyleo:
     @pytest.mark.parametrize('method, dt', [('euler', 0.01), ('RK45', None)])
     @pytest.mark.parametrize('var_names', ['x', 'y', 'z', ['x', 'y'], ['x', 'y', 'z']])
     def test_topyleo_t0(self, method, dt, var_names):
-        '''Test to_pyleo method'''
-        def func(x):
-            return 0
-
-        forcing = pb.core.Forcing(func)
+        '''Test to_pyleo method on PBOutput'''
+        forcing = pb.core.Forcing(lambda t: 0)
         model = lorenz.Lorenz63(forcing=forcing)
         output = model.integrate(t_span=(0, 10), y0=[1, 1, 1], method=method, dt=dt)
         output.to_pyleo(var_names=var_names)

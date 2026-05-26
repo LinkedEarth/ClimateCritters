@@ -288,7 +288,7 @@ class EBM0D(EBMBase):
         """
         T = float(x[0])
 
-        f_solar_incoming = self.forcing.get_forcing(t)
+        f_solar_incoming = self.resolve_forcing(t)
         albedo = self.calc_albedo(T, t)
         absorbed_SW = (1 - albedo) * f_solar_incoming / 4
         OLR = self.calc_OLR(T, t)
