@@ -47,13 +47,11 @@ class TestSignalModelsSimplePendulumPhysics:
 
         theta = model.state_variables['theta']
         time = model.time
-        # find zero-crossings (θ going positive → negative)
+        # consecutive downward zero-crossings are exactly one full period apart
         sign_changes = np.where(np.diff(np.sign(theta)) < 0)[0]
         assert len(sign_changes) >= 4
-        # half-periods between consecutive downward crossings
-        half_periods = np.diff(time[sign_changes])
-        full_periods = half_periods[::2] * 2.0  # every other half-period = full period
-        assert np.allclose(full_periods, T0, rtol=0.02)
+        periods = np.diff(time[sign_changes])
+        assert np.allclose(periods, T0, rtol=0.02)
 
     def test_undamped_energy_conservation_t1(self):
         """Zero damping, no forcing: mechanical energy must be conserved."""
