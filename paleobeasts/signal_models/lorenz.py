@@ -110,9 +110,7 @@ class Lorenz96(PBModel):
         self.params = ()
 
     def _forcing_value(self, t, x):
-        if self.forcing is None:
-            return self.get_param_value('F', t, x)
-        return self.forcing.get_forcing(self.time_util(t))
+        return self.resolve_forcing(t, default=self.get_param_value('F', t, x))
 
     def dydt(self, t, x):
         x = np.asarray(x, dtype=float)
@@ -228,7 +226,7 @@ class Lorenz63(PBModel):
         ts = output.to_pyleo(var_names=['x', 'y', 'z'])
     """
 
-    def __init__(self, forcing, var_name='lorenz63', sigma=10.0, rho=28.0, beta=8 / 3,
+    def __init__(self, forcing=None, var_name='lorenz63', sigma=10.0, rho=28.0, beta=8 / 3,
                  state_variables=None, diagnostic_variables=None, *args, **kwargs):
         if state_variables is None:
             state_variables = ['x', 'y', 'z']
@@ -249,10 +247,7 @@ class Lorenz63(PBModel):
         self.params = ()
 
     def _forcing_vector(self, t):
-        if self.forcing is None:
-            return np.zeros(3)
-
-        f_val = self.forcing.get_forcing(self.time_util(t))
+        f_val = self.resolve_forcing(t)
 
         if np.isscalar(f_val):
             return np.array([f_val, 0.0, 0.0])

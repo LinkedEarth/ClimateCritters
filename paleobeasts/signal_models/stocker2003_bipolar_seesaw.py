@@ -113,10 +113,7 @@ class Stocker2003BipolarSeesaw(PBModel):
         if tau <= 0:
             raise ValueError("tau must be > 0.")
         beta = float(self.get_param_value("beta", t, x))
-        if self.forcing is not None:
-            Tn_t = float(self.forcing.get_forcing(self.time_util(t)))
-        else:
-            Tn_t = float(self.get_param_value("Tn", t, x))
+        Tn_t = float(self.resolve_forcing(t, default=self.get_param_value("Tn", t, x)))
         dTsdt = (beta * Tn_t - Ts) / tau
         return [dTsdt]
 
@@ -125,10 +122,7 @@ class Stocker2003BipolarSeesaw(PBModel):
         history = np.asarray(history, dtype=float)
         Tn_vals = []
         for t, row in zip(time, history):
-            if self.forcing is not None:
-                Tn_vals.append(float(self.forcing.get_forcing(self.time_util(t))))
-            else:
-                Tn_vals.append(float(self.get_param_value("Tn", t, row)))
+            Tn_vals.append(float(self.resolve_forcing(t, default=self.get_param_value("Tn", t, row))))
         Tn_vals = np.asarray(Tn_vals, dtype=float)
         self.diagnostic_variables = {"Tn": Tn_vals}
 
@@ -298,9 +292,7 @@ class Stocker2003ExtendedSeaIceSeesaw(PBModel):
     uses_post_history = True
 
     def resolve_north(self, t, state):
-        if self.forcing is not None:
-            return float(self.forcing.get_forcing(self.time_util(t)))
-        return float(self.get_param_value("T_N", t, state))
+        return float(self.resolve_forcing(t, default=self.get_param_value("T_N", t, state)))
 
     def dydt(self, t, x):
         state = np.asarray(x, dtype=float).reshape(-1)
