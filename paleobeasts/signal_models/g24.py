@@ -4,50 +4,73 @@ from scipy.interpolate import CubicSpline
 
 
 class Model3(PBModel):
-    """
-    Model 3 from Ganopolski (2024) which describes the evolution of ice volume as a function of orbital forcing.
+    """Model 3 from Ganopolski (2024) describing glacial cycle evolution under orbital forcing.
 
-    
+    The model tracks ice volume ``v`` and glacial regime ``k`` (1 = glaciation,
+    2 = deglaciation).  The ice volume relaxes toward a forcing-dependent
+    equilibrium:
+
+        dv/dt = (ve(f) - v) / t1    when k=1  (glaciation)
+        dv/dt = -vc / t2             when k=2  (deglaciation)
+
+    Regime switches follow:
+
+    - k=1 → k=2  if v > vc, df/dt > 0, and f > 0
+    - k=2 → k=1  if f < f1
 
     Parameters
     ----------
-    Parameter defaults taken From Ganopolski 2024:
-
-    forcing : object
-        Object that provides the orbital forcing at time t and its derivative.
-
+    forcing : pb.core.Forcing
+        Orbital insolation forcing ``f(t)`` (W m\ :sup:`-2`).  Required.
     var_name : str
-        Name of the variable being modeled.
-        Default is 'ice volume'
-
-    vc : numeric, callable, or pb.Forcing
-        value for critical ice volume; controls the dominant periodicity and degree of asymmetry of glacial cycles
-        default is 1.4
-
-    f1 : numeric, callable, or pb.Forcing
-        insolation threshold for glacial inception (pinned at -20 to -15 W/m^2)
-        default is -16
-
-    t1 : numeric, callable, or pb.Forcing
-        relaxation timescale for glacial inception (in kyr)
-        default is 30
-
-    f2 : numeric, callable, or pb.Forcing
-        insolation threshold for deglaciation inception (tunable; positive)
-        default is 16
-
-    t2 : numeric, callable, or pb.Forcing
-        relaxation timescale for deglaciation (in kyr)
-        default is 10
+        Label for the model output.  Default ``'ice volume'``.
+    f1 : float or callable or pb.core.Forcing
+        Insolation threshold for glacial inception (W m\ :sup:`-2`;
+        typically -20 to -15).  Default -16.
+    f2 : float or callable or pb.core.Forcing
+        Insolation threshold for deglaciation inception (W m\ :sup:`-2`;
+        positive).  Default 16.
+    t1 : float or callable or pb.core.Forcing
+        Relaxation timescale for glacial inception (kyr).  Default 30.
+    t2 : float or callable or pb.core.Forcing
+        Relaxation timescale for deglaciation (kyr).  Default 10.
+    vc : float or callable or pb.core.Forcing
+        Critical ice volume controlling dominant periodicity and asymmetry.
+        Default 1.4.
 
     Notes
     -----
-    Time-varying parameters can be provided as callables with common signatures such as
-    ``(t)``, ``(t, state)``, ``(t, state, model)``, ``(model, state)``, or ``(state)``.
+    State variables are ``v`` (ice volume, normalised) and ``k`` (regime
+    index, non-integrated).  The diagnostic variable ``insolation`` records
+    ``f(t)`` at each output step.
 
-    params : tuple
-        Tuple of parameters (f1, f2, t1, t2, vc) for the model.
+    The internal derivative of forcing ``dfdt`` is computed via
+    :func:`calc_df` by default; supply a custom callable or
+    ``pb.core.Forcing`` to override.
 
+    Parameter defaults are taken from Ganopolski (2024).  Time-varying
+    parameters follow the standard callable contract ``(t)``,
+    ``(t, state)``, or ``(t, state, model)``.
+
+    References
+    ----------
+    Ganopolski, A. (2024). Glacial cycles. *Nature Reviews Earth &
+    Environment*, 5, 89–106.
+
+    Examples
+    --------
+    .. code-block:: python
+
+        import paleobeasts as pb
+        from paleobeasts.signal_models.g24 import Model3, calc_f
+
+        orbital_forcing = pb.core.Forcing(calc_f)
+        model = Model3(forcing=orbital_forcing)
+        output = model.integrate(
+            t_span=(-2000, 0), y0=[0.0, 1], method='RK45',
+            kwargs={'max_step': 0.5}
+        )
+        ts = output.to_pyleo(var_names=['v'])
     """
 
     def __init__(self, forcing, var_name='ice volume', f1=-16, f2=16, t1=30, t2=10, vc=1.4,
@@ -73,26 +96,13 @@ class Model3(PBModel):
         self.params = ()
 
     def dydt(self, t, x):
-        """
-        Differential equation for dv/dt (where v=ice volume) at state k.
+        """Evaluate ice-volume tendency at time ``t`` and state ``x``.
 
-        The transition from a glacial (k=1) to deglaciation regime (k = 2) occurs if:
-            - v > vc, dfdt > 0, and f > 0.
-        The transition from deglaciation (k=2) to glacial regime (k=1) occurs if:
-            - f < glaciation threshold f1.
-        The interglacial state formally belongs to the deglaciation regime.
-
-        Inputs:
-            t : time in kyr
-            x : [v] where v = ice volume
-            f1 : insolation threshold for glacial inception (pinned at -20 to -15 W/m^2)
-            f2 : insolation threshold for deglaciation inception (tunable; positive)
-            t1 : relaxation time scale for glacial inception (in kyr)
-            t2 : relaxation time scale for deglaciation (in kyr)
-
-        Returns:
-            dv/dt and dk/dt.
-
+        Returns
+        -------
+        list of float
+            ``[dvdt]`` — the ice-volume tendency.  The regime index ``k``
+            is a non-integrated state variable updated in-place.
         """
         v = x[0]  # int(self.state_variables[-1][0])
         if isinstance(v, np.ndarray):
@@ -227,78 +237,79 @@ class Model3(PBModel):
 
 
 def calc_df(t, A=25, eps=0.5, T1=100, T2=30):
-    """
-    Calculate the derivative of the orbital forcing at time t.
+    """Derivative of the Ganopolski (2024) orbital forcing at time ``t``.
 
     Parameters
     ----------
     t : float
-        Time.
-
+        Time (kyr).
     A : float
-        Magnitude of forcing in Wm−2
-        Default is 25 w/m^2
-
+        Forcing amplitude (W m\ :sup:`-2`).  Default 25.
     eps : float
-        Nondimensional magnitude of eccentricity modulation. eps = 0 corresponds to no eccentricty modulation.
-        Default is 0.5
-
+        Eccentricity modulation amplitude.  ``eps=0`` removes eccentricity
+        modulation.  Default 0.5.
     T1 : float
-        Eccentricity timescale
-        Default is 100 kyr
-
+        Eccentricity timescale (kyr).  Default 100.
     T2 : float
-        Precession timescale
-        Default is 30 kyr
+        Precession timescale (kyr).  Default 30.
 
     Returns
     -------
-    df : float
-        The value of the derivative of the orbital forcing at time t.
-
+    float
+        df/dt at time ``t``.
     """
     return A * eps * ((2 * np.pi / T1) * np.cos(2 * np.pi * t / T1) * np.cos(2 * np.pi * t / T2) -
                       (2 * np.pi / T2) * np.sin(2 * np.pi * t / T2) * np.sin(2 * np.pi * t / T1))
 
 
 def calc_f(t, A=25, eps=0.5, T1=100, T2=30):
-    """
-    Calculate the orbital forcing value at time t.
+    """Ganopolski (2024) orbital forcing value at time ``t``.
 
     Parameters
     ----------
     t : float
-        Time.
-
+        Time (kyr).
     A : float
-        Magnitude of forcing in Wm−2
-        Default is 25 w/m^2
-
+        Forcing amplitude (W m\ :sup:`-2`).  Default 25.
     eps : float
-        Nondimensional magnitude of eccentricity modulation. eps = 0 corresponds to no eccentricty modulation.
-        Default is 0.5
-
+        Eccentricity modulation amplitude.  Default 0.5.
     T1 : float
-        Eccentricity timescale
-        Default is 100 kyr
-
+        Eccentricity timescale (kyr).  Default 100.
     T2 : float
-        Precession timescale
-        Default is 30 kyr
-
+        Precession timescale (kyr).  Default 30.
 
     Returns
     -------
-    f : float
-        The value of the orbital forcing at time t.
-
+    float
+        Orbital forcing value at time ``t``.
     """
-
     return A * (1 + eps * np.sin(2 * np.pi * t / T1)) * np.cos(2 * np.pi * t / T2)
 
 
-def vc_func(t, vc1=.65, vc2=1.38, t1_mpt=-1050, tau1=250):
-    """
-    Calculate the value for critical ice volume as in Ganopolski (2024) for MPT
+def vc_func(t, vc1=0.65, vc2=1.38, t1_mpt=-1050, tau1=250):
+    """Time-varying critical ice volume for the Mid-Pleistocene Transition.
+
+    Returns a sigmoid ramp between ``vc1`` (pre-MPT) and ``vc2`` (post-MPT)
+    following Ganopolski (2024):
+
+        vc(t) = 0.5*(vc1 + vc2) + 0.5*(vc2 - vc1) * tanh((t - t1_mpt)/tau1)
+
+    Parameters
+    ----------
+    t : float
+        Time (kyr).
+    vc1 : float
+        Pre-MPT critical ice volume.  Default 0.65.
+    vc2 : float
+        Post-MPT critical ice volume.  Default 1.38.
+    t1_mpt : float
+        Centre of the MPT transition (kyr).  Default -1050.
+    tau1 : float
+        Width of the MPT transition (kyr).  Default 250.
+
+    Returns
+    -------
+    float
+        Critical ice volume at time ``t``.
     """
     return 0.5 * (vc1 + vc2) + 0.5 * (vc2 - vc1) * np.tanh((t - t1_mpt) / tau1)

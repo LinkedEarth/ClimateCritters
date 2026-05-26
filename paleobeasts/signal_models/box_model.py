@@ -122,28 +122,58 @@ class BoxModelContext:
 class BoxModelSpec:
     """Declarative specification for simple ODE box models.
 
-    A ``BoxModelSpec`` stores state names, parameter defaults, optional inputs,
-    diagnostics, and either:
+    A ``BoxModelSpec`` stores state names, parameter defaults, optional
+    inputs, diagnostics, and either:
 
-    - explicit callable tendencies, or
-    - an automatic box network assembled from volumes, reciprocal exchange, and
-      directed transport terms
+    - explicit callable tendencies registered via
+      :meth:`register_tendency` / :meth:`register_relations`, or
+    - an automatic box network assembled from volumes, reciprocal exchange,
+      and directed transport terms
+
+    Parameters
+    ----------
+    name : str
+        Model name used as the default ``var_name`` of the produced
+        ``GenericBoxModel``.
+
+    Notes
+    -----
+    Call :meth:`validate` (or :meth:`make_boxmodel`) before integrating.
+    Validation checks that every state variable has a tendency relation
+    (explicit mode) or a registered volume (automatic mode).
+
+    See also
+    --------
+    GenericBoxModel : The ``PBModel`` subclass produced by :meth:`make_boxmodel`.
+    BoxModelContext : Evaluation context passed to callable tendencies.
 
     Examples
     --------
     Minimal explicit one-box relaxation model:
 
-    >>> spec = BoxModelSpec("relaxation")
-    >>> spec.register_state_variables(["x"])
-    >>> spec.register_parameters(tau=10.0, x_eq=1.0)
-    >>> spec.register_tendency("x", lambda ctx: (ctx.param("x_eq") - ctx["x"]) / ctx.param("tau"))
+    .. code-block:: python
+
+        import paleobeasts as pb
+        from paleobeasts.signal_models.box_model import BoxModelSpec
+
+        spec = BoxModelSpec("relaxation")
+        spec.register_state_variables(["x"])
+        spec.register_parameters(tau=10.0, x_eq=1.0)
+        spec.register_tendency(
+            "x", lambda ctx: (ctx.param("x_eq") - ctx["x"]) / ctx.param("tau")
+        )
+        model = spec.make_boxmodel()
+        output = model.integrate(t_span=(0, 100), y0=[0.0], method='RK45')
 
     Automatic two-box exchange model:
 
-    >>> spec = BoxModelSpec("exchange")
-    >>> spec.register_state_variables(["A", "S"])
-    >>> spec.register_box_volumes(A=1.0, S=50.0)
-    >>> spec.register_exchange("A", "S", 0.2)
+    .. code-block:: python
+
+        spec = BoxModelSpec("exchange")
+        spec.register_state_variables(["A", "S"])
+        spec.register_box_volumes(A=1.0, S=50.0)
+        spec.register_exchange("A", "S", 0.2)
+        model = spec.make_boxmodel()
     """
 
     def __init__(self, name):
@@ -355,12 +385,26 @@ class BoxModelSpec:
 
 
 class GenericBoxModel(PBModel):
-    """PBModel backed by a :class:`BoxModelSpec`.
+    """``PBModel`` subclass produced by :class:`BoxModelSpec`.
 
-    Users will usually construct this via ``BoxModelSpec.make_boxmodel()``.
-    The resulting model behaves like any other ``PBModel`` subclass: it can be
-    integrated with ``integrate(...)``, exported to Pyleoclim, and post-process
-    diagnostics from solved history.
+    Users construct this via :meth:`BoxModelSpec.make_boxmodel` rather than
+    instantiating it directly.  The resulting model integrates with
+    ``model.integrate(...)``, exports to Pyleoclim via ``output.to_pyleo()``,
+    and computes diagnostics from solved history via
+    ``populate_diagnostics_from_history``.
+
+    Parameters
+    ----------
+    spec : BoxModelSpec
+        The validated specification object.
+    forcing : pb.core.Forcing or None
+        Optional external forcing passed through to registered input
+        channels.  Default ``None``.
+    var_name : str or None
+        Override for the model name.  Defaults to ``spec.name``.
+    **kwargs
+        Additional parameter overrides applied on top of
+        ``spec.parameter_defaults``.
     """
 
     def __init__(self, spec, forcing=None, var_name=None, *args, **kwargs):
