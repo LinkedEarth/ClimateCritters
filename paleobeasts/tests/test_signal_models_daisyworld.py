@@ -10,10 +10,10 @@ from paleobeasts.signal_models import daisyworld
 class TestSignalModelsDaisyworldIntegrate:
     @pytest.mark.parametrize('y0', [[0.2, 0.2, 288.0], [0.1, 0.3, 290.0]])
     @pytest.mark.parametrize('t_span', [(0, 2), (0, 5)])
-    @pytest.mark.parametrize('method, kwargs', [('euler', {'dt': 0.01}), ('RK45', None)])
-    def test_integrate_t0(self, t_span, y0, method, kwargs):
+    @pytest.mark.parametrize('method, dt', [('euler', 0.01), ('RK45', None)])
+    def test_integrate_t0(self, t_span, y0, method, dt):
         model = daisyworld.Daisyworld(forcing=None)
-        model.integrate(t_span=t_span, y0=y0, method=method, kwargs=kwargs)
+        model.integrate(t_span=t_span, y0=y0, method=method, dt=dt)
 
         assert model.state_variables.dtype.names == ('Aw', 'Ab', 'T')
         assert 'A_planet' in model.diagnostic_variables
@@ -36,9 +36,8 @@ class TestSignalModelsDaisyworldTimeVaryingParams:
 
         t_span = (0, 0.05)
         y0 = [0.2, 0.2, 288.0]
-        kwargs = {'dt': 0.01}
-        model_const.integrate(t_span=t_span, y0=y0, method='euler', kwargs=kwargs)
-        model_tv.integrate(t_span=t_span, y0=y0, method='euler', kwargs=kwargs)
+        model_const.integrate(t_span=t_span, y0=y0, method='euler', dt=0.01)
+        model_tv.integrate(t_span=t_span, y0=y0, method='euler', dt=0.01)
 
         const_last = np.array([
             model_const.state_variables['Aw'][-1],
@@ -59,9 +58,8 @@ class TestSignalModelsDaisyworldForcing:
         unforced = daisyworld.Daisyworld(forcing=None)
         t_span = (0, 0.05)
         y0 = [0.2, 0.2, 288.0]
-        kwargs = {'dt': 0.01}
 
-        forced.integrate(t_span=t_span, y0=y0, method='euler', kwargs=kwargs)
-        unforced.integrate(t_span=t_span, y0=y0, method='euler', kwargs=kwargs)
+        forced.integrate(t_span=t_span, y0=y0, method='euler', dt=0.01)
+        unforced.integrate(t_span=t_span, y0=y0, method='euler', dt=0.01)
 
         assert not np.isclose(forced.state_variables['T'][-1], unforced.state_variables['T'][-1])

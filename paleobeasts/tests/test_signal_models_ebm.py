@@ -23,34 +23,34 @@ class TestSignalModelsEBMIntegrate:
     @pytest.mark.parametrize('y0', [[1],[10]])
     @pytest.mark.parametrize('t_span', [(0,10),(0,100)])
     @pytest.mark.parametrize('OLR', [(None),(ebm.OLR_func(1000, 1000))])
-    @pytest.mark.parametrize('method, kwargs', [('euler',{'dt':1}),('RK45',None)])
-    def test_integrate_t0(self,t_span,y0,method,OLR, kwargs):
+    @pytest.mark.parametrize('method, dt', [('euler', 1), ('RK45', None)])
+    def test_integrate_t0(self,t_span,y0,method,OLR,dt):
         '''Test integrate method'''
         def func(x):
             return 1
         forcing = pb.core.Forcing(func)
         model = ebm.EBM(forcing=forcing)
-        model.integrate(t_span=t_span,y0=y0,method=method,kwargs=kwargs)
+        model.integrate(t_span=t_span,y0=y0,method=method,dt=dt)
 
 class TestSignalModelsEBMtoPyleo:
-    @pytest.mark.parametrize('method, kwargs', [('euler',{'dt':1}),('RK45',None)])
+    @pytest.mark.parametrize('method, dt', [('euler', 1), ('RK45', None)])
     @pytest.mark.parametrize('var_names', [
                                     'T',
                                     'albedo',
-                                    'absorbed_SW', 
-                                    'OLR', 
+                                    'absorbed_SW',
+                                    'OLR',
                                     'solar_incoming',
                                     ['T','albedo'],
                                     ['T','albedo','absorbed_SW','OLR','solar_incoming'],
                                 ])
-    def test_topyleo_t0(self,method,kwargs,var_names):
+    def test_topyleo_t0(self,method,dt,var_names):
         '''Test to_pyleo method'''
         def func(x):
             return 1
         forcing = pb.core.Forcing(func)
         model = ebm.EBM(forcing=forcing)
-        model.integrate(t_span=(0,10),y0=[100],method=method,kwargs=kwargs)
-        model.to_pyleo(var_names=var_names)
+        output = model.integrate(t_span=(0,10),y0=[100],method=method,dt=dt)
+        output.to_pyleo(var_names=var_names)
 
 
 class TestSignalModelsEBMTimeVaryingParams:
@@ -65,9 +65,8 @@ class TestSignalModelsEBMTimeVaryingParams:
         )
 
         t_span = (0, 10)
-        kwargs = {'dt': 1}
-        model_const.integrate(t_span=t_span, y0=[280], method='euler', kwargs=kwargs)
-        model_tv.integrate(t_span=t_span, y0=[280], method='euler', kwargs=kwargs)
+        model_const.integrate(t_span=t_span, y0=[280], method='euler', dt=1)
+        model_tv.integrate(t_span=t_span, y0=[280], method='euler', dt=1)
 
         const_last = model_const.state_variables['T'][-1]
         tv_last = model_tv.state_variables['T'][-1]
@@ -85,6 +84,6 @@ class TestSignalModelsEBMSequenceForcing:
             label='ebm_sequence',
         )
         model = ebm.EBM(forcing=forcing)
-        model.integrate(t_span=(0, 10), y0=[280], method='euler', kwargs={'dt': 1})
+        model.integrate(t_span=(0, 10), y0=[280], method='euler', dt=1)
         assert len(model.time) > 1
         assert np.isfinite(model.state_variables['T'][-1])

@@ -13,7 +13,7 @@ class TestSignalModelsStocker2003Integrate:
         forcing = pb.Forcing(data=north, time=time, interpolation="linear")
 
         model = Stocker2003BipolarSeesaw(forcing=forcing, tau=1000.0, beta=-1.0)
-        model.integrate(t_span=(0, 4000), y0=[0.0], method="euler", kwargs={"dt": 10.0})
+        model.integrate(t_span=(0, 4000), y0=[0.0], method="euler", dt=10.0)
 
         assert model.state_variables.dtype.names == ("Ts",)
         assert "Tn" in model.diagnostic_variables

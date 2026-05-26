@@ -24,6 +24,6 @@ class TestSignalModelsRoessler:
         const_c = pb.core.Forcing(lambda t: 5.7)
         model = Roessler(forcing=None, a=const_a, b=const_b, c=const_c)
 
-        model.integrate(t_span=(0, 10), y0=[1, 1, 1], method='euler', kwargs={'dt': 0.01})
+        model.integrate(t_span=(0, 10), y0=[1, 1, 1], method='euler', dt=0.01)
 
         assert model.state_variables.dtype.names == ('x', 'y', 'z')

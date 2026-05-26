@@ -10,10 +10,10 @@ from paleobeasts.signal_models import stommel
 class TestSignalModelsStommelIntegrate:
     @pytest.mark.parametrize('y0', [[1.0, 0.5], [0.2, -0.1]])
     @pytest.mark.parametrize('t_span', [(0, 2), (0, 5)])
-    @pytest.mark.parametrize('method, kwargs', [('euler', {'dt': 0.01}), ('RK45', None)])
-    def test_integrate_t0(self, t_span, y0, method, kwargs):
+    @pytest.mark.parametrize('method, dt', [('euler', 0.01), ('RK45', None)])
+    def test_integrate_t0(self, t_span, y0, method, dt):
         model = stommel.Stommel(forcing=None)
-        model.integrate(t_span=t_span, y0=y0, method=method, kwargs=kwargs)
+        model.integrate(t_span=t_span, y0=y0, method=method, dt=dt)
         assert model.state_variables.dtype.names == ('T', 'S')
         assert 'q' in model.diagnostic_variables
 
@@ -46,11 +46,10 @@ class TestSignalModelsStommelTimeVaryingParams:
         )
 
         t_span = (0, 0.05)
-        kwargs = {'dt': 0.01}
         y0 = [1.0, 0.5]
 
-        model_const.integrate(t_span=t_span, y0=y0, method='euler', kwargs=kwargs)
-        model_tv.integrate(t_span=t_span, y0=y0, method='euler', kwargs=kwargs)
+        model_const.integrate(t_span=t_span, y0=y0, method='euler', dt=0.01)
+        model_tv.integrate(t_span=t_span, y0=y0, method='euler', dt=0.01)
 
         const_last = np.array([model_const.state_variables['T'][-1], model_const.state_variables['S'][-1]])
         tv_last = np.array([model_tv.state_variables['T'][-1], model_tv.state_variables['S'][-1]])
@@ -63,10 +62,9 @@ class TestSignalModelsStommelForcing:
         unforced = stommel.Stommel(forcing=None, E=0.0)
         t_span = (0, 0.05)
         y0 = [1.0, 0.1]
-        kwargs = {'dt': 0.01}
 
-        forced.integrate(t_span=t_span, y0=y0, method='euler', kwargs=kwargs)
-        unforced.integrate(t_span=t_span, y0=y0, method='euler', kwargs=kwargs)
+        forced.integrate(t_span=t_span, y0=y0, method='euler', dt=0.01)
+        unforced.integrate(t_span=t_span, y0=y0, method='euler', dt=0.01)
 
         assert not np.isclose(forced.state_variables['S'][-1], unforced.state_variables['S'][-1])
 
@@ -81,5 +79,5 @@ class TestSignalModelsStommelSequenceForcing:
             label='stommel_sequence',
         )
         model = stommel.Stommel(forcing=forcing, E=0.0)
-        model.integrate(t_span=(0, 0.05), y0=[1.0, 0.1], method='euler', kwargs={'dt': 0.01})
+        model.integrate(t_span=(0, 0.05), y0=[1.0, 0.1], method='euler', dt=0.01)
         assert np.isfinite(model.state_variables['S'][-1])

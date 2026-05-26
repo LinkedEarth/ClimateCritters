@@ -22,25 +22,25 @@ from paleobeasts.signal_models import g24
 class TestSignalModelsG24Integrate:
     @pytest.mark.parametrize('y0', [[0,1],[1,1]])
     @pytest.mark.parametrize('t_span', [(0,10),(0,100)])
-    @pytest.mark.parametrize('method, kwargs', [('euler',{'dt':1}),('RK45',None)])
-    def test_integrate_t0(self,t_span,y0,method,kwargs):
+    @pytest.mark.parametrize('method, dt', [('euler', 1), ('RK45', None)])
+    def test_integrate_t0(self,t_span,y0,method,dt):
         '''Test integrate method'''
         def func(x):
             return 1
         forcing = pb.core.Forcing(func)
         model3 = g24.Model3(forcing=forcing)
-        model3.integrate(t_span=t_span,y0=y0,method=method,kwargs=kwargs)
+        model3.integrate(t_span=t_span,y0=y0,method=method,dt=dt)
 
 class TestSignalModelsG24toPyleo:
-    @pytest.mark.parametrize('method, kwargs', [('euler',{'dt':1}),('RK45',None)])
+    @pytest.mark.parametrize('method, dt', [('euler', 1), ('RK45', None)])
     @pytest.mark.parametrize('var_names', ['v','k','insolation', ['v','k'], ['k','v','insolation']])
-    def test_topyleo_t0(self,method,kwargs,var_names):
+    def test_topyleo_t0(self,method,dt,var_names):
         '''Test to_pyleo method'''
         def func(x):
             return 1
         forcing = pb.core.Forcing(func)
         model3 = g24.Model3(forcing=forcing)
-        output = model3.integrate(t_span=(0,10),y0=[1,1],method=method,kwargs=kwargs)
+        output = model3.integrate(t_span=(0,10),y0=[1,1],method=method,dt=dt)
         output.to_pyleo(var_names=var_names)
 
 
@@ -59,10 +59,9 @@ class TestSignalModelsG24TimeVaryingParams:
         )
 
         t_span = (0, 10)
-        kwargs = {'dt': 1}
         y0 = [1, 1]
-        model_const.integrate(t_span=t_span, y0=y0, method='euler', kwargs=kwargs)
-        model_tv.integrate(t_span=t_span, y0=y0, method='euler', kwargs=kwargs)
+        model_const.integrate(t_span=t_span, y0=y0, method='euler', dt=1)
+        model_tv.integrate(t_span=t_span, y0=y0, method='euler', dt=1)
 
         const_last = np.array([model_const.state_variables['v'][-1], model_const.state_variables['k'][-1]])
         tv_last = np.array([model_tv.state_variables['v'][-1], model_tv.state_variables['k'][-1]])
@@ -81,7 +80,7 @@ class TestSignalModelsG24TimeVaryingParams:
             vc=lambda t, x: 1.4,
         )
 
-        model_tv.integrate(t_span=(0, 10), y0=[1, 1], method='euler', kwargs={'dt': 1})
+        model_tv.integrate(t_span=(0, 10), y0=[1, 1], method='euler', dt=1)
         assert np.isfinite(model_tv.state_variables['v'][-1])
 
     def test_dfdt_attribute_assignment_updates_param_store_t2(self):
@@ -102,5 +101,5 @@ class TestSignalModelsG24SequenceForcing:
             label='g24_sequence',
         )
         model3 = g24.Model3(forcing=forcing)
-        model3.integrate(t_span=(0, 10), y0=[1, 1], method='euler', kwargs={'dt': 1})
+        model3.integrate(t_span=(0, 10), y0=[1, 1], method='euler', dt=1)
         assert np.isfinite(model3.state_variables['v'][-1])

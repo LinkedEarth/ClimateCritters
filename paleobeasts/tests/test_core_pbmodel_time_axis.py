@@ -34,7 +34,7 @@ class TestCorePBModelReframeTimeAxis:
 
         forcing = pb.core.Forcing(func)
         model = lorenz.Lorenz63(forcing=forcing)
-        output = model.integrate(t_span=(0, 5), y0=[1, 1, 1], method='euler', kwargs={'dt': 0.1})
+        output = model.integrate(t_span=(0, 5), y0=[1, 1, 1], method='euler', dt=0.1)
 
         t_eval = np.linspace(0, 5, 26)
         output.reframe_time_axis(t_eval)
@@ -60,7 +60,7 @@ class _PostHistoryModel(PBModel):
 class TestCorePBModelPostHistoryHooks:
     def test_post_history_model_integrates_t0(self):
         model = _PostHistoryModel()
-        model.integrate(t_span=(0, 1), y0=[1.0], method='euler', kwargs={'dt': 0.1})
+        model.integrate(t_span=(0, 1), y0=[1.0], method='euler', dt=0.1)
 
         assert model.state_variables.dtype.names == ('x',)
         assert len(model.time) == len(model.diagnostic_variables['x_squared'])

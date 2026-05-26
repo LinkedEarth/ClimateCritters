@@ -169,6 +169,70 @@ def build_state_from_history(time, history, state_variables_names):
     return history
 
 
+def rk4_method(f, t_span, y0, dt, si=None, args=()):
+    """Fixed-step 4th-order Runge-Kutta integration.
+
+    Parameters
+    ----------
+    f : callable
+        Derivative function ``f(t, y, *args)``.
+    t_span : tuple of float
+        ``(t0, tf)`` integration bounds.
+    y0 : array-like
+        Initial state vector.
+    dt : float
+        Integration timestep.
+    si : float, optional
+        Sampling interval — output is saved every ``si`` time units.
+        Must be an integer multiple of ``dt``.  Defaults to ``dt``
+        (every step is saved).
+    args : tuple
+        Extra positional arguments forwarded to ``f``.
+
+    Returns
+    -------
+    Solution
+    """
+    t0, t1 = float(t_span[0]), float(t_span[1])
+    dt = float(dt)
+    si = float(si) if si is not None else dt
+
+    if t1 - t0 <= 0:
+        raise ValueError("t_span must satisfy t_span[1] > t_span[0].")
+
+    if si < dt:
+        dt = si
+        ns = 1
+    else:
+        ns = int(round(si / dt))
+        if abs(ns * dt - si) > 1e-10 * max(1.0, abs(si)):
+            raise ValueError("si must be an integer multiple of dt.")
+
+    nt = int(round((t1 - t0) / si))
+    if abs(nt * si - (t1 - t0)) > 1e-10 * max(1.0, abs(t1 - t0)):
+        raise ValueError("t_span length must be an integer multiple of si.")
+
+    y = np.asarray(y0, dtype=float)
+    history = np.zeros((nt + 1, y.size), dtype=float)
+    times = np.zeros(nt + 1, dtype=float)
+    history[0] = y
+    times[0] = t0
+
+    for step in range(nt):
+        base_t = t0 + step * si
+        for s in range(ns):
+            t_curr = base_t + s * dt
+            k1 = np.asarray(f(t_curr, y, *args), dtype=float)
+            k2 = np.asarray(f(t_curr + 0.5 * dt, y + 0.5 * dt * k1, *args), dtype=float)
+            k3 = np.asarray(f(t_curr + 0.5 * dt, y + 0.5 * dt * k2, *args), dtype=float)
+            k4 = np.asarray(f(t_curr + dt, y + dt * k3, *args), dtype=float)
+            y = y + (dt / 6.0) * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
+        history[step + 1] = y
+        times[step + 1] = t0 + (step + 1) * si
+
+    return Solution(times, history)
+
+
 def euler_method(f, t_span, y0, dt, args=()):
     """
     Solves an ODE using the Euler method with a fixed timestep.

@@ -113,5 +113,5 @@ class TestForcingModelIntegration:
             label="stommel_sequence",
         )
         model = stommel.Stommel(forcing=forcing, E=0.0)
-        model.integrate(t_span=(0, 0.05), y0=[1.0, 0.1], method="euler", kwargs={"dt": 0.01})
+        model.integrate(t_span=(0, 0.05), y0=[1.0, 0.1], method="euler", dt=0.01)
         assert np.isfinite(model.state_variables["S"][-1])

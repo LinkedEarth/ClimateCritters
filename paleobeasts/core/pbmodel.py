@@ -1,9 +1,10 @@
 from scipy.integrate import solve_ivp
 import inspect
+import warnings
 from types import MethodType
 import numpy as np
 
-from ..utils.solver import (euler_method, euler_maruyama_method, Solution,
+from ..utils.solver import (euler_method, euler_maruyama_method, rk4_method, Solution,
                             validate_initial_state as _validate_initial_state,
                             build_state_from_history as _build_state_from_history)
 from .pboutput import PBOutput
@@ -50,14 +51,9 @@ class PBModel:
         self.params = ()
         self.param_values = {}
 
-        self.t_span = None
-        self.y0 = None
-        self.solution = None
-        self.method = None
+        self.t_span = None   # set at start of integrate(); useful for inspection
+        self.y0 = None       # set at start of integrate(); useful for inspection
         self.time = None
-        self.kwargs = None
-        self.t_eval= None
-        self.run_name = None
         self.time_util = lambda t: t
         self.rng = None
 
@@ -144,15 +140,6 @@ class PBModel:
             return param(t, state)
         return param(t, state, self)
 
-    def get_series_by_name(self, var_name):
-        """Return a variable's array and storage location from the latest output.
-
-        Delegates to ``self.output.get_series_by_name``; raises if the model
-        has not yet been integrated.
-        """
-        if self.output is None:
-            raise RuntimeError("No output available. Call integrate() first.")
-        return self.output.get_series_by_name(var_name)
 
 
     def get_param_value(self, name, t, state):
@@ -167,16 +154,7 @@ class PBModel:
             raise KeyError(f"Parameter '{name}' not found in param_values.")
         return self._resolve_param(self.param_values[name], t, state)
 
-    def set_param_value(self, name, value):
-        """Add or update a parameter and keep the attribute and ``param_values`` in sync.
 
-        ``__setattr__`` syncs the direction ``model.alpha = v → param_values``,
-        but only for names already in ``param_values``.  This method handles
-        the reverse and covers inserting new parameters that weren't declared
-        at initialization.
-        """
-        self.param_values[name] = value
-        setattr(self, name, value)
 
 
     def get_param_vector(self, name, t, state, size):
@@ -198,6 +176,16 @@ class PBModel:
             )
         return arr
 
+    def set_param_value(self, name, value):
+        """Add or update a parameter and keep the attribute and ``param_values`` in sync.
+
+        ``__setattr__`` syncs the direction ``model.alpha = v → param_values``,
+        but only for names already in ``param_values``.  This method handles
+        the reverse and covers inserting new parameters that weren't declared
+        at initialization.
+        """
+        self.param_values[name] = value
+        setattr(self, name, value)
 
     def set_function(self, name, function, bind=None):
         """Swap out a model calculation function on a single instance.
@@ -257,17 +245,9 @@ class PBModel:
         pass
 
 
-    def integrate(self, t_span=None, y0=None, method='RK45', kwargs=None,
-                  output_time=None, run_name=None):
-        """Integrate the model over a time span and return a PBOutput.
-
-        This is the main entry point for running the model.  It validates the
-        initial state, selects the requested solver, runs the integration, and
-        assembles the result into a :class:`PBOutput`.  The full solver
-        trajectory is always retained inside the output (via ``solution`` and
-        ``model_time``); ``output_time`` optionally places the front-line
-        result on a different grid immediately, e.g. to exclude a spin-up
-        period or coarsen the time axis.
+    def integrate(self, t_span=None, y0=None, method='RK45', dt=None,
+                  output_time=None, run_name=None, kwargs=None):
+        """Integrate the model over a time span and return a :class:`PBOutput`.
 
         Parameters
         ----------
@@ -279,134 +259,103 @@ class PBModel:
         method : str
             Solver to use: ``'RK45'`` (default), ``'euler'``, ``'euler_maruyama'``,
             ``'rk4'``, or any method accepted by ``scipy.integrate.solve_ivp``.
-        kwargs : dict, optional
-            Solver-specific options.  ``'dt'`` is required for fixed-step methods.
+        dt : float, optional
+            Fixed timestep for ``euler``, ``euler_maruyama``, and ``rk4``.
+            Required for those methods.
         output_time : array-like, optional
             If provided, the returned ``PBOutput`` is immediately reframed onto
-            this time axis.  ``output_time`` may be any subset of ``t_span``
-            (e.g. post-spinup) or a coarser uniform grid.  ``output.model_time``
-            always retains the raw solver grid regardless.  The window can be
-            changed later by calling ``output.reframe_time_axis`` again.
+            this time axis (e.g. to exclude a spin-up period).
+            ``output.model_time`` always retains the raw solver grid.
         run_name : str, optional
-            Label stored on the output for bookkeeping.  Defaults to a string
-            describing the method and timestep.
-        """
+            Label stored on the output.  Defaults to ``'<method>, dt=<dt>'``.
+        kwargs : dict, optional
+            Additional solver options.  For ``solve_ivp`` methods these are
+            forwarded directly (e.g. ``rtol``, ``atol``, ``t_eval``).  For
+            ``euler_maruyama``, ``random_seed`` is extracted here.  For
+            ``rk4``, ``si`` (sampling interval) is extracted here.
 
-        self.t_span = t_span
-        self.y0 = y0
-        self.solution = None
-        self.method = method
+            .. deprecated::
+                Passing ``dt`` inside ``kwargs`` is deprecated.  Use the
+                explicit ``dt`` parameter instead.
+        """
+        kwargs = dict(kwargs) if kwargs is not None else {}
+
+        # --- dt backward compatibility ---
+        if dt is None and 'dt' in kwargs:
+            warnings.warn(
+                "Passing 'dt' inside kwargs is deprecated and will be removed in a "
+                "future version. Use the explicit parameter: integrate(..., dt=value).",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            dt = float(kwargs.pop('dt'))
+        elif dt is not None:
+            kwargs.pop('dt', None)  # drop if accidentally supplied in both places
+
+        # --- validate dt for fixed-step methods ---
+        if method in ('euler', 'euler_maruyama', 'rk4'):
+            if dt is None:
+                raise ValueError(f"method='{method}' requires a timestep; pass dt=<value>.")
+            dt = float(dt)
+
+        # --- reset accumulators for a fresh run ---
         self.time = [0]
         self.diagnostic_variables = {var: [] for var in self.diagnostic_variables}
-        # self.t_eval = None
-        self.kwargs = kwargs if kwargs is not None else {}
-        if self.method in ('euler', 'euler_maruyama'):
-            assert 'dt' in kwargs, "Please provide a time step for the Euler method."
 
+        # --- validate and normalise initial state ---
         y0 = self.validate_initial_state(y0)
         self.y0 = y0
+        self.t_span = t_span
 
-        # Define the structured array
-        if len(self.state_variables_names) > 0:
-            dtype = [(var, float) for i, var in enumerate(self.state_variables_names)]
-            self.dtypes = dtype
+        # --- build initial structured array (used by step-by-step models) ---
+        if self.state_variables_names:
+            dtype = [(var, float) for var in self.state_variables_names]
         else:
-            dtype = [type(val) for i, val in enumerate(self.y0)]
-            self.dtypes = dtype
+            dtype = [type(val) for val in self.y0]
+        self.dtypes = dtype
+        self.state_variables = (
+            np.array([tuple(self.y0)], dtype=dtype) if self.state_variables_names
+            else np.array(self.y0, dtype=dtype)
+        )
 
-        if len(self.state_variables_names) > 0:
-            array = np.array([tuple(self.y0)], dtype=dtype)
-        else:
-            array = np.array(self.y0, dtype=dtype)
-        self.state_variables = array
+        # --- run solver ---
+        y0_integrated = y0[:len(self.integrated_state_vars)]
 
-        if kwargs is None:
-            kwargs = self.kwargs
-        else:
-            kwargs = {**self.kwargs, **kwargs}
-        if self.t_eval is not None:
-            kwargs['t_eval'] = self.t_eval
-        if 'method' in kwargs:
-            self.method = kwargs['method']
+        if method == 'euler':
+            solution = euler_method(self.dydt, t_span, y0_integrated, dt, args=self.params)
 
-        if self.method == 'euler':
-            solution = euler_method(self.dydt, self.t_span,self.y0[:len(self.integrated_state_vars)],  kwargs['dt'],
-                                    args=self.params)
-
-        elif self.method == 'euler_maruyama':
-            seed = kwargs.get('random_seed', None)
+        elif method == 'euler_maruyama':
+            seed = kwargs.pop('random_seed', None)
             self.rng = np.random.default_rng(seed) if seed is not None else np.random.default_rng()
-
-            if hasattr(self, 'sde_noise') and callable(getattr(self, 'sde_noise')):
-                noise_func = self.sde_noise
-            else:
+            noise_func = getattr(self, 'sde_noise', None)
+            if not callable(noise_func):
                 noise_func = lambda _t, x: np.zeros_like(np.asarray(x, dtype=float))
-
             solution = euler_maruyama_method(
-                self.dydt,
-                self.t_span,
-                self.y0[:len(self.integrated_state_vars)],
-                kwargs['dt'],
-                noise_func=noise_func,
-                rng=self.rng,
-                args=self.params,
+                self.dydt, t_span, y0_integrated, dt,
+                noise_func=noise_func, rng=self.rng, args=self.params,
             )
 
-        elif self.method == 'rk4':
+        elif method == 'rk4':
             if not self.uses_post_history:
                 raise ValueError(
-                    "method='rk4' requires a conformant dydt with no side effects. "
-                    "Set uses_post_history = True on the subclass and remove any "
-                    "state-appending from dydt before using this method."
+                    "method='rk4' requires uses_post_history = True on the subclass."
                 )
-            if 'dt' not in kwargs:
-                raise ValueError("kwargs must include 'dt' for method='rk4'.")
-            dt = float(kwargs['dt'])
-            si = float(kwargs.get('si', dt))
-            t0, t1 = float(t_span[0]), float(t_span[1])
-            total_time = t1 - t0
-            if total_time <= 0:
-                raise ValueError("t_span must have t_span[1] > t_span[0].")
-            if si < dt:
-                dt = si
-                ns = 1
-            else:
-                ns = int(round(si / dt))
-                if abs(ns * dt - si) > 1e-10 * max(1.0, abs(si)):
-                    raise ValueError("si must be an integer multiple of dt for method='rk4'.")
-            nt = int(round(total_time / si))
-            if abs(nt * si - total_time) > 1e-10 * max(1.0, abs(total_time)):
-                raise ValueError("t_span length must be an integer multiple of si for method='rk4'.")
-            y = np.asarray(y0[:len(self.integrated_state_vars)], dtype=float)
-            history = np.zeros((nt + 1, y.size), dtype=float)
-            times = np.zeros(nt + 1, dtype=float)
-            history[0] = y
-            times[0] = t0
-            for step in range(nt):
-                base_t = t0 + step * si
-                for s in range(ns):
-                    t_curr = base_t + s * dt
-                    k1 = np.asarray(self.dydt(t_curr, y), dtype=float)
-                    k2 = np.asarray(self.dydt(t_curr + 0.5 * dt, y + 0.5 * dt * k1), dtype=float)
-                    k3 = np.asarray(self.dydt(t_curr + 0.5 * dt, y + 0.5 * dt * k2), dtype=float)
-                    k4 = np.asarray(self.dydt(t_curr + dt, y + dt * k3), dtype=float)
-                    y = y + (dt / 6.0) * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
-                history[step + 1] = y
-                times[step + 1] = t0 + (step + 1) * si
-            solution = Solution(times, history)
+            si = float(kwargs.pop('si', dt))
+            solution = rk4_method(self.dydt, t_span, y0_integrated, dt, si=si, args=self.params)
 
-        else:
-            solution = solve_ivp(self.dydt, self.t_span,
-                                 self.y0[:len(self.integrated_state_vars)],
-                                 dense_output=kwargs['dense_output'] if 'dense_output' in kwargs else True,
-                                 method=self.method,
-                                 args=self.params,
-                                 **kwargs)
-            self.kwargs['dt'] = 'variable'
+        else:  # scipy solve_ivp
+            kwargs.setdefault('dense_output', True)
+            solution = solve_ivp(
+                self.dydt, t_span, y0_integrated,
+                method=method, args=self.params,
+                **kwargs,
+            )
             solution.y = solution.y.T
+            dt = 'variable'
 
-        self.run_name = run_name if run_name is not None else f'{self.method}, dt={self.kwargs["dt"]}'
-        self.solution = solution
+        # --- assemble output ---
+        run_name = run_name if run_name is not None else f'{method}, dt={dt}'
+
         if self.uses_post_history:
             history = np.asarray(solution.y, dtype=float)
             if history.ndim == 1:
@@ -423,8 +372,8 @@ class PBModel:
             state_variables=self.state_variables,
             state_variable_names=list(self.state_variables_names),
             diagnostic_variables=self.diagnostic_variables,
-            solution=self.solution,
-            run_name=self.run_name,
+            solution=solution,
+            run_name=run_name,
         )
         if output_time is not None:
             output.reframe_time_axis(output_time)

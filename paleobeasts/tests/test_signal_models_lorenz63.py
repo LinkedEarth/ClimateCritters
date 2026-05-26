@@ -23,28 +23,28 @@ from paleobeasts.signal_models import lorenz
 class TestSignalModelsLorenz63Integrate:
     @pytest.mark.parametrize('y0', [[1, 1, 1], [0, 1, 2]])
     @pytest.mark.parametrize('t_span', [(0, 10), (0, 100)])
-    @pytest.mark.parametrize('method, kwargs', [('euler', {'dt': 0.01}), ('RK45', None)])
-    def test_integrate_t0(self, t_span, y0, method, kwargs):
+    @pytest.mark.parametrize('method, dt', [('euler', 0.01), ('RK45', None)])
+    def test_integrate_t0(self, t_span, y0, method, dt):
         '''Test integrate method'''
         def func(x):
             return 0
 
         forcing = pb.core.Forcing(func)
         model = lorenz.Lorenz63(forcing=forcing)
-        model.integrate(t_span=t_span, y0=y0, method=method, kwargs=kwargs)
+        model.integrate(t_span=t_span, y0=y0, method=method, dt=dt)
 
 
 class TestSignalModelsLorenz63toPyleo:
-    @pytest.mark.parametrize('method, kwargs', [('euler', {'dt': 0.01}), ('RK45', None)])
+    @pytest.mark.parametrize('method, dt', [('euler', 0.01), ('RK45', None)])
     @pytest.mark.parametrize('var_names', ['x', 'y', 'z', ['x', 'y'], ['x', 'y', 'z']])
-    def test_topyleo_t0(self, method, kwargs, var_names):
+    def test_topyleo_t0(self, method, dt, var_names):
         '''Test to_pyleo method'''
         def func(x):
             return 0
 
         forcing = pb.core.Forcing(func)
         model = lorenz.Lorenz63(forcing=forcing)
-        output = model.integrate(t_span=(0, 10), y0=[1, 1, 1], method=method, kwargs=kwargs)
+        output = model.integrate(t_span=(0, 10), y0=[1, 1, 1], method=method, dt=dt)
         output.to_pyleo(var_names=var_names)
 
 
@@ -61,9 +61,8 @@ class TestSignalModelsLorenz63TimeVaryingParams:
         )
 
         t_span = (0, 0.05)
-        kwargs = {'dt': 0.01}
-        model_const.integrate(t_span=t_span, y0=[1, 1, 1], method='euler', kwargs=kwargs)
-        model_tv.integrate(t_span=t_span, y0=[1, 1, 1], method='euler', kwargs=kwargs)
+        model_const.integrate(t_span=t_span, y0=[1, 1, 1], method='euler', dt=0.01)
+        model_tv.integrate(t_span=t_span, y0=[1, 1, 1], method='euler', dt=0.01)
 
         const_last = np.array([
             model_const.state_variables['x'][-1],
