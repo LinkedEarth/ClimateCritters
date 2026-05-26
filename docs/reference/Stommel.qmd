@@ -1,0 +1,71 @@
+# Stommel { #paleobeasts.Stommel }
+
+```python
+Stommel(
+    forcing=None,
+    var_name='stommel',
+    alpha=1.0,
+    beta=1.0,
+    k=1.0,
+    E=0.0,
+    lambda_T=1.0,
+    lambda_S=1.0,
+    T_star=1.0,
+    S_star=0.0,
+    state_variables=None,
+    diagnostic_variables=None,
+    *args,
+    **kwargs,
+)
+```
+
+Minimal two-box Stommel thermohaline circulation model.
+
+State variables are the pole-to-equator temperature contrast ``T`` and
+salinity contrast ``S``.  The overturning strength is parameterized as:
+
+    q = k * (alpha*T - beta*S)
+
+and the prognostic equations are:
+
+    dT/dt = -lambda_T * (T - T_star) - |q|*T + f_T(t)
+    dS/dt =  E - lambda_S * (S - S_star) - |q|*S + f_S(t)
+
+## Parameters {.doc-section .doc-section-parameters}
+
+| Name     | Type                                 | Description                                                                                                                                                                                                                 | Default     |
+|----------|--------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------|
+| forcing  | pb.core.Forcing or None              | Optional external forcing.  If the forcing value is scalar it is applied as a freshwater perturbation added to ``dS/dt``.  If array-like with 2 entries, it is added to ``(dT/dt, dS/dt)`` respectively.  Default ``None``. | `None`      |
+| var_name | str                                  | Label for the model output.  Default ``'stommel'``.                                                                                                                                                                         | `'stommel'` |
+| alpha    | float or callable or pb.core.Forcing | Thermal expansion coefficient.  Default 1.0.                                                                                                                                                                                | `1.0`       |
+| beta     | float or callable or pb.core.Forcing | Haline contraction coefficient.  Default 1.0.                                                                                                                                                                               | `1.0`       |
+| k        | float or callable or pb.core.Forcing | Hydraulic constant controlling overturning sensitivity.  Default 1.0.                                                                                                                                                       | `1.0`       |
+| E        | float or callable or pb.core.Forcing | Net evaporation-minus-precipitation freshwater flux.  Default 0.0.                                                                                                                                                          | `0.0`       |
+| lambda_T | float or callable or pb.core.Forcing | Thermal restoring rate.  Default 1.0.                                                                                                                                                                                       | `1.0`       |
+| lambda_S | float or callable or pb.core.Forcing | Saline restoring rate.  Default 1.0.                                                                                                                                                                                        | `1.0`       |
+| T_star   | float or callable or pb.core.Forcing | Equilibrium temperature contrast.  Default 1.0.                                                                                                                                                                             | `1.0`       |
+| S_star   | float or callable or pb.core.Forcing | Equilibrium salinity contrast.  Default 0.0.                                                                                                                                                                                | `0.0`       |
+
+## Notes {.doc-section .doc-section-notes}
+
+The model uses ``uses_post_history`` to compute the overturning
+diagnostic ``q`` after integration.  State variables are ``T`` and ``S``;
+diagnostic variable is ``q``.
+
+## References {.doc-section .doc-section-references}
+
+Stommel, H. (1961). Thermohaline convection with two stable regimes of
+flow. Tellus, 13(2), 224–230.
+
+## Examples {.doc-section .doc-section-examples}
+
+.. code-block:: python
+
+    import paleobeasts as pb
+    from paleobeasts.signal_models.stommel import Stommel
+
+    model = Stommel(forcing=None, E=0.3, T_star=1.0, S_star=0.0)
+    output = model.integrate(
+        t_span=(0, 50), y0=[1.0, 0.0], method='RK45'
+    )
+    ts_q = output.to_pyleo(var_names=['q'])
