@@ -54,14 +54,17 @@ def downsample(series, method='exponential', param=None, return_index=False, see
 
     Examples
     --------
-    .. code-block:: python
+    ```python
+    import matplotlib.pyplot as plt
+    import pyleoclim as pyleo
+    from paleobeasts.utils.resample import downsample
 
-        import pyleoclim as pyleo
-        from paleobeasts.utils.resample import downsample
-
-        soi = pyleo.utils.load_dataset('SOI')
-        soi_sparse = downsample(soi, method='exponential', param=[2.0], seed=42)
-        soi_sparse.plot()
+    soi = pyleo.utils.load_dataset('SOI')
+    soi_sparse = downsample(soi, method='exponential', param=[3.0], seed=42)
+    soi_sparse.plot()
+    plt.savefig('docs/reference/figures/downsample_example.png',
+                dpi=150, bbox_inches='tight')
+    ```
     """
     if param is None:
         param = [1]

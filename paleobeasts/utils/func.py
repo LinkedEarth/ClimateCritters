@@ -54,22 +54,22 @@ def make_derivative_func(method='numpy', derivative=None, data=None, time=None):
 
     Examples
     --------
-    .. code-block:: python
+    ```python
+    import numpy as np
+    import paleobeasts as pb
+    from paleobeasts.utils.func import make_derivative_func
 
-        import numpy as np
-        import paleobeasts as pb
-        from paleobeasts.utils.func import make_derivative_func
+    # Build derivative from a Forcing object's underlying data arrays
+    orb_forcing = pb.core.Forcing(some_callable)
+    dfdt = make_derivative_func(
+        method='numpy', data=orb_forcing.data, time=orb_forcing.time
+    )
 
-        # Build derivative from a Forcing object's underlying data arrays
-        orb_forcing = pb.core.Forcing(some_callable)
-        dfdt = make_derivative_func(
-            method='numpy', data=orb_forcing.data, time=orb_forcing.time
-        )
-
-        # Attach to Model3 for use in regime-switch logic
-        from paleobeasts.signal_models.g24 import Model3
-        model = Model3(forcing=orb_forcing)
-        model.dfdt = dfdt
+    # Attach to Model3 for use in regime-switch logic
+    from paleobeasts.signal_models.g24 import Model3
+    model = Model3(forcing=orb_forcing)
+    model.dfdt = dfdt
+    ```
     """
     if derivative is not None:
         if callable(derivative):
@@ -121,14 +121,14 @@ def smooth_and_interpolate(years, values, target_years=None, window=50):
 
     Examples
     --------
-    .. code-block:: python
+    ```python
+    import numpy as np
+    from paleobeasts.utils.func import smooth_and_interpolate
 
-        import numpy as np
-        from paleobeasts.utils.func import smooth_and_interpolate
-
-        years = np.linspace(-800, 0, 1600)
-        values = np.sin(2 * np.pi * years / 100)
-        annual = smooth_and_interpolate(years, values, window=10)
+    years = np.linspace(-800, 0, 1600)
+    values = np.sin(2 * np.pi * years / 100)
+    annual = smooth_and_interpolate(years, values, window=10)
+    ```
     """
     years = np.asarray(years, dtype=float)
     values = np.asarray(values, dtype=float)

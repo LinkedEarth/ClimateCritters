@@ -73,15 +73,15 @@ def create_periodic_forcing_function(periods_powers, desired_amplitude=1, y0=0):
 
     Examples
     --------
-    .. code-block:: python
+    ```python
+    from paleobeasts.utils.forcing_utils import create_periodic_forcing_function
 
-        from paleobeasts.utils.forcing_utils import create_periodic_forcing_function
-
-        # Milankovitch-like forcing: 100 kyr + 41 kyr components
-        f = create_periodic_forcing_function(
-            [(100, 0.6), (41, 0.4)], desired_amplitude=25.0
-        )
-        print(f(0.0))   # offset at t=0
+    # Milankovitch-like forcing: 100 kyr + 41 kyr components
+    f = create_periodic_forcing_function(
+        [(100, 0.6), (41, 0.4)], desired_amplitude=25.0
+    )
+    print(f(0.0))   # offset at t=0
+    ```
     """
     pairs, total_max_amplitude = _validate_periods_powers(periods_powers)
     desired_amplitude = float(desired_amplitude)
@@ -128,14 +128,14 @@ def create_periodic_forcing(periods_powers, desired_amplitude=1, y0=0):
 
     Examples
     --------
-    .. code-block:: python
+    ```python
+    import paleobeasts as pb
+    from paleobeasts.utils.forcing_utils import create_periodic_forcing
+    from paleobeasts.signal_models.stommel import Stommel
 
-        import paleobeasts as pb
-        from paleobeasts.utils.forcing_utils import create_periodic_forcing
-        from paleobeasts.signal_models.stommel import Stommel
-
-        orbital = create_periodic_forcing([(100, 0.6), (41, 0.4)], desired_amplitude=0.3)
-        model = Stommel(forcing=orbital)
+    orbital = create_periodic_forcing([(100, 0.6), (41, 0.4)], desired_amplitude=0.3)
+    model = Stommel(forcing=orbital)
+    ```
     """
     func = create_periodic_forcing_function(
         periods_powers, desired_amplitude=desired_amplitude, y0=y0
@@ -158,12 +158,12 @@ def create_constant_forcing(value):
 
     Examples
     --------
-    .. code-block:: python
+    ```python
+    from paleobeasts.utils.forcing_utils import create_constant_forcing
+    from paleobeasts.signal_models.lorenz import Lorenz63
 
-        from paleobeasts.utils.forcing_utils import create_constant_forcing
-        from paleobeasts.signal_models.lorenz import Lorenz63
-
-        model = Lorenz63(forcing=create_constant_forcing(0.0))
+    model = Lorenz63(forcing=create_constant_forcing(0.0))
+    ```
     """
     def _constant(t):
         t_arr = np.asarray(t, dtype=float)
@@ -203,13 +203,13 @@ def create_sinusoid_forcing(A, period, y0=0.0):
 
     Examples
     --------
-    .. code-block:: python
+    ```python
+    from paleobeasts.utils.forcing_utils import create_sinusoid_forcing
+    from paleobeasts.signal_models.enso_recharge import ENSORechargeOscillator
 
-        from paleobeasts.utils.forcing_utils import create_sinusoid_forcing
-        from paleobeasts.signal_models.enso_recharge import ENSORechargeOscillator
-
-        seasonal = create_sinusoid_forcing(A=0.5, period=1.0)
-        model = ENSORechargeOscillator(forcing=seasonal)
+    seasonal = create_sinusoid_forcing(A=0.5, period=1.0)
+    model = ENSORechargeOscillator(forcing=seasonal)
+    ```
     """
     A = float(A)
     period = float(period)
@@ -255,14 +255,14 @@ def create_piecewise_forcing(elements, y0=0.0, label="forcing"):
 
     Examples
     --------
-    .. code-block:: python
+    ```python
+    from paleobeasts.utils.forcing_utils import create_piecewise_forcing
 
-        from paleobeasts.utils.forcing_utils import create_piecewise_forcing
-
-        forcing = create_piecewise_forcing(
-            [{"type": "ramp", "t_start": 0, "t_end": 100, "value": 1.0},
-             {"type": "hold", "t_start": 100, "t_end": 500, "value": 1.0}],
-            label="CO2 ramp"
-        )
+    forcing = create_piecewise_forcing(
+        [{"type": "ramp", "t_start": 0, "t_end": 100, "value": 1.0},
+         {"type": "hold", "t_start": 100, "t_end": 500, "value": 1.0}],
+        label="CO2 ramp"
+    )
+    ```
     """
     return Forcing.from_elements(elements=elements, y0=y0, label=label)

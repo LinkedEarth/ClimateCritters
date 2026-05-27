@@ -40,13 +40,13 @@ def from_series(target_series, method, number=1, seed=None, label=None):
 
     Examples
     --------
-    .. code-block:: python
+    ```python
+    import pyleoclim as pyleo
+    from paleobeasts.utils.noise import from_series
 
-        import pyleoclim as pyleo
-        from paleobeasts.utils.noise import from_series
-
-        soi = pyleo.utils.load_dataset('SOI')
-        surr = from_series(soi, method='ar1sim', number=10, seed=42)
+    soi = pyleo.utils.load_dataset('SOI')
+    surr = from_series(soi, method='ar1sim', number=10, seed=42)
+    ```
     """
     import pyleoclim as pyleo
     surr = pyleo.SurrogateSeries(method=method, number=number, seed=seed, label=label)
@@ -102,13 +102,13 @@ def from_param(method='uar1', noise_param=None, length=50, number=1,
 
     Examples
     --------
-    .. code-block:: python
+    ```python
+    from paleobeasts.utils.noise import from_param
 
-        from paleobeasts.utils.noise import from_param
-
-        # Ten AR(1) realizations with tau=5, sigma=0.5
-        surr = from_param(method='ar1sim', noise_param=[5, 0.5],
-                          length=200, number=10, seed=0)
+    # Ten AR(1) realizations with tau=5, sigma=0.5
+    surr = from_param(method='ar1sim', noise_param=[5, 0.5],
+                      length=200, number=10, seed=0)
+    ```
     """
     if noise_param is None:
         noise_param = [1, 1]
