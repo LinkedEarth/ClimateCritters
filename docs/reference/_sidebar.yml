@@ -28,8 +28,7 @@ website:
         - docs/reference/DoublePendulum.qmd
         - docs/reference/DampedSpring.qmd
         section: Pendulums & Oscillators
-      - collapsed: true
-        contents:
+      - contents:
         - docs/reference/Daisyworld.qmd
         - docs/reference/ENSORechargeOscillator.qmd
         - docs/reference/Model3.qmd
@@ -38,37 +37,36 @@ website:
         - docs/reference/Stommel.qmd
         section: Individual Models
       section: Models
-    - collapsed: true
-      contents:
+    - contents:
       - contents:
-        - docs/reference/utils.from_series.qmd
-        - docs/reference/utils.from_param.qmd
+        - docs/reference/utils.noise.from_series.qmd
+        - docs/reference/utils.noise.from_param.qmd
         section: Noise
       - contents:
-        - docs/reference/utils.downsample.qmd
+        - docs/reference/utils.resample.downsample.qmd
         section: Resampling
       - contents:
-        - docs/reference/utils.create_periodic_forcing_function.qmd
-        - docs/reference/utils.create_periodic_forcing.qmd
-        - docs/reference/utils.create_constant_forcing.qmd
-        - docs/reference/utils.create_sinusoid_forcing.qmd
-        - docs/reference/utils.create_piecewise_forcing.qmd
+        - docs/reference/utils.forcing_utils.create_periodic_forcing_function.qmd
+        - docs/reference/utils.forcing_utils.create_periodic_forcing.qmd
+        - docs/reference/utils.forcing_utils.create_constant_forcing.qmd
+        - docs/reference/utils.forcing_utils.create_sinusoid_forcing.qmd
+        - docs/reference/utils.forcing_utils.create_piecewise_forcing.qmd
         section: Forcing
       - contents:
-        - docs/reference/utils.Solution.qmd
-        - docs/reference/utils.rk4_method.qmd
-        - docs/reference/utils.euler_method.qmd
-        - docs/reference/utils.euler_maruyama_method.qmd
-        - docs/reference/utils.define_t_eval.qmd
-        - docs/reference/utils.validate_monotonic_grid.qmd
-        - docs/reference/utils.validate_layer_thicknesses.qmd
-        - docs/reference/utils.flux_divergence.qmd
-        - docs/reference/utils.validate_initial_state.qmd
-        - docs/reference/utils.build_state_from_history.qmd
+        - docs/reference/utils.solver.Solution.qmd
+        - docs/reference/utils.solver.rk4_method.qmd
+        - docs/reference/utils.solver.euler_method.qmd
+        - docs/reference/utils.solver.euler_maruyama_method.qmd
+        - docs/reference/utils.solver.define_t_eval.qmd
+        - docs/reference/utils.solver.validate_monotonic_grid.qmd
+        - docs/reference/utils.solver.validate_layer_thicknesses.qmd
+        - docs/reference/utils.solver.flux_divergence.qmd
+        - docs/reference/utils.solver.validate_initial_state.qmd
+        - docs/reference/utils.solver.build_state_from_history.qmd
         section: Solvers
       - contents:
-        - docs/reference/utils.make_derivative_func.qmd
-        - docs/reference/utils.smooth_and_interpolate.qmd
+        - docs/reference/utils.func.make_derivative_func.qmd
+        - docs/reference/utils.func.smooth_and_interpolate.qmd
         section: Functions
       section: Utils
     id: docs/reference
