@@ -143,23 +143,28 @@ class Model3(PBModel):
         return k
 
     def calc_ve(self, v, f, f1, f2, vi=0):
-        """
-        Calculate equilibrium state towards which the system is attracted is a function of orbital forcing and,
-        for the bi-stable regime, also depends on ice volume
+        """Equilibrium ice volume toward which the system is attracted.
+
+        In the bi-stable regime (``f1 < f < f2``) the target depends on the
+        current ice volume ``v`` relative to the unstable equilibrium ``vu``.
 
         Parameters
         ----------
         v : float
-            Ice volume
-
+            Current ice volume (normalised).
         f : float
-            Orbital forcing
+            Orbital forcing value (W m\ :sup:`-2`).
+        f1 : float
+            Lower insolation threshold (glaciation onset).
+        f2 : float
+            Upper insolation threshold (deglaciation onset).
+        vi : float
+            Interglacial equilibrium ice volume.  Default 0.
 
         Returns
         -------
         ve : float
-            ice volume of the equilibrium state to which the system is attracted
-
+            Target equilibrium ice volume.
         """
         vg = self.calc_vg(f, f1, f2)
         vu = self.calc_vu(f, f1, f2)
@@ -174,51 +179,51 @@ class Model3(PBModel):
             return vi
 
     def calc_vg(self, f, f1, f2):
-        """
-        Calculate glacial equilibrium state.
+        """Glacial equilibrium ice volume.
 
         Parameters
         ----------
         f : float
-            Orbital forcing
+            Orbital forcing value (W m\ :sup:`-2`).
+        f1 : float
+            Lower insolation threshold.
+        f2 : float
+            Upper insolation threshold.
 
         Returns
         -------
         vg : float
-            ice volume of the glacial equilibrium state
-
+            Glacial equilibrium ice volume.
         """
         return 1 + np.sqrt((f2 - f) / (f2 - f1))
 
     def calc_vu(self, f, f1, f2):
-        """
-        Calculate unstable equilibrium ice volume which separates the glacial and interglacial attraction domains.
+        """Unstable equilibrium ice volume separating glacial and interglacial basins.
 
         Parameters
         ----------
         f : float
-            Orbital forcing
+            Orbital forcing value (W m\ :sup:`-2`).
+        f1 : float
+            Lower insolation threshold.
+        f2 : float
+            Upper insolation threshold.
 
         Returns
         -------
         vu : float
-            ice volume of the unstable equilibrium state
-
+            Unstable equilibrium ice volume.
         """
         return 1 - np.sqrt((f2 - f) / (f2 - f1))
 
     def calc_vc(self, t, x=None):
-        """
-        Evaluate vc which can be a function of time and state or a constant.
-        """
+        """Evaluate the critical ice volume ``vc`` (constant or time/state-varying)."""
         if x is None:
             x = self.state_variables[-1] if self.state_variables is not None else None
         return self.get_param_value('vc', t, x)
 
     def calc_dfdt(self, t, x=None):
-        """
-        Calculate the derivative of the orbital forcing at time t.
-        """
+        """Evaluate df/dt — the time derivative of the orbital forcing at time ``t``."""
         if x is None:
             x = self.state_variables[-1] if self.state_variables is not None else None
         dfdt_spec = self.param_values['dfdt']
