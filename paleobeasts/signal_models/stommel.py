@@ -57,16 +57,22 @@ class Stommel(PBModel):
 
     Examples
     --------
-    .. code-block:: python
+    ```python
+    import paleobeasts as pb
+    from paleobeasts.signal_models.stommel import Stommel
 
-        import paleobeasts as pb
-        from paleobeasts.signal_models.stommel import Stommel
+    import matplotlib.pyplot as plt
+    from paleobeasts.signal_models.stommel import Stommel
 
-        model = Stommel(forcing=None, E=0.3, T_star=1.0, S_star=0.0)
-        output = model.integrate(
-            t_span=(0, 50), y0=[1.0, 0.0], method='RK45'
-        )
-        ts_q = output.to_pyleo(var_names=['q'])
+    model = Stommel(forcing=None, E=0.3, T_star=1.0, S_star=0.0)
+    output = model.integrate(
+        t_span=(0, 50), y0=[1.0, 0.0], method='RK45'
+    )
+    ts_q = output.to_pyleo(var_names=['q'])
+    ts_q.plot()
+    plt.savefig('docs/reference/figures/Stommel_example.png',
+                dpi=150, bbox_inches='tight')
+    ```
     """
 
     def __init__(self, forcing=None, var_name='stommel', alpha=1.0, beta=1.0, k=1.0, E=0.0,

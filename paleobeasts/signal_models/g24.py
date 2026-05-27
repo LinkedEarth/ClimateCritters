@@ -59,18 +59,23 @@ class Model3(PBModel):
 
     Examples
     --------
-    .. code-block:: python
+    ```python
+    import paleobeasts as pb
+    from paleobeasts.signal_models.g24 import Model3, calc_f
 
-        import paleobeasts as pb
-        from paleobeasts.signal_models.g24 import Model3, calc_f
+    orbital_forcing = pb.core.Forcing(calc_f)
+    model = Model3(forcing=orbital_forcing)
+    import matplotlib.pyplot as plt
 
-        orbital_forcing = pb.core.Forcing(calc_f)
-        model = Model3(forcing=orbital_forcing)
-        output = model.integrate(
-            t_span=(-2000, 0), y0=[0.0, 1], method='RK45',
-            kwargs={'max_step': 0.5}
-        )
-        ts = output.to_pyleo(var_names=['v'])
+    output = model.integrate(
+        t_span=(-2000, 0), y0=[0.0, 1], method='RK45',
+        kwargs={'max_step': 0.5}
+    )
+    ts = output.to_pyleo(var_names=['v'])
+    ts.plot()
+    plt.savefig('docs/reference/figures/Model3_example.png',
+                dpi=150, bbox_inches='tight')
+    ```
     """
 
     def __init__(self, forcing, var_name='ice volume', f1=-16, f2=16, t1=30, t2=10, vc=1.4,

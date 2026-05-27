@@ -62,26 +62,31 @@ class Lorenz96(PBModel):
 
     Examples
     --------
-    .. code-block:: python
+    ```python
+    import matplotlib.pyplot as plt
+    import numpy as np
+    import paleobeasts as pb
+    from paleobeasts.signal_models.lorenz import Lorenz96
 
-        import numpy as np
-        import paleobeasts as pb
-        from paleobeasts.signal_models.lorenz import Lorenz96
+    # Single-scale system
+    model = Lorenz96(forcing=None, n=40, F=8.0)
+    y0 = np.random.randn(40) + 8.0
+    output = model.integrate(t_span=(0, 10), y0=y0, method='rk4', dt=0.01)
+    ts = output.to_pyleo(var_names=['x0'])
 
-        # Single-scale system
-        model = Lorenz96(forcing=None, n=40, F=8.0)
-        y0 = np.random.randn(40) + 8.0
-        output = model.integrate(t_span=(0, 10), y0=y0, method='rk4', dt=0.01)
-        ts = output.to_pyleo(var_names=['x0'])
-
-        # Two-scale system
-        K, J = 36, 10
-        model2 = Lorenz96(forcing=None, n=K, J=J, F=10.0)
-        y0_2 = np.concatenate([np.random.randn(K) + 10.0,
-                                np.random.randn(K * J) * 0.01])
-        output2 = model2.integrate(t_span=(0, 10), y0=y0_2,
-                                   method='rk4', dt=0.005,
-                                   kwargs={'si': 0.05})
+    # Two-scale system
+    K, J = 36, 10
+    model2 = Lorenz96(forcing=None, n=K, J=J, F=10.0)
+    y0_2 = np.concatenate([np.random.randn(K) + 10.0,
+                            np.random.randn(K * J) * 0.01])
+    output2 = model2.integrate(t_span=(0, 10), y0=y0_2,
+                               method='rk4', dt=0.005,
+                               kwargs={'si': 0.05})
+    ts = output.to_pyleo(var_names=['x0'])
+    ts.plot()
+    plt.savefig('docs/reference/figures/Lorenz96_example.png',
+                dpi=150, bbox_inches='tight')
+    ```
     """
 
     def __init__(self, forcing=None, var_name='lorenz96', n=40, J=0,
@@ -214,16 +219,22 @@ class Lorenz63(PBModel):
 
     Examples
     --------
-    .. code-block:: python
+    ```python
+    import matplotlib.pyplot as plt
+    import paleobeasts as pb
+    from paleobeasts.signal_models.lorenz import Lorenz63
 
-        import paleobeasts as pb
-        from paleobeasts.signal_models.lorenz import Lorenz63
-
-        model = Lorenz63(forcing=pb.core.Forcing(lambda t: 0.0))
-        output = model.integrate(
-            t_span=(0, 100), y0=[-8.0, 8.0, 27.0], method='RK45'
-        )
-        ts = output.to_pyleo(var_names=['x', 'y', 'z'])
+    model = Lorenz63(forcing=pb.core.Forcing(lambda t: 0.0))
+    output = model.integrate(
+        t_span=(0, 100), y0=[-8.0, 8.0, 27.0], method='RK45'
+    )
+    fig, ax = plt.subplots()
+    ax.plot(output.state_variables['x'], output.state_variables['z'],
+            lw=0.3, alpha=0.8)
+    ax.set_xlabel('x'); ax.set_ylabel('z')
+    plt.savefig('docs/reference/figures/Lorenz63_example.png',
+                dpi=150, bbox_inches='tight')
+    ```
     """
 
     def __init__(self, forcing=None, var_name='lorenz63', sigma=10.0, rho=28.0, beta=8 / 3,

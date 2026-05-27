@@ -14,6 +14,7 @@ Two styles are supported:
 
 Examples
 --------
+
 Build a two-box carbon model with explicit tendencies:
 
 >>> spec = BoxModelSpec("two_box")
@@ -38,6 +39,7 @@ Build a mixed network with reciprocal exchange and directed transport:
 >>> spec.register_transport("SA", "DA", 0.22)
 >>> spec.register_transport("DA", "SO", 0.12)
 >>> model = spec.make_boxmodel()
+
 """
 
 from dataclasses import dataclass
@@ -149,31 +151,33 @@ class BoxModelSpec:
 
     Examples
     --------
+
     Minimal explicit one-box relaxation model:
 
-    .. code-block:: python
+    ```python
+    import paleobeasts as pb
+    from paleobeasts.signal_models.box_model import BoxModelSpec
 
-        import paleobeasts as pb
-        from paleobeasts.signal_models.box_model import BoxModelSpec
-
-        spec = BoxModelSpec("relaxation")
-        spec.register_state_variables(["x"])
-        spec.register_parameters(tau=10.0, x_eq=1.0)
-        spec.register_tendency(
-            "x", lambda ctx: (ctx.param("x_eq") - ctx["x"]) / ctx.param("tau")
-        )
-        model = spec.make_boxmodel()
-        output = model.integrate(t_span=(0, 100), y0=[0.0], method='RK45')
+    spec = BoxModelSpec("relaxation")
+    spec.register_state_variables(["x"])
+    spec.register_parameters(tau=10.0, x_eq=1.0)
+    spec.register_tendency(
+        "x", lambda ctx: (ctx.param("x_eq") - ctx["x"]) / ctx.param("tau")
+    )
+    model = spec.make_boxmodel()
+    output = model.integrate(t_span=(0, 100), y0=[0.0], method='RK45')
+    ```
 
     Automatic two-box exchange model:
 
-    .. code-block:: python
+    ```python
+    spec = BoxModelSpec("exchange")
+    spec.register_state_variables(["A", "S"])
+    spec.register_box_volumes(A=1.0, S=50.0)
+    spec.register_exchange("A", "S", 0.2)
+    model = spec.make_boxmodel()
+    ```
 
-        spec = BoxModelSpec("exchange")
-        spec.register_state_variables(["A", "S"])
-        spec.register_box_volumes(A=1.0, S=50.0)
-        spec.register_exchange("A", "S", 0.2)
-        model = spec.make_boxmodel()
     """
 
     def __init__(self, name):
@@ -224,10 +228,11 @@ class BoxModelSpec:
 
         Parameters
         ----------
-        **volumes
+        volumes : dict
             Mapping from box name to box volume. These are stored internally as
             parameters named ``V__<box>``.
         """
+
         for box, value in volumes.items():
             box_name = str(box)
             param_name = f"V__{box_name}"
@@ -402,7 +407,7 @@ class GenericBoxModel(PBModel):
         channels.  Default ``None``.
     var_name : str or None
         Override for the model name.  Defaults to ``spec.name``.
-    **kwargs
+    kwargs : dict
         Additional parameter overrides applied on top of
         ``spec.parameter_defaults``.
     """

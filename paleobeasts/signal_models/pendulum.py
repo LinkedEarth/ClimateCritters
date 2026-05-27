@@ -62,6 +62,20 @@ class SimplePendulum(PBModel):
         Names for [angle, angular velocity].
     diagnostic_variables:
         Names for post-integration diagnostics.
+
+    Examples
+    --------
+    ```python
+    import matplotlib.pyplot as plt
+    from paleobeasts.signal_models.pendulum import SimplePendulum
+
+    model = SimplePendulum(forcing=None, L=1.0, g=9.81, damping=0.1)
+    output = model.integrate(t_span=(0, 20), y0=[1.5, 0.0], method='RK45')
+    ts = output.to_pyleo(var_names=['theta'])
+    ts.plot()
+    plt.savefig('docs/reference/figures/SimplePendulum_example.png',
+                dpi=150, bbox_inches='tight')
+    ```
     """
 
     def __init__(
@@ -186,6 +200,26 @@ class DrivenPendulum(PBModel):
         Names for [angle, angular velocity].
     diagnostic_variables:
         Names for post-integration diagnostics.
+
+    Examples
+    --------
+    ```python
+    import matplotlib.pyplot as plt
+    from paleobeasts.signal_models.pendulum import DrivenPendulum
+
+    model = DrivenPendulum(forcing=None, q=0.5, A=1.2, Omega=2.0/3.0)
+    output = model.integrate(
+        t_span=(0, 500), y0=[0.0, 0.0], method='RK45',
+        kwargs={'rtol': 1e-9, 'atol': 1e-11},
+    )
+    theta = output.state_variables['theta']
+    omega = output.state_variables['omega']
+    fig, ax = plt.subplots()
+    ax.plot(theta, omega, ',', ms=0.4, alpha=0.5)
+    ax.set_xlabel('θ (rad)'); ax.set_ylabel('ω')
+    plt.savefig('docs/reference/figures/DrivenPendulum_example.png',
+                dpi=150, bbox_inches='tight')
+    ```
     """
 
     def __init__(
@@ -304,6 +338,24 @@ class DoublePendulum(PBModel):
         Names for [θ₁, ω₁, θ₂, ω₂].
     diagnostic_variables:
         Names for post-integration diagnostics.
+
+    Examples
+    --------
+    ```python
+    import matplotlib.pyplot as plt
+    import numpy as np
+    from paleobeasts.signal_models.pendulum import DoublePendulum
+
+    model = DoublePendulum(forcing=None, m1=1.0, m2=1.0, L1=1.0, L2=1.0)
+    output = model.integrate(
+        t_span=(0, 60), y0=[np.pi/2, 0.0, np.pi/4, 0.0], method='RK45',
+        kwargs={'rtol': 1e-10, 'atol': 1e-12},
+    )
+    ts = output.to_pyleo(var_names=['theta1'])
+    ts.plot()
+    plt.savefig('docs/reference/figures/DoublePendulum_example.png',
+                dpi=150, bbox_inches='tight')
+    ```
     """
 
     def __init__(

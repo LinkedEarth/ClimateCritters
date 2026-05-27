@@ -41,16 +41,21 @@ class Roessler(PBModel):
 
     Examples
     --------
-    .. code-block:: python
+    ```python
+    import matplotlib.pyplot as plt
+    from paleobeasts.signal_models.roessler import Roessler
 
-        import paleobeasts as pb
-        from paleobeasts.signal_models.roessler import Roessler
-
-        model = Roessler(forcing=None)
-        output = model.integrate(
-            t_span=(0, 200), y0=[0.1, 0.0, 0.0], method='RK45'
-        )
-        ts = output.to_pyleo(var_names=['x', 'y', 'z'])
+    model = Roessler(forcing=None)
+    output = model.integrate(
+        t_span=(0, 200), y0=[0.1, 0.0, 0.0], method='RK45'
+    )
+    fig, ax = plt.subplots()
+    ax.plot(output.state_variables['x'], output.state_variables['z'],
+            lw=0.3, alpha=0.8)
+    ax.set_xlabel('x'); ax.set_ylabel('z')
+    plt.savefig('docs/reference/figures/Roessler_example.png',
+                dpi=150, bbox_inches='tight')
+    ```
     """
 
     def __init__(
