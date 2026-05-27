@@ -1,0 +1,18 @@
+---
+title: About PaleoBeasts
+sidebar: get-started
+---
+
+The name comes from Wally Broecker, who characterized Earth's climate as an "angry beast" — capable of abrupt, large-amplitude shifts that defy easy extrapolation. PaleoBeasts is a collection of minimal models that try to capture pieces of that behavior in a tractable, well-understood form.
+
+The motivation borrows loosely from biology, where progress often runs through model organisms: well-characterized systems whose dynamics are known precisely enough to serve as a reference for new methods and theories. Climate science has fewer of those. The models gathered here — Lorenz's three-equation convection system, thermohaline box models, ice-volume oscillators, energy balance frameworks, and others — are not intended as comprehensive representations of climate. Their value runs in the other direction: they are simple enough to explore fully, yet rich enough to exhibit chaos, multiple equilibria, tipping points, and intermittency.
+
+A few things these models lend themselves to:
+
+- **Sensitivity and parameter exploration** — because the models are small, parameter sweeps, forcing scenarios, and initial-condition experiments run quickly and the results are interpretable.
+
+- **Evaluating analysis methods** — running a spectral method, a causal inference algorithm, or a tipping-point detector on a synthetic series with known properties can help build intuition about what the method is actually responding to. The structure of the underlying system matters here in the first instance: a method suited to a stationary periodic signal will behave quite differently on a chaotic or intermittent one, independent of noise or sampling effects. Taphonomic complications — noise, irregular sampling, bioturbation — add a further layer of realism once the structural questions are reasonably well understood.
+
+- **Taphonomic simulation** — real paleoclimate archives introduce noise, irregular sampling, and age uncertainty between the climate signal and the record. PaleoBeasts includes utilities for adding these effects to model output, so that the gap between clean synthetic series and proxy-like records can be explored gradually.
+
+Model output can be exported to [Pyleoclim](https://pyleoclim-util.readthedocs.io/) for downstream analysis via `output.to_pyleo()`.

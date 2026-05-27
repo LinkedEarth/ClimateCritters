@@ -28,9 +28,15 @@ website:
       title: Get Started
       style: docked
       contents:
+        - docs/get-started/overview.qmd
         - docs/get-started/installation.qmd
         - docs/get-started/quickstart.qmd
         - docs/get-started/concepts.qmd
+        - docs/get-started/models.qmd
+        - docs/get-started/downsampling.qmd
+        - docs/get-started/noise.qmd
+        - docs/get-started/solvers.qmd
+
 
     - id: tutorials
       title: Tutorials
@@ -63,37 +69,38 @@ quartodoc:
   package: paleobeasts
   parser: numpy
   dir: docs/reference
-  sidebar: docs/reference/_sidebar.yml
   css: docs/reference/_styles-quartodoc.css
 
   sections:
 
-    - title: Core infrastructure
+    - title: Core
       desc: Base classes underlying all models.
       contents:
         - core.PBModel
         - core.PBOutput
         - core.Forcing
 
-    - title: Climate models
-      desc: >
-        Energy balance, ocean circulation, carbon cycle,
-        and orbital-scale paleoclimate models.
+    - title: EBMs
+      desc: Energy balance models.
       contents:
-        - EBM
-        - Stommel
-        - Stocker2003BipolarSeesaw
-        - Daisyworld
-        - ENSORechargeOscillator
-        - Model3
+        - EBMBase
+        - EBM0D
+        - EBM1DLat
 
-    - title: "Dynamical systems: Lorenz"
-      desc: Single-scale and two-scale Lorenz atmospheric models.
+    - title: Box Models
+      desc: Composable framework for building custom multi-reservoir models.
+      contents:
+        - BoxModelSpec
+        - TwoBoxCarbon
+
+    - title: Lorenz & Roessler
+      desc: Single-scale & two-scale Lorenz atmospheric models + Roessler system.
       contents:
         - Lorenz63
         - Lorenz96
+        - Roessler
 
-    - title: "Dynamical systems: Pendulums and oscillators"
+    - title: Pendulums & Oscillators
       desc: Mechanical oscillators ranging from simple SHM to chaotic driven pendulums.
       contents:
         - SimplePendulum
@@ -101,13 +108,12 @@ quartodoc:
         - DoublePendulum
         - DampedSpring
 
-    - title: "Dynamical systems: Other attractors"
-      desc: Additional chaotic systems.
+    - title: Individual Models
+      desc: Standalone paleoclimate and dynamical systems models.
       contents:
-        - Roessler
-
-    - title: Box model framework
-      desc: Composable framework for building custom multi-reservoir models.
-      contents:
-        - BoxModelSpec
-        - TwoBoxCarbon
+        - Daisyworld
+        - ENSORechargeOscillator
+        - Model3
+        - Stocker2003BipolarSeesaw
+        - Stocker2003ExtendedSeaIceSeesaw
+        - Stommel

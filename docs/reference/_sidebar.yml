@@ -6,31 +6,70 @@ website:
       - docs/reference/core.PBModel.qmd
       - docs/reference/core.PBOutput.qmd
       - docs/reference/core.Forcing.qmd
-      section: Core infrastructure
+      section: Core
     - contents:
-      - docs/reference/EBM.qmd
-      - docs/reference/Stommel.qmd
-      - docs/reference/Stocker2003BipolarSeesaw.qmd
-      - docs/reference/Daisyworld.qmd
-      - docs/reference/ENSORechargeOscillator.qmd
-      - docs/reference/Model3.qmd
-      section: Climate models
-    - contents:
-      - docs/reference/Lorenz63.qmd
-      - docs/reference/Lorenz96.qmd
-      section: 'Dynamical systems: Lorenz'
-    - contents:
-      - docs/reference/SimplePendulum.qmd
-      - docs/reference/DrivenPendulum.qmd
-      - docs/reference/DoublePendulum.qmd
-      - docs/reference/DampedSpring.qmd
-      section: 'Dynamical systems: Pendulums and oscillators'
-    - contents:
-      - docs/reference/Roessler.qmd
-      section: 'Dynamical systems: Other attractors'
-    - contents:
-      - docs/reference/BoxModelSpec.qmd
-      - docs/reference/TwoBoxCarbon.qmd
-      section: Box model framework
+      - contents:
+        - docs/reference/EBMBase.qmd
+        - docs/reference/EBM0D.qmd
+        - docs/reference/EBM1DLat.qmd
+        section: EBMs
+      - contents:
+        - docs/reference/BoxModelSpec.qmd
+        - docs/reference/TwoBoxCarbon.qmd
+        section: Box Models
+      - contents:
+        - docs/reference/Lorenz63.qmd
+        - docs/reference/Lorenz96.qmd
+        - docs/reference/Roessler.qmd
+        section: Lorenz & Roessler
+      - contents:
+        - docs/reference/SimplePendulum.qmd
+        - docs/reference/DrivenPendulum.qmd
+        - docs/reference/DoublePendulum.qmd
+        - docs/reference/DampedSpring.qmd
+        section: Pendulums & Oscillators
+      - collapsed: true
+        contents:
+        - docs/reference/Daisyworld.qmd
+        - docs/reference/ENSORechargeOscillator.qmd
+        - docs/reference/Model3.qmd
+        - docs/reference/Stocker2003BipolarSeesaw.qmd
+        - docs/reference/Stocker2003ExtendedSeaIceSeesaw.qmd
+        - docs/reference/Stommel.qmd
+        section: Individual Models
+      section: Models
+    - collapsed: true
+      contents:
+      - contents:
+        - docs/reference/utils.from_series.qmd
+        - docs/reference/utils.from_param.qmd
+        section: Noise
+      - contents:
+        - docs/reference/utils.downsample.qmd
+        section: Resampling
+      - contents:
+        - docs/reference/utils.create_periodic_forcing_function.qmd
+        - docs/reference/utils.create_periodic_forcing.qmd
+        - docs/reference/utils.create_constant_forcing.qmd
+        - docs/reference/utils.create_sinusoid_forcing.qmd
+        - docs/reference/utils.create_piecewise_forcing.qmd
+        section: Forcing
+      - contents:
+        - docs/reference/utils.Solution.qmd
+        - docs/reference/utils.rk4_method.qmd
+        - docs/reference/utils.euler_method.qmd
+        - docs/reference/utils.euler_maruyama_method.qmd
+        - docs/reference/utils.define_t_eval.qmd
+        - docs/reference/utils.validate_monotonic_grid.qmd
+        - docs/reference/utils.validate_layer_thicknesses.qmd
+        - docs/reference/utils.flux_divergence.qmd
+        - docs/reference/utils.validate_initial_state.qmd
+        - docs/reference/utils.build_state_from_history.qmd
+        section: Solvers
+      - contents:
+        - docs/reference/utils.make_derivative_func.qmd
+        - docs/reference/utils.smooth_and_interpolate.qmd
+        section: Functions
+      section: Utils
     id: docs/reference
   - id: dummy-sidebar

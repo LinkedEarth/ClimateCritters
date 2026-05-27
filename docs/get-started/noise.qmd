@@ -1,0 +1,68 @@
+---
+title: Noise
+sidebar: get-started
+---
+
+Noise in paleoclimate records comes from at least two distinct sources, and keeping them separate tends to be useful: variability that was part of the *dynamics themselves* (process noise), and noise introduced *after* a signal has been recorded — measurement error, archive-level degradation, bioturbation (observation noise). PaleoBeasts supports both.
+
+## Observation noise
+
+Observation noise sits outside the model — it is added to output after integration. The `paleobeasts.utils.noise` module provides two functions for generating surrogate series to use this way.
+
+`from_param()` generates surrogates from a parametric noise model:
+
+```python
+from paleobeasts.utils.noise import from_param
+
+# Ten AR(1) surrogates with decorrelation time tau=5, amplitude sigma=0.5
+surr = from_param(method='ar1sim', noise_param=[5, 0.5], length=200, number=10, seed=0)
+```
+
+`from_series()` fits a surrogate to an existing Pyleoclim series, preserving its autocorrelation or spectral structure:
+
+```python
+from paleobeasts.utils.noise import from_series
+
+# Phase-randomised surrogates preserving the power spectrum of a target series
+surr = from_series(target_series=ts, method='phaseran', number=20)
+```
+
+To add observation noise to model output, generate a surrogate of the appropriate length and add it to a state variable array. The underlying attractor is unchanged — the surrogate just represents the noisy window through which an archive records the signal.
+
+## Process noise
+
+Process noise enters during integration — it is part of the dynamics, not added afterwards. This is the appropriate representation for stochastic atmospheric forcing, internal ocean variability, or any mechanism where randomness drives the system rather than merely obscuring it.
+
+PaleoBeasts supports this through the `euler_maruyama` solver, which implements the Euler–Maruyama scheme for stochastic differential equations:
+
+$$\mathrm{d}y = f(t, y)\,\mathrm{d}t + g(t, y)\,\mathrm{d}W$$
+
+where $\mathrm{d}W$ is a Wiener increment and $g(t, y)$ (the `noise_func` argument) sets the diffusion scale per state variable.
+
+```python
+import numpy as np
+from paleobeasts.signal_models.stommel import Stommel
+from paleobeasts.utils.forcing_utils import create_constant_forcing
+
+model = Stommel(forcing=create_constant_forcing(0.0))
+
+def noise_func(t, y):
+    return np.array([0.05, 0.01])   # diffusion scale on T and S
+
+output = model.integrate(
+    t_span=(0, 500),
+    y0=[1.0, 0.5],
+    method='euler_maruyama',
+    dt=0.1,
+    noise_func=noise_func,
+    seed=42,
+)
+```
+
+Because noise enters at every timestep, the trajectory itself is altered. Near a bifurcation or tipping point, stochastic kicks can trigger transitions that the deterministic system would not reach on its own — something post-hoc noise cannot reproduce.
+
+## Combining both
+
+The two approaches can be layered: integrate with `euler_maruyama` to produce a stochastic trajectory, then add observation noise on top to simulate what an archive would actually record. Whether that is the right decomposition depends on the system and the question being asked.
+
+For a more extended walkthrough, see the [noise demo notebook](../../notebooks/functionality_demos/noise_demo.ipynb) and the [model noise demo](../../notebooks/functionality_demos/model_noise_demo.ipynb).
