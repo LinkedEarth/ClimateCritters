@@ -57,6 +57,20 @@ class DampedSpring(PBModel):
         Names for the two integrated state variables (position, velocity).
     diagnostic_variables:
         Names for post-integration diagnostics.
+
+    Examples
+    --------
+    ```python
+    import matplotlib.pyplot as plt
+    from paleobeasts.signal_models.damped_spring import DampedSpring
+
+    model = DampedSpring(forcing=None, m=1.0, k=4.0, c=0.4)
+    output = model.integrate(t_span=(0, 30), y0=[1.0, 0.0], method='RK45')
+    ts = output.to_pyleo(var_names=['x'])
+    ts.plot()
+    plt.savefig('docs/reference/figures/DampedSpring_example.png',
+                dpi=150, bbox_inches='tight')
+    ```
     """
 
     def __init__(
