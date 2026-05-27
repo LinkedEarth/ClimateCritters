@@ -2,7 +2,7 @@
 
 ```python
 Roessler(
-    forcing,
+    forcing=None,
     var_name='roessler',
     a=0.2,
     b=0.2,
@@ -24,13 +24,13 @@ A three-variable continuous-time system with a single scroll attractor:
 
 ## Parameters {.doc-section .doc-section-parameters}
 
-| Name     | Type                                 | Description                                                                           | Default      |
-|----------|--------------------------------------|---------------------------------------------------------------------------------------|--------------|
-| forcing  | pb.core.Forcing or None              | Included for API consistency; the base dynamics do not use forcing. Default ``None``. | _required_   |
-| var_name | str                                  | Label for the model output.  Default ``'roessler'``.                                  | `'roessler'` |
-| a        | float or callable or pb.core.Forcing | Controls the strength of the y-feedback.  Default 0.2.                                | `0.2`        |
-| b        | float or callable or pb.core.Forcing | Offset in the z equation.  Default 0.2.                                               | `0.2`        |
-| c        | float or callable or pb.core.Forcing | Nonlinear threshold in the z equation.  Default 5.7.                                  | `5.7`        |
+| Name     | Type                                 | Description                                                                                                                                                                                  | Default      |
+|----------|--------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------|
+| forcing  | pb.core.Forcing or None              | External forcing applied additively to the equations.  If the value at time t is scalar it is added to dx/dt only; if it is a 3-element array it is added component-wise.  Default ``None``. | `None`       |
+| var_name | str                                  | Label for the model output.  Default ``'roessler'``.                                                                                                                                         | `'roessler'` |
+| a        | float or callable or pb.core.Forcing | Controls the strength of the y-feedback.  Default 0.2.                                                                                                                                       | `0.2`        |
+| b        | float or callable or pb.core.Forcing | Offset in the z equation.  Default 0.2.                                                                                                                                                      | `0.2`        |
+| c        | float or callable or pb.core.Forcing | Nonlinear threshold in the z equation.  Default 5.7.                                                                                                                                         | `5.7`        |
 
 ## Notes {.doc-section .doc-section-notes}
 

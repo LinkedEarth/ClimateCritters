@@ -32,19 +32,19 @@ where ``b = b0*mu`` and ``R = gamma*b - c``.
 
 ## Parameters {.doc-section .doc-section-parameters}
 
-| Name     | Type                                 | Description                                                                                                                         | Default                      |
-|----------|--------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------|------------------------------|
-| forcing  | pb.core.Forcing or None              | External forcing added to ``dT/dt``.  If provided it overrides the internal seasonal term ``Af*sin(2*pi*t/Pf)``.  Default ``None``. | `None`                       |
-| var_name | str                                  | Label for the model output.  Default ``'enso_recharge_oscillator'``.                                                                | `'enso_recharge_oscillator'` |
-| mu       | float or callable or pb.core.Forcing | Bjerknes coupling coefficient.  Default 0.7.                                                                                        | `0.7`                        |
-| en       | float or callable or pb.core.Forcing | Nonlinear damping coefficient.  Default 0.0 (linear limit).                                                                         | `0.0`                        |
-| Af       | float or callable or pb.core.Forcing | Seasonal forcing amplitude.  Default 0.0.                                                                                           | `0.0`                        |
-| Pf       | float or callable or pb.core.Forcing | Seasonal forcing period (model time units).  Default 6.0.                                                                           | `6.0`                        |
-| c        | float or callable or pb.core.Forcing | Newtonian cooling rate of SST.  Default 1.0.                                                                                        | `1.0`                        |
-| r        | float or callable or pb.core.Forcing | Thermocline recharge damping rate.  Default 0.25.                                                                                   | `0.25`                       |
-| alpha    | float or callable or pb.core.Forcing | Wind-stress feedback strength.  Default 0.125.                                                                                      | `0.125`                      |
-| b0       | float or callable or pb.core.Forcing | Background thermocline slope sensitivity.  Default 2.5.                                                                             | `2.5`                        |
-| gamma    | float or callable or pb.core.Forcing | Thermocline feedback onto SST.  Default 0.75.                                                                                       | `0.75`                       |
+| Name     | Type                                 | Description                                                                                                                              | Default                      |
+|----------|--------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------|------------------------------|
+| forcing  | pb.core.Forcing or None              | External forcing used in ``dT/dt``. If provided it replaces the internal seasonal term ``Af*sin(2*pi*t/Pf)`` entirely. Default ``None``. | `None`                       |
+| var_name | str                                  | Label for the model output.  Default ``'enso_recharge_oscillator'``.                                                                     | `'enso_recharge_oscillator'` |
+| mu       | float or callable or pb.core.Forcing | Bjerknes coupling coefficient.  Default 0.7.                                                                                             | `0.7`                        |
+| en       | float or callable or pb.core.Forcing | Nonlinear damping coefficient.  Default 0.0 (linear limit).                                                                              | `0.0`                        |
+| Af       | float or callable or pb.core.Forcing | Seasonal forcing amplitude used only when ``forcing`` is ``None``. Default 0.0.                                                          | `0.0`                        |
+| Pf       | float or callable or pb.core.Forcing | Seasonal forcing period (model time units), used only when ``forcing`` is ``None``. Default 6.0.                                         | `6.0`                        |
+| c        | float or callable or pb.core.Forcing | Newtonian cooling rate of SST.  Default 1.0.                                                                                             | `1.0`                        |
+| r        | float or callable or pb.core.Forcing | Thermocline recharge damping rate.  Default 0.25.                                                                                        | `0.25`                       |
+| alpha    | float or callable or pb.core.Forcing | Wind-stress feedback strength.  Default 0.125.                                                                                           | `0.125`                      |
+| b0       | float or callable or pb.core.Forcing | Background thermocline slope sensitivity.  Default 2.5.                                                                                  | `2.5`                        |
+| gamma    | float or callable or pb.core.Forcing | Thermocline feedback onto SST.  Default 0.75.                                                                                            | `0.75`                       |
 
 ## Notes {.doc-section .doc-section-notes}
 
@@ -52,8 +52,9 @@ The internal time scale is ``tscale = 1/6`` (months to years mapping);
 this is baked in but does not affect ``t`` directly as the equations are
 already in the dimensionless form used in the worksheet.
 
-State variables are ``T`` and ``h`` in that order.  ``Pf`` must be
-non-zero (raises ``ValueError`` otherwise).
+State variables are ``T`` and ``h`` in that order. ``Pf`` must be
+non-zero when the internal seasonal forcing is used (raises
+``ValueError`` otherwise).
 
 ## References {.doc-section .doc-section-references}
 

@@ -1,0 +1,63 @@
+# EBMBase { #paleobeasts.EBMBase }
+
+```python
+EBMBase(
+    forcing,
+    variable_name,
+    state_variables=None,
+    non_integrated_state_vars=None,
+    diagnostic_variables=None,
+)
+```
+
+Shared energy balance physics for all EBM variants.
+
+Provides default implementations of ``calc_OLR``, ``calc_albedo``, and
+``calc_C`` that delegate to ``param_values`` via ``get_param_value``.
+Subclasses with different formulations (e.g. ``EBM1DLat`` with Budyko
+linear OLR and an array ice-line albedo) override the relevant
+``calc_*`` methods.  The external signature ``(self, T, t)`` is shared
+across all variants so user code can call these helpers uniformly.
+
+## Notes {.doc-section .doc-section-notes}
+
+This class is not meant to be instantiated directly.  Subclass it and
+override at minimum ``dydt`` and, where needed, the ``calc_*`` helpers.
+
+## See also {.doc-section .doc-section-see-also}
+
+paleobeasts.core.PBModel : Base class for all PaleoBeasts models.
+EBM0D : Zero-dimensional EBM subclass.
+EBM1DLat : Latitudinally-resolved diffusive EBM subclass.
+
+## Methods
+
+| Name | Description |
+| --- | --- |
+| [calc_C](#paleobeasts.EBMBase.calc_C) | Return heat capacity at state T and time t (delegates to param_values['C']). |
+| [calc_OLR](#paleobeasts.EBMBase.calc_OLR) | Return OLR at state T and time t (delegates to param_values['OLR']). |
+| [calc_albedo](#paleobeasts.EBMBase.calc_albedo) | Return albedo at state T and time t (delegates to param_values['albedo']). |
+
+### calc_C { #paleobeasts.EBMBase.calc_C }
+
+```python
+EBMBase.calc_C(T, t)
+```
+
+Return heat capacity at state T and time t (delegates to param_values['C']).
+
+### calc_OLR { #paleobeasts.EBMBase.calc_OLR }
+
+```python
+EBMBase.calc_OLR(T, t)
+```
+
+Return OLR at state T and time t (delegates to param_values['OLR']).
+
+### calc_albedo { #paleobeasts.EBMBase.calc_albedo }
+
+```python
+EBMBase.calc_albedo(T, t)
+```
+
+Return albedo at state T and time t (delegates to param_values['albedo']).

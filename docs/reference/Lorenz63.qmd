@@ -2,7 +2,7 @@
 
 ```python
 Lorenz63(
-    forcing,
+    forcing=None,
     var_name='lorenz63',
     sigma=10.0,
     rho=28.0,
@@ -25,20 +25,19 @@ on initial conditions and a strange attractor:
 
 ## Parameters {.doc-section .doc-section-parameters}
 
-| Name     | Type                                 | Description                                                                                                                                                                | Default      |
-|----------|--------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------|
-| forcing  | pb.core.Forcing or None              | Optional external forcing.  If the forcing value ``f(t)`` is scalar it is added to ``dx/dt``; if it is array-like with 3 entries it is added to ``(dx/dt, dy/dt, dz/dt)``. | _required_   |
-| var_name | str                                  | Label for the model output.  Default ``'lorenz63'``.                                                                                                                       | `'lorenz63'` |
-| sigma    | float or callable or pb.core.Forcing | Prandtl number controlling rotation of convective rolls.  Default 10.                                                                                                      | `10.0`       |
-| rho      | float or callable or pb.core.Forcing | Rayleigh number (reduced) controlling the buoyancy forcing. Default 28.                                                                                                    | `28.0`       |
-| beta     | float or callable or pb.core.Forcing | Geometric factor controlling the spatial structure.  Default 8/3.                                                                                                          | `8 / 3`      |
+| Name     | Type                                 | Description                                                                                                                                                                                                             | Default      |
+|----------|--------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------|
+| forcing  | pb.core.Forcing or None              | External forcing, which must be provided explicitly but may be ``None``. If the forcing value ``f(t)`` is scalar it is added to ``dx/dt``; if it is array-like with 3 entries it is added to ``(dx/dt, dy/dt, dz/dt)``. | `None`       |
+| var_name | str                                  | Label for the model output.  Default ``'lorenz63'``.                                                                                                                                                                    | `'lorenz63'` |
+| sigma    | float or callable or pb.core.Forcing | Prandtl number controlling rotation of convective rolls.  Default 10.                                                                                                                                                   | `10.0`       |
+| rho      | float or callable or pb.core.Forcing | Rayleigh number (reduced) controlling the buoyancy forcing. Default 28.                                                                                                                                                 | `28.0`       |
+| beta     | float or callable or pb.core.Forcing | Geometric factor controlling the spatial structure.  Default 8/3.                                                                                                                                                       | `8 / 3`      |
 
 ## Notes {.doc-section .doc-section-notes}
 
 The classic strange attractor exists for ``sigma=10``, ``rho=28``,
 ``beta=8/3``.  Time-varying parameters are supported as callables with
-signatures ``(t)``, ``(t, state)``, ``(t, state, model)``,
-``(model, state)``, or ``(state)``.
+signatures ``(t)``, ``(t, state)``, or ``(t, state, model)``.
 
 State variables are ``x``, ``y``, ``z`` in that order.
 

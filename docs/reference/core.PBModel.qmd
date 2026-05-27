@@ -34,6 +34,7 @@ Use ``get_param(name, t, state)`` inside ``dydt`` to resolve time-varying parame
 | [integrate](#paleobeasts.core.PBModel.integrate) | Integrate the model over a time span and return a :class:`PBOutput`. |
 | [populate_diagnostics_from_history](#paleobeasts.core.PBModel.populate_diagnostics_from_history) | Compute diagnostic variables from the full solved trajectory. |
 | [post_integrate](#paleobeasts.core.PBModel.post_integrate) | Orchestrate post-solve output construction for ``uses_post_history`` models. |
+| [resolve_forcing](#paleobeasts.core.PBModel.resolve_forcing) | Evaluate the model's external forcing at time t. |
 | [set_function](#paleobeasts.core.PBModel.set_function) | Swap out a model calculation function on a single instance. |
 | [set_param_value](#paleobeasts.core.PBModel.set_param_value) | Add or update a parameter and keep the attribute and ``param_values`` in sync. |
 | [validate_initial_state](#paleobeasts.core.PBModel.validate_initial_state) | Validate and normalize the initial state vector. |
@@ -133,6 +134,20 @@ all outputs here.  This method sequences the required steps in the correct
 order: build the structured state array, set the time axis, populate
 diagnostics, and convert diagnostic lists to arrays.  It is called
 automatically by ``integrate`` when ``uses_post_history = True``.
+
+### resolve_forcing { #paleobeasts.core.PBModel.resolve_forcing }
+
+```python
+core.PBModel.resolve_forcing(t, default=0.0)
+```
+
+Evaluate the model's external forcing at time t.
+
+If no forcing object is attached (``self.forcing is None``), returns
+``default``, which the caller supplies — a fallback parameter value, a
+zero vector, or a computed internal term.  Keeping the fallback out of
+this method preserves the distinction between forcings (external drivers)
+and parameters (intrinsic model properties).
 
 ### set_function { #paleobeasts.core.PBModel.set_function }
 

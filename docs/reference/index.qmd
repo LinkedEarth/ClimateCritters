@@ -1,6 +1,6 @@
 # Function reference {.doc .doc-index}
 
-## Core infrastructure
+## Core
 
 Base classes underlying all models.
 
@@ -10,30 +10,36 @@ Base classes underlying all models.
 | [core.PBOutput](core.PBOutput.qmd#paleobeasts.core.PBOutput) | Container for the results of one call to ``PBModel.integrate()``. |
 | [core.Forcing](core.Forcing.qmd#paleobeasts.core.Forcing) | Unified forcing object for callables, time series arrays, and element sequences. |
 
-## Climate models
+## EBMs
 
-Energy balance, ocean circulation, carbon cycle, and orbital-scale paleoclimate models.
-
+Energy balance models.
 
 | | |
 | --- | --- |
-| [EBM](EBM.qmd#paleobeasts.EBM) | Energy Balance Model (EBM) class |
-| [Stommel](Stommel.qmd#paleobeasts.Stommel) | Minimal two-box Stommel thermohaline circulation model. |
-| [Stocker2003BipolarSeesaw](Stocker2003BipolarSeesaw.qmd#paleobeasts.Stocker2003BipolarSeesaw) | Minimum thermodynamic model for the thermal bipolar seesaw. |
-| [Daisyworld](Daisyworld.qmd#paleobeasts.Daisyworld) | Minimal 0D Daisyworld model with black/white daisy coverage and temperature. |
-| [ENSORechargeOscillator](ENSORechargeOscillator.qmd#paleobeasts.ENSORechargeOscillator) | Jin-style ENSO recharge oscillator. |
-| [Model3](Model3.qmd#paleobeasts.Model3) | Model 3 from Ganopolski (2024) describing glacial cycle evolution under orbital forcing. |
+| [EBMBase](EBMBase.qmd#paleobeasts.EBMBase) | Shared energy balance physics for all EBM variants. |
+| [EBM0D](EBM0D.qmd#paleobeasts.EBM0D) | Zero-dimensional energy balance model for global-mean surface temperature. |
+| [EBM1DLat](EBM1DLat.qmd#paleobeasts.EBM1DLat) | Diffusive annual-mean latitudinal energy balance model (Budyko-Sellers type). |
 
-## Dynamical systems: Lorenz
+## Box Models
 
-Single-scale and two-scale Lorenz atmospheric models.
+Composable framework for building custom multi-reservoir models.
+
+| | |
+| --- | --- |
+| [BoxModelSpec](BoxModelSpec.qmd#paleobeasts.BoxModelSpec) | Declarative specification for simple ODE box models. |
+| [TwoBoxCarbon](TwoBoxCarbon.qmd#paleobeasts.TwoBoxCarbon) | Two-box carbon exchange model with explicit box volumes. |
+
+## Lorenz & Roessler
+
+Single-scale & two-scale Lorenz atmospheric models + Roessler system.
 
 | | |
 | --- | --- |
 | [Lorenz63](Lorenz63.qmd#paleobeasts.Lorenz63) | Lorenz (1963) system. |
 | [Lorenz96](Lorenz96.qmd#paleobeasts.Lorenz96) | Lorenz (1996) single-scale and two-scale atmospheric model. |
+| [Roessler](Roessler.qmd#paleobeasts.Roessler) | Roessler chaotic oscillator. |
 
-## Dynamical systems: Pendulums and oscillators
+## Pendulums & Oscillators
 
 Mechanical oscillators ranging from simple SHM to chaotic driven pendulums.
 
@@ -44,19 +50,15 @@ Mechanical oscillators ranging from simple SHM to chaotic driven pendulums.
 | [DoublePendulum](DoublePendulum.qmd#paleobeasts.DoublePendulum) | Double pendulum — a conservative chaotic system. |
 | [DampedSpring](DampedSpring.qmd#paleobeasts.DampedSpring) | Damped (and optionally driven) spring-mass oscillator. |
 
-## Dynamical systems: Other attractors
+## Individual Models
 
-Additional chaotic systems.
-
-| | |
-| --- | --- |
-| [Roessler](Roessler.qmd#paleobeasts.Roessler) | Roessler chaotic oscillator. |
-
-## Box model framework
-
-Composable framework for building custom multi-reservoir models.
+Standalone paleoclimate and dynamical systems models.
 
 | | |
 | --- | --- |
-| [BoxModelSpec](BoxModelSpec.qmd#paleobeasts.BoxModelSpec) | Declarative specification for simple ODE box models. |
-| [TwoBoxCarbon](TwoBoxCarbon.qmd#paleobeasts.TwoBoxCarbon) | Two-box carbon exchange model with explicit box volumes. |
+| [Daisyworld](Daisyworld.qmd#paleobeasts.Daisyworld) | Minimal 0D Daisyworld model with black/white daisy coverage and temperature. |
+| [ENSORechargeOscillator](ENSORechargeOscillator.qmd#paleobeasts.ENSORechargeOscillator) | Jin-style ENSO recharge oscillator. |
+| [Model3](Model3.qmd#paleobeasts.Model3) | Model 3 from Ganopolski (2024) describing glacial cycle evolution under orbital forcing. |
+| [Stocker2003BipolarSeesaw](Stocker2003BipolarSeesaw.qmd#paleobeasts.Stocker2003BipolarSeesaw) | Minimum thermodynamic model for the thermal bipolar seesaw. |
+| [Stocker2003ExtendedSeaIceSeesaw](Stocker2003ExtendedSeaIceSeesaw.qmd#paleobeasts.Stocker2003ExtendedSeaIceSeesaw) | Extended Stocker-style model with reservoir, Southern Ocean, sea-ice, and Antarctic states. |
+| [Stommel](Stommel.qmd#paleobeasts.Stommel) | Minimal two-box Stommel thermohaline circulation model. |

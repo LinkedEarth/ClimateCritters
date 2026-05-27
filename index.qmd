@@ -1,7 +1,7 @@
 ---
 title: "PaleoBeasts"
 subtitle: "Synthetic paleoclimate signal models"
-sidebar: false
+sidebar: PaleoBeasts
 ---
 
 PaleoBeasts is a Python package for generating synthetic paleoclimate time series

@@ -28,17 +28,17 @@ State variables: [θ₁, ω₁, θ₂, ω₂]
 
 ## Parameters {.doc-section .doc-section-parameters}
 
-| Name     | Type   | Description                                                                                           | Default             |
-|----------|--------|-------------------------------------------------------------------------------------------------------|---------------------|
-| forcing  |        | Not used; included for interface consistency.                                                         | `None`              |
-| var_name |        | Human-readable label.                                                                                 | `'double_pendulum'` |
-| m1       |        | Masses of the two bobs in kg.                                                                         | `1.0`               |
-| m2       |        | Masses of the two bobs in kg.                                                                         | `1.0`               |
-| L1       |        | Rod lengths in metres.                                                                                | `1.0`               |
-| L2       |        | Rod lengths in metres.                                                                                | `1.0`               |
-| g        |        | Gravitational acceleration in m/s².                                                                   | `9.81`              |
-| d1       |        | Optional linear damping coefficients on ω₁ and ω₂ (s⁻¹). Default 0 (Hamiltonian / energy-conserving). | `0.0`               |
-| d2       |        | Optional linear damping coefficients on ω₁ and ω₂ (s⁻¹). Default 0 (Hamiltonian / energy-conserving). | `0.0`               |
+| Name     | Type   | Description                                                                                                                                                            | Default             |
+|----------|--------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------|
+| forcing  |        | Optional external torque applied additively to ``dω₁/dt`` (the first bob).  A scalar ``Forcing`` value is added directly; if ``None``, the unforced dynamics are used. | `None`              |
+| var_name |        | Human-readable label.                                                                                                                                                  | `'double_pendulum'` |
+| m1       |        | Masses of the two bobs in kg.                                                                                                                                          | `1.0`               |
+| m2       |        | Masses of the two bobs in kg.                                                                                                                                          | `1.0`               |
+| L1       |        | Rod lengths in metres.                                                                                                                                                 | `1.0`               |
+| L2       |        | Rod lengths in metres.                                                                                                                                                 | `1.0`               |
+| g        |        | Gravitational acceleration in m/s².                                                                                                                                    | `9.81`              |
+| d1       |        | Optional linear damping coefficients on ω₁ and ω₂ (s⁻¹). Default 0 (Hamiltonian / energy-conserving).                                                                  | `0.0`               |
+| d2       |        | Optional linear damping coefficients on ω₁ and ω₂ (s⁻¹). Default 0 (Hamiltonian / energy-conserving).                                                                  | `0.0`               |
 
 ## Notes {.doc-section .doc-section-notes}
 

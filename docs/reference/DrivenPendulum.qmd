@@ -26,15 +26,15 @@ small A, period-doubling, and chaotic strange attractors as A increases.
 
 ## Parameters {.doc-section .doc-section-parameters}
 
-| Name                 | Type   | Description                                                                                                                    | Default             |
-|----------------------|--------|--------------------------------------------------------------------------------------------------------------------------------|---------------------|
-| forcing              |        | Optional.  If provided, ``forcing.get_forcing(t)`` replaces the cosine drive term entirely (allows arbitrary drive waveforms). | `None`              |
-| var_name             |        | Human-readable label.                                                                                                          | `'driven_pendulum'` |
-| q                    |        | Damping coefficient (dimensionless).                                                                                           | `0.5`               |
-| A                    |        | Driving amplitude (dimensionless).  Ignored when ``forcing`` is set.                                                           | `1.2`               |
-| Omega                |        | Driving angular frequency (dimensionless rad/time).  Ignored when ``forcing`` is set.                                          | `2.0 / 3.0`         |
-| state_variables      |        | Names for [angle, angular velocity].                                                                                           | `None`              |
-| diagnostic_variables |        | Names for post-integration diagnostics.                                                                                        | `None`              |
+| Name                 | Type   | Description                                                                                                                                                                                                | Default             |
+|----------------------|--------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------|
+| forcing              |        | Optional external drive.  If provided, ``forcing.get_forcing(t)`` replaces the built-in cosine term entirely, allowing arbitrary drive waveforms.  When ``None``, the cosine drive ``A cos(Ω t)`` is used. | `None`              |
+| var_name             |        | Human-readable label.                                                                                                                                                                                      | `'driven_pendulum'` |
+| q                    |        | Damping coefficient (dimensionless).                                                                                                                                                                       | `0.5`               |
+| A                    |        | Driving amplitude (dimensionless).  Ignored when ``forcing`` is set.                                                                                                                                       | `1.2`               |
+| Omega                |        | Driving angular frequency (dimensionless rad/time).  Ignored when ``forcing`` is set.                                                                                                                      | `2.0 / 3.0`         |
+| state_variables      |        | Names for [angle, angular velocity].                                                                                                                                                                       | `None`              |
+| diagnostic_variables |        | Names for post-integration diagnostics.                                                                                                                                                                    | `None`              |
 
 ## Methods
 

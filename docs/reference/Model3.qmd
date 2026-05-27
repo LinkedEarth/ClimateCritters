@@ -81,11 +81,11 @@ Environment*, 5, 89–106.
 
 | Name | Description |
 | --- | --- |
-| [calc_dfdt](#paleobeasts.Model3.calc_dfdt) | Calculate the derivative of the orbital forcing at time t. |
-| [calc_vc](#paleobeasts.Model3.calc_vc) | Evaluate vc which can be a function of time and state or a constant. |
-| [calc_ve](#paleobeasts.Model3.calc_ve) | Calculate equilibrium state towards which the system is attracted is a function of orbital forcing and, |
-| [calc_vg](#paleobeasts.Model3.calc_vg) | Calculate glacial equilibrium state. |
-| [calc_vu](#paleobeasts.Model3.calc_vu) | Calculate unstable equilibrium ice volume which separates the glacial and interglacial attraction domains. |
+| [calc_dfdt](#paleobeasts.Model3.calc_dfdt) | Evaluate df/dt — the time derivative of the orbital forcing at time ``t``. |
+| [calc_vc](#paleobeasts.Model3.calc_vc) | Evaluate the critical ice volume ``vc`` (constant or time/state-varying). |
+| [calc_ve](#paleobeasts.Model3.calc_ve) | Equilibrium ice volume toward which the system is attracted. |
+| [calc_vg](#paleobeasts.Model3.calc_vg) | Glacial equilibrium ice volume. |
+| [calc_vu](#paleobeasts.Model3.calc_vu) | Unstable equilibrium ice volume separating glacial and interglacial basins. |
 | [dydt](#paleobeasts.Model3.dydt) | Evaluate ice-volume tendency at time ``t`` and state ``x``. |
 
 ### calc_dfdt { #paleobeasts.Model3.calc_dfdt }
@@ -94,7 +94,7 @@ Environment*, 5, 89–106.
 Model3.calc_dfdt(t, x=None)
 ```
 
-Calculate the derivative of the orbital forcing at time t.
+Evaluate df/dt — the time derivative of the orbital forcing at time ``t``.
 
 ### calc_vc { #paleobeasts.Model3.calc_vc }
 
@@ -102,7 +102,7 @@ Calculate the derivative of the orbital forcing at time t.
 Model3.calc_vc(t, x=None)
 ```
 
-Evaluate vc which can be a function of time and state or a constant.
+Evaluate the critical ice volume ``vc`` (constant or time/state-varying).
 
 ### calc_ve { #paleobeasts.Model3.calc_ve }
 
@@ -110,21 +110,26 @@ Evaluate vc which can be a function of time and state or a constant.
 Model3.calc_ve(v, f, f1, f2, vi=0)
 ```
 
-Calculate equilibrium state towards which the system is attracted is a function of orbital forcing and,
-for the bi-stable regime, also depends on ice volume
+Equilibrium ice volume toward which the system is attracted.
+
+In the bi-stable regime (``f1 < f < f2``) the target depends on the
+current ice volume ``v`` relative to the unstable equilibrium ``vu``.
 
 #### Parameters {.doc-section .doc-section-parameters}
 
-| Name   | Type   | Description     | Default    |
-|--------|--------|-----------------|------------|
-| v      | float  | Ice volume      | _required_ |
-| f      | float  | Orbital forcing | _required_ |
+| Name   | Type   | Description                                      | Default    |
+|--------|--------|--------------------------------------------------|------------|
+| v      | float  | Current ice volume (normalised).                 | _required_ |
+| f      | float  | Orbital forcing value (W m\ :sup:`-2`).          | _required_ |
+| f1     | float  | Lower insolation threshold (glaciation onset).   | _required_ |
+| f2     | float  | Upper insolation threshold (deglaciation onset). | _required_ |
+| vi     | float  | Interglacial equilibrium ice volume.  Default 0. | `0`        |
 
 #### Returns {.doc-section .doc-section-returns}
 
-| Name   | Type   | Description                                                          |
-|--------|--------|----------------------------------------------------------------------|
-| ve     | float  | ice volume of the equilibrium state to which the system is attracted |
+| Name   | Type   | Description                    |
+|--------|--------|--------------------------------|
+| ve     | float  | Target equilibrium ice volume. |
 
 ### calc_vg { #paleobeasts.Model3.calc_vg }
 
@@ -132,19 +137,21 @@ for the bi-stable regime, also depends on ice volume
 Model3.calc_vg(f, f1, f2)
 ```
 
-Calculate glacial equilibrium state.
+Glacial equilibrium ice volume.
 
 #### Parameters {.doc-section .doc-section-parameters}
 
-| Name   | Type   | Description     | Default    |
-|--------|--------|-----------------|------------|
-| f      | float  | Orbital forcing | _required_ |
+| Name   | Type   | Description                             | Default    |
+|--------|--------|-----------------------------------------|------------|
+| f      | float  | Orbital forcing value (W m\ :sup:`-2`). | _required_ |
+| f1     | float  | Lower insolation threshold.             | _required_ |
+| f2     | float  | Upper insolation threshold.             | _required_ |
 
 #### Returns {.doc-section .doc-section-returns}
 
-| Name   | Type   | Description                                 |
-|--------|--------|---------------------------------------------|
-| vg     | float  | ice volume of the glacial equilibrium state |
+| Name   | Type   | Description                     |
+|--------|--------|---------------------------------|
+| vg     | float  | Glacial equilibrium ice volume. |
 
 ### calc_vu { #paleobeasts.Model3.calc_vu }
 
@@ -152,19 +159,21 @@ Calculate glacial equilibrium state.
 Model3.calc_vu(f, f1, f2)
 ```
 
-Calculate unstable equilibrium ice volume which separates the glacial and interglacial attraction domains.
+Unstable equilibrium ice volume separating glacial and interglacial basins.
 
 #### Parameters {.doc-section .doc-section-parameters}
 
-| Name   | Type   | Description     | Default    |
-|--------|--------|-----------------|------------|
-| f      | float  | Orbital forcing | _required_ |
+| Name   | Type   | Description                             | Default    |
+|--------|--------|-----------------------------------------|------------|
+| f      | float  | Orbital forcing value (W m\ :sup:`-2`). | _required_ |
+| f1     | float  | Lower insolation threshold.             | _required_ |
+| f2     | float  | Upper insolation threshold.             | _required_ |
 
 #### Returns {.doc-section .doc-section-returns}
 
-| Name   | Type   | Description                                  |
-|--------|--------|----------------------------------------------|
-| vu     | float  | ice volume of the unstable equilibrium state |
+| Name   | Type   | Description                      |
+|--------|--------|----------------------------------|
+| vu     | float  | Unstable equilibrium ice volume. |
 
 ### dydt { #paleobeasts.Model3.dydt }
 
