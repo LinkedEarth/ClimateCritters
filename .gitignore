@@ -269,7 +269,7 @@ fabric.properties
 _site/
 docs/reference/_styles-quartodoc.css
 .quarto/
-docs/reference/
+docs/reference/*.qmd
 
 /.quarto/
 **/*.quarto_ipynb
