@@ -14,8 +14,8 @@ Pages and figures are handled separately. Figures do not get regenerated on buil
 
 To rebuild the pages:
 ```
+cd docs
 quartodoc build
-python -m quartodoc interlinks
 quarto render
 ```
 
