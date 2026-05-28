@@ -316,7 +316,7 @@ class PBModel:
         self.diagnostic_variables = {var: [] for var in self.diagnostic_variables}
 
         # --- validate and normalise initial state ---
-        y0 = self.validate_initial_state(y0)
+        y0 = self._validate_initial_state(y0)
         self.y0 = y0
         self.t_span = t_span
 
@@ -407,13 +407,14 @@ class PBModel:
         """
         return None
 
-    def validate_initial_state(self, y0):
+    def _validate_initial_state(self, y0):
         """Validate and normalize the initial state vector.
 
-        Exists as a method so that subclasses with non-standard initial state
-        requirements (e.g. a spatially discretised model that accepts a scalar
-        and broadcasts it to the grid) can override it.  The base implementation
-        delegates to the utility in ``utils/solver``.
+        Protected hook called by ``integrate()`` before the solver runs.
+        Subclasses with non-standard initial state requirements (e.g. a
+        spatially discretised model that accepts a scalar and broadcasts it
+        to the grid) override this method.  The base implementation delegates
+        to the utility in ``utils/solver``.
         """
         return _validate_initial_state(y0, self.integrated_state_vars, self.state_variables_names)
 

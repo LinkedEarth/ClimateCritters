@@ -364,13 +364,18 @@ class EBM1DLat(EBMBase):
     from the full solved trajectory in ``populate_diagnostics_from_history``
     rather than accumulated step-by-step in ``dydt``.
 
-    ``validate_initial_state`` accepts a scalar and broadcasts it uniformly
-    to the full grid.
+    Accepts a scalar ``y0`` and broadcasts it uniformly to the full grid
+    (via the ``_validate_initial_state`` hook).
 
     All parameters (``C``, ``D``, ``A``, ``B``, ``S0``, ``CO2_forcing``) are
     registered in ``param_values`` and can be swapped for callables or
     Forcing objects at any time.  Callables must follow the contract in
     ``contracts/signal_model_contract.md``.
+
+    **Numerical stability**: the explicit RK4 scheme is subject to a CFL-like
+    stability condition from the diffusion term.  With the default parameters
+    (``D=0.55``, ``grid_n=50``) use ``dt ≤ 0.1``; larger timesteps will
+    overflow.
 
     See also
     --------
@@ -389,7 +394,7 @@ class EBM1DLat(EBMBase):
     grid_n = 50
     model = EBM1DLat(forcing=None, S0=1365.0, grid_n=grid_n)
     output = model.integrate(
-        t_span=(0, 200), y0=np.full(grid_n, 15.0), method='rk4', dt=1.0
+        t_span=(0, 200), y0=np.full(grid_n, 15.0), method='rk4', dt=0.1
     )
     # Plot the equilibrium latitude–temperature profile
     T_final = [output.state_variables[f'T_{i}'][-1] for i in range(grid_n)]
@@ -448,10 +453,10 @@ class EBM1DLat(EBMBase):
         }
         self.params = ()
 
-    def validate_initial_state(self, y0):
+    def _validate_initial_state(self, y0):
         """Validate and normalize the initial temperature profile.
 
-        Overrides :meth:`PBModel.validate_initial_state` to accept a scalar
+        Overrides :meth:`PBModel._validate_initial_state` to accept a scalar
         initial condition and broadcast it uniformly across the latitude grid.
 
         Parameters
@@ -636,6 +641,10 @@ class EBM1DLat(EBMBase):
             phi_side = phi_side[order]
             temp_side = temp_side[order]
 
+            # Guard: NaN values (diverged integration) propagate as NaN.
+            if np.any(np.isnan(temp_side)):
+                hemi_edges.append(np.nan)
+                continue
             if np.all(temp_side > threshold):
                 hemi_edges.append(90.0)
                 continue
