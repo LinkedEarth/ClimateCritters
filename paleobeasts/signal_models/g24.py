@@ -62,10 +62,10 @@ class Model3(PBModel):
     ```python
     import paleobeasts as pb
     from paleobeasts.signal_models.g24 import Model3, calc_f
+    import matplotlib.pyplot as plt
 
     orbital_forcing = pb.core.Forcing(calc_f)
     model = Model3(forcing=orbital_forcing)
-    import matplotlib.pyplot as plt
 
     output = model.integrate(
         t_span=(-2000, 0), y0=[0.0, 1], method='RK45',

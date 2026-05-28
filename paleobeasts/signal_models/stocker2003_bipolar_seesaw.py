@@ -202,11 +202,11 @@ class Stocker2003ExtendedSeaIceSeesaw(PBModel):
     from paleobeasts.signal_models.stocker2003_bipolar_seesaw import (
         Stocker2003ExtendedSeaIceSeesaw,
     )
+    import matplotlib.pyplot as plt
+
 
     T_N = pb.core.Forcing(lambda t: 1.0 if (t % 2000) < 1000 else 0.0)
     model = Stocker2003ExtendedSeaIceSeesaw(forcing=T_N)
-    import matplotlib.pyplot as plt
-
     output = model.integrate(
         t_span=(0, 10000), y0=[0.0, 0.0, 0.3, 0.0], method='RK45'
     )

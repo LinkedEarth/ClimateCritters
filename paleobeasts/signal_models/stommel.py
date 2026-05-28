@@ -60,9 +60,7 @@ class Stommel(PBModel):
     ```python
     import paleobeasts as pb
     from paleobeasts.signal_models.stommel import Stommel
-
     import matplotlib.pyplot as plt
-    from paleobeasts.signal_models.stommel import Stommel
 
     model = Stommel(forcing=None, E=0.3, T_star=1.0, S_star=0.0)
     output = model.integrate(

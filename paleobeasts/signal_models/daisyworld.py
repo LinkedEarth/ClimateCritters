@@ -69,9 +69,7 @@ class Daisyworld(PBModel):
     ```python
     import paleobeasts as pb
     from paleobeasts.signal_models.daisyworld import Daisyworld
-
     import matplotlib.pyplot as plt
-    from paleobeasts.signal_models.daisyworld import Daisyworld
 
     model = Daisyworld(forcing=None, L=0.9)
     output = model.integrate(

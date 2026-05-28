@@ -63,9 +63,6 @@ class ENSORechargeOscillator(PBModel):
     Examples
     --------
     ```python
-    import paleobeasts as pb
-    from paleobeasts.signal_models.enso_recharge import ENSORechargeOscillator
-
     import matplotlib.pyplot as plt
     from paleobeasts.signal_models.enso_recharge import ENSORechargeOscillator
 

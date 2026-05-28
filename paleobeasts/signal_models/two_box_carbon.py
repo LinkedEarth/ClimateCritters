@@ -50,9 +50,7 @@ class TwoBoxCarbon(PBModel):
     ```python
     import paleobeasts as pb
     from paleobeasts.signal_models.two_box_carbon import TwoBoxCarbon
-
     import matplotlib.pyplot as plt
-    from paleobeasts.signal_models.two_box_carbon import TwoBoxCarbon
 
     model = TwoBoxCarbon(forcing=None, k=0.1, V_atm=1.0, V_surf=50.0)
     output = model.integrate(
