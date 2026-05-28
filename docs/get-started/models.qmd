@@ -13,9 +13,9 @@ For method-evaluation purposes, the most relevant initial question is usually st
 
 *Equilibrium between absorbed shortwave and outgoing longwave radiation, with ice-albedo feedback.*
 
-**[EBM0D](../reference/EBMBase.qmd)** — Zero-dimensional global-mean surface temperature model. A single ODE tracking T from the balance `C dT/dt = (1 - α) S₀/4 - OLR`. With a temperature-dependent albedo function active, the model is bistable: a warm ice-free state and a fully glaciated (Snowball) state can both be stable for the same solar constant.
+**[EBM0D](../api/EBMBase.qmd)** — Zero-dimensional global-mean surface temperature model. A single ODE tracking T from the balance `C dT/dt = (1 - α) S₀/4 - OLR`. With a temperature-dependent albedo function active, the model is bistable: a warm ice-free state and a fully glaciated (Snowball) state can both be stable for the same solar constant.
 
-**[EBM1DLat](../reference/EBM1DLat.qmd)** — Budyko-Sellers type latitudinal EBM on a latitude grid. Diffusive meridional heat transport connects grid cells; OLR follows the Budyko linear form. The ice-line latitude emerges as a diagnostic. Useful for studying how meridional structure and polar amplification respond to changes in diffusivity or solar forcing.
+**[EBM1DLat](../api/EBM1DLat.qmd)** — Budyko-Sellers type latitudinal EBM on a latitude grid. Diffusive meridional heat transport connects grid cells; OLR follows the Budyko linear form. The ice-line latitude emerges as a diagnostic. Useful for studying how meridional structure and polar amplification respond to changes in diffusivity or solar forcing.
 
 ---
 
@@ -23,9 +23,9 @@ For method-evaluation purposes, the most relevant initial question is usually st
 
 *Composable multi-reservoir framework.*
 
-**[BoxModelSpec / GenericBoxModel](../reference/BoxModelSpec.qmd)** — A framework rather than a specific model. Users define reservoirs and the fluxes connecting them; the integration machinery is handled automatically. Suitable for custom multi-box ocean, carbon, or tracer cycling experiments.
+**[BoxModelSpec / GenericBoxModel](../api/BoxModelSpec.qmd)** — A framework rather than a specific model. Users define reservoirs and the fluxes connecting them; the integration machinery is handled automatically. Suitable for custom multi-box ocean, carbon, or tracer cycling experiments.
 
-**[TwoBoxCarbon](../reference/TwoBoxCarbon.qmd)** — Two-reservoir carbon cycle model tracking atmospheric CO₂ and surface ocean dissolved carbon. Exchange is proportional to the concentration gradient; a biological pump and weathering sink can be included.
+**[TwoBoxCarbon](../api/TwoBoxCarbon.qmd)** — Two-reservoir carbon cycle model tracking atmospheric CO₂ and surface ocean dissolved carbon. Exchange is proportional to the concentration gradient; a biological pump and weathering sink can be included.
 
 ---
 
@@ -33,11 +33,11 @@ For method-evaluation purposes, the most relevant initial question is usually st
 
 *Low-dimensional chaotic systems.*
 
-**[Lorenz63](../reference/Lorenz63.qmd)** — Lorenz's 1963 three-equation convection model. The canonical example of a strange attractor and sensitive dependence on initial conditions. Useful for testing anything that purports to detect chaos, nonlinearity, or memory in a time series.
+**[Lorenz63](../api/Lorenz63.qmd)** — Lorenz's 1963 three-equation convection model. The canonical example of a strange attractor and sensitive dependence on initial conditions. Useful for testing anything that purports to detect chaos, nonlinearity, or memory in a time series.
 
-**[Lorenz96](../reference/Lorenz96.qmd)** — Lorenz's 1996 atmospheric ring model with N slow variables and, optionally, J fast variables per slow variable. Widely used as a testbed for data assimilation and ensemble forecasting. Complexity and number of active degrees of freedom scale with N and the forcing parameter F.
+**[Lorenz96](../api/Lorenz96.qmd)** — Lorenz's 1996 atmospheric ring model with N slow variables and, optionally, J fast variables per slow variable. Widely used as a testbed for data assimilation and ensemble forecasting. Complexity and number of active degrees of freedom scale with N and the forcing parameter F.
 
-**[Roessler](../reference/Roessler.qmd)** — Three-dimensional chaotic system with a simpler attractor geometry than Lorenz63. Often used as a comparison case when the structure of the attractor matters — the Rössler attractor has a cleaner folding topology than the butterfly.
+**[Roessler](../api/Roessler.qmd)** — Three-dimensional chaotic system with a simpler attractor geometry than Lorenz63. Often used as a comparison case when the structure of the attractor matters — the Rössler attractor has a cleaner folding topology than the butterfly.
 
 ---
 
@@ -45,13 +45,13 @@ For method-evaluation purposes, the most relevant initial question is usually st
 
 *Mechanical oscillators ranging from simple to chaotic.*
 
-**[SimplePendulum](../reference/SimplePendulum.qmd)** — Nonlinear pendulum with optional linear damping. Periodic at small amplitudes and anharmonic at larger ones. The natural frequency depends on amplitude, which can affect period-finding methods in non-obvious ways.
+**[SimplePendulum](../api/SimplePendulum.qmd)** — Nonlinear pendulum with optional linear damping. Periodic at small amplitudes and anharmonic at larger ones. The natural frequency depends on amplitude, which can affect period-finding methods in non-obvious ways.
 
-**[DrivenPendulum](../reference/DrivenPendulum.qmd)** — Periodically forced damped pendulum. As the drive amplitude increases the system transitions from periodic to period-doubled to chaotic, making it a textbook example of the period-doubling route to chaos.
+**[DrivenPendulum](../api/DrivenPendulum.qmd)** — Periodically forced damped pendulum. As the drive amplitude increases the system transitions from periodic to period-doubled to chaotic, making it a textbook example of the period-doubling route to chaos.
 
-**[DoublePendulum](../reference/DoublePendulum.qmd)** — Conservative four-dimensional system. Chaotic for most initial conditions away from the trivial fixed point; sensitive dependence on initial conditions is especially pronounced.
+**[DoublePendulum](../api/DoublePendulum.qmd)** — Conservative four-dimensional system. Chaotic for most initial conditions away from the trivial fixed point; sensitive dependence on initial conditions is especially pronounced.
 
-**[DampedSpring](../reference/DampedSpring.qmd)** — Damped spring-mass oscillator with optional periodic driving. The simplest oscillatory system in the library; exhibits resonance when driven near the natural frequency ω₀ = √(k/m). Useful as a baseline for testing methods that assume an underlying harmonic structure.
+**[DampedSpring](../api/DampedSpring.qmd)** — Damped spring-mass oscillator with optional periodic driving. The simplest oscillatory system in the library; exhibits resonance when driven near the natural frequency ω₀ = √(k/m). Useful as a baseline for testing methods that assume an underlying harmonic structure.
 
 ---
 
@@ -59,14 +59,14 @@ For method-evaluation purposes, the most relevant initial question is usually st
 
 *Standalone models drawn from the paleoclimate literature.*
 
-**[Daisyworld](../reference/Daisyworld.qmd)** — Watson & Lovelock (1983). Two daisy species with different albedos colonize a planet and modulate its temperature. The system self-regulates temperature across a fairly wide range of solar luminosities, illustrating how biological feedbacks can stabilize climate. Multiple equilibria exist at the edges of the habitable range.
+**[Daisyworld](../api/Daisyworld.qmd)** — Watson & Lovelock (1983). Two daisy species with different albedos colonize a planet and modulate its temperature. The system self-regulates temperature across a fairly wide range of solar luminosities, illustrating how biological feedbacks can stabilize climate. Multiple equilibria exist at the edges of the habitable range.
 
-**[ENSORechargeOscillator](../reference/ENSORechargeOscillator.qmd)** — Jin (1997) recharge oscillator for ENSO. Two variables — sea surface temperature and thermocline heat content — produce quasi-periodic El Niño / La Niña cycles. Seasonal forcing can push the system into a more irregular or chaotic regime.
+**[ENSORechargeOscillator](../api/ENSORechargeOscillator.qmd)** — Jin (1997) recharge oscillator for ENSO. Two variables — sea surface temperature and thermocline heat content — produce quasi-periodic El Niño / La Niña cycles. Seasonal forcing can push the system into a more irregular or chaotic regime.
 
-**[Model3](../reference/Model3.qmd)** — Ganopolski (2024) glacial cycle model. Tracks ice volume and a discrete glacial/deglaciation regime under orbital forcing. A regime-switch structure with hysteresis produces the asymmetric sawtooth of glacial cycles; a time-varying critical ice volume (`vc_func`) can reproduce the Mid-Pleistocene Transition from 41 kyr to 100 kyr dominant periodicity.
+**[Model3](../api/Model3.qmd)** — Ganopolski (2024) glacial cycle model. Tracks ice volume and a discrete glacial/deglaciation regime under orbital forcing. A regime-switch structure with hysteresis produces the asymmetric sawtooth of glacial cycles; a time-varying critical ice volume (`vc_func`) can reproduce the Mid-Pleistocene Transition from 41 kyr to 100 kyr dominant periodicity.
 
-**[Stocker2003BipolarSeesaw](../reference/Stocker2003BipolarSeesaw.qmd)** — Stocker & Johnsen (2003). Antarctic temperature evolves as a damped, lagged response to an imposed North Atlantic forcing record. A minimal representation of interhemispheric thermal coupling via ocean heat transport.
+**[Stocker2003BipolarSeesaw](../api/Stocker2003BipolarSeesaw.qmd)** — Stocker & Johnsen (2003). Antarctic temperature evolves as a damped, lagged response to an imposed North Atlantic forcing record. A minimal representation of interhemispheric thermal coupling via ocean heat transport.
 
-**[Stocker2003ExtendedSeaIceSeesaw](../reference/Stocker2003ExtendedSeaIceSeesaw.qmd)** — Four-equation extension of the seesaw model incorporating sea ice, NADW strength, and Antarctic temperature as prognostic variables. Richer internal dynamics than the basic seesaw while remaining analytically tractable.
+**[Stocker2003ExtendedSeaIceSeesaw](../api/Stocker2003ExtendedSeaIceSeesaw.qmd)** — Four-equation extension of the seesaw model incorporating sea ice, NADW strength, and Antarctic temperature as prognostic variables. Richer internal dynamics than the basic seesaw while remaining analytically tractable.
 
-**[Stommel](../reference/Stommel.qmd)** — Stommel (1961) two-box thermohaline circulation model. Arguably the most influential minimal climate model: a warm-salty and a cold-fresh circulation mode can be simultaneously stable for the same boundary conditions. A classic demonstration of multiple equilibria in the ocean.
+**[Stommel](../api/Stommel.qmd)** — Stommel (1961) two-box thermohaline circulation model. Arguably the most influential minimal climate model: a warm-salty and a cold-fresh circulation mode can be simultaneously stable for the same boundary conditions. A classic demonstration of multiple equilibria in the ocean.

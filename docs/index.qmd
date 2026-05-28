@@ -41,6 +41,6 @@ ts.plot()
 
 | | |
 |---|---|
-| [Get Started](docs/get-started/installation.qmd) | Install the package and run your first model |
-| [Tutorials](docs/tutorials/index.qmd) | Worked examples covering climate and dynamical systems models |
-| [Reference](docs/reference/index.qmd) | Full API documentation for every class and function |
+| [Get Started](get-started/installation.qmd) | Install the package and run your first model |
+| [Tutorials](tutorials/index.qmd) | Worked examples covering climate and dynamical systems models |
+| [Reference](api/index.qmd) | Full API documentation for every class and function |

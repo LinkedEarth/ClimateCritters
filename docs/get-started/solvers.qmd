@@ -66,4 +66,4 @@ output = model.integrate(
 
 If `noise_func` is omitted, the stochastic term is zero and deterministic Euler is recovered. See [Noise](noise.qmd) for more on the distinction between process and observation noise.
 
-The full solver API — including `validate_monotonic_grid`, `flux_divergence`, and other internal utilities — is documented in the [Reference](../reference/index.qmd) under Utils → Solvers.
+The full solver API — including `validate_monotonic_grid`, `flux_divergence`, and other internal utilities — is documented in the [Reference](../api/index.qmd) under Utils → Solvers.

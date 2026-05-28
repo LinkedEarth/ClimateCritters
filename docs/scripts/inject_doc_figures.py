@@ -30,7 +30,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-QMD_DIR = ROOT / 'docs' / 'reference'
+QMD_DIR = ROOT / 'api'
 
 # Match the savefig path inside a code block, capturing the bare filename.
 # Handles both single- and double-quoted paths.
@@ -51,7 +51,7 @@ def inject_into_content(content: str) -> tuple[str, list[str]]:
 
     Detects Markdown fenced code blocks (`` ```python `` or plain `` ``` ``).
     If a block contains a ``plt.savefig(...)`` call pointing to
-    ``docs/reference/figures/``, a Markdown image reference is inserted
+    ``api/figures/``, a Markdown image reference is inserted
     immediately after the closing fence.
 
     Returns the (possibly modified) content and a list of injected filenames.
@@ -139,7 +139,7 @@ def main() -> None:
     )
     parser.add_argument(
         'files', nargs='*', metavar='FILE',
-        help='Specific .qmd files to process (default: all docs/reference/*.qmd)',
+        help='Specific .qmd files to process (default: all api/*.qmd)',
     )
     parser.add_argument(
         '--dry-run', action='store_true',

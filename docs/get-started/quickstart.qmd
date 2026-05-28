@@ -77,4 +77,4 @@ output_tv = model_tv.integrate(t_span=(0, 50), y0=[1, 1, 1], method='RK45')
 
 - [Core concepts](concepts.qmd) — understand `PBModel`, `Forcing`, and `PBOutput` in depth
 - [Tutorials](../tutorials/index.qmd) — worked examples for climate and dynamical systems models
-- [Reference](../reference/index.qmd) — full API documentation
+- [Reference](../api/index.qmd) — full API documentation

@@ -1,15 +1,21 @@
 project:
   type: website
   output-dir: _site
-  render:
-    - index.qmd
-    - docs/get-started/*.qmd
-    - docs/tutorials/*.qmd
-    - docs/reference/*.qmd
-    - notebooks/model_demos/*.ipynb
-    - notebooks/functionality_demos/*.ipynb
+  resources:
+    - notebooks
+    - scripts
+  # render:
+  #   - index.qmd
+  #   - get-started/*.qmd
+  #   - tutorials/*.qmd
+  #   - api/*.qmd
+  #   - notebooks/model_demos/*.ipynb
+  #   - notebooks/functionality_demos/*.ipynb
   pre-render:
     - python scripts/inject_doc_figures.py
+
+metadata-files:
+  - api/_sidebar.yml
 
 filters:
   - "interlinks"
@@ -31,15 +37,14 @@ website:
   description: "Synthetic paleoclimate signal models"
   favicon: thumbnails/paleobeasts_logo.png
   page-navigation: true
-
   navbar:
     left:
-      - text: Get Started
-        href: docs/get-started/installation.qmd
-      - text: Tutorials
-        href: docs/tutorials/index.qmd
-      - text: Reference
-        href: docs/reference/index.qmd
+      - file: get-started/installation.qmd
+        text: Get Started
+      - file: tutorials/index.qmd
+        text: Tutorials
+      - href: api/index.qmd
+        text: Reference
   
     right:
       - icon: github
@@ -51,67 +56,69 @@ website:
       style: floating
       align: left
       contents:
-        - docs/get-started/overview.qmd
+        - get-started/overview.qmd
         - section: "Basic Use"
           contents:
-          - docs/get-started/installation.qmd
-          - docs/get-started/quickstart.qmd
+          - get-started/installation.qmd
+          - get-started/quickstart.qmd
 
         - section: "Package Design"
           contents:
           - section: "Core Components"
             contents:
-            - docs/get-started/concepts.qmd
-            - docs/get-started/models.qmd
+            - get-started/concepts.qmd
+            - get-started/models.qmd
 
           - section: "Utilities"
             contents:
-              - docs/get-started/downsampling.qmd
-              - docs/get-started/noise.qmd
-              - docs/get-started/solvers.qmd
+              - get-started/downsampling.qmd
+              - get-started/noise.qmd
+              - get-started/solvers.qmd
 
 
     - id: tutorials
       title: Tutorials
-      style: docked
+      style: floating
+      align: left      
       contents:
-        - docs/tutorials/index.qmd
+        - tutorials/index.qmd
         - section: "Model demos"
           contents:
             - notebooks/model_demos/lorenz63.ipynb
             - notebooks/model_demos/lorenz96.ipynb
             - notebooks/model_demos/ebm_demo.ipynb
             - notebooks/model_demos/Ganopolski2024_demo.ipynb
+
         - section: "Functionality demos"
           contents:
             - notebooks/functionality_demos/noise_demo.ipynb
             - notebooks/functionality_demos/model_noise_demo.ipynb
             - notebooks/functionality_demos/downsample_demo.ipynb
 
-metadata-files:
-  - docs/reference/_sidebar.yml
 
 format:
   html:
     theme: cosmo
     toc: true
-    toc-depth: 3
+    toc-depth: 5
+    toc-location: right
     css:
-      - docs/reference/_styles-quartodoc.css
-      - docs/styles.css
+      - api/_styles-quartodoc.css
+      - styles.css
 
 quartodoc:
   style: pkgdown
-  dir: docs/reference
+  dir: api
   package: paleobeasts
+  out_index: index.qmd
   render_interlinks: true
   renderer:
     style: markdown
     table_style: description-list  
   # parser: numpy
   # source_url: "https://github.com/LinkedEarth/PaleoBeasts/blob/main/"
-  sidebar: "docs/reference/_sidebar.yml"
-  css: "docs/reference/_styles-quartodoc.css"
+  sidebar: "api/_sidebar.yml"
+  css: "api/_styles-quartodoc.css"
 
   sections:
     - title: Core

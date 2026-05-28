@@ -1,33 +1,3 @@
-"""Damped (and optionally driven) spring-mass oscillator.
-
-Models the 1-D motion of a mass on a spring with linear damping:
-
-    dx/dt = v
-    dv/dt = -(c/m)*v - (k/m)*x + F(t)/m
-
-where
-    x  — displacement from equilibrium  [m]
-    v  — velocity                        [m/s]
-    m  — mass                            [kg]
-    k  — spring constant                 [N/m]
-    c  — damping coefficient             [N·s/m]
-    F(t) — optional external driving force [N]; provided via ``forcing``
-
-With no forcing the system is autonomous (damped SHM).  Providing a
-``Forcing`` object enables the driven case, which exhibits resonance at
-the natural frequency ω₀ = √(k/m).
-
-Fixed point: (x*, v*) = (0, 0) — stable when c > 0.
-
-Natural frequency and period:
-    ω₀ = √(k/m)          [rad/s]
-    T₀ = 2π/ω₀           [s]
-
-Diagnostic variables (computed post-integration):
-    energy  — total mechanical energy  ½mv² + ½kx²  [J]
-    omega_0 — natural angular frequency              [rad/s]
-"""
-
 from __future__ import annotations
 
 import numpy as np
@@ -60,6 +30,7 @@ class DampedSpring(PBModel):
 
     Examples
     --------
+
     ```python
     import matplotlib.pyplot as plt
     from paleobeasts.signal_models.damped_spring import DampedSpring
@@ -71,6 +42,7 @@ class DampedSpring(PBModel):
     plt.savefig('docs/reference/figures/DampedSpring_example.png',
                 dpi=150, bbox_inches='tight')
     ```
+
     """
 
     def __init__(
