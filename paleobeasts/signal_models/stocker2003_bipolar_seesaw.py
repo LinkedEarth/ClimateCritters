@@ -52,21 +52,26 @@ class Stocker2003BipolarSeesaw(PBModel):
 
     Examples
     --------
-    .. code-block:: python
+    ```python
+    import numpy as np
+    import paleobeasts as pb
+    from paleobeasts.signal_models.stocker2003_bipolar_seesaw import (
+        Stocker2003BipolarSeesaw,
+    )
 
-        import numpy as np
-        import paleobeasts as pb
-        from paleobeasts.signal_models.stocker2003_bipolar_seesaw import (
-            Stocker2003BipolarSeesaw,
-        )
+    # Square-wave northern forcing
+    Tn = pb.core.Forcing(lambda t: 1.0 if (t % 2000) < 1000 else -1.0)
+    import matplotlib.pyplot as plt
 
-        # Square-wave northern forcing
-        Tn = pb.core.Forcing(lambda t: 1.0 if (t % 2000) < 1000 else -1.0)
-        model = Stocker2003BipolarSeesaw(forcing=Tn, tau=500.0, beta=-1.0)
-        output = model.integrate(
-            t_span=(0, 8000), y0=[0.0], method='RK45'
-        )
-        ts = output.to_pyleo(var_names=['Ts'])
+    model = Stocker2003BipolarSeesaw(forcing=Tn, tau=500.0, beta=-1.0)
+    output = model.integrate(
+        t_span=(0, 8000), y0=[0.0], method='RK45'
+    )
+    ts = output.to_pyleo(var_names=['Ts'])
+    ts.plot()
+    plt.savefig('docs/reference/figures/Stocker2003BipolarSeesaw_example.png',
+                dpi=150, bbox_inches='tight')
+    ```
     """
 
     def __init__(
@@ -192,19 +197,24 @@ class Stocker2003ExtendedSeaIceSeesaw(PBModel):
 
     Examples
     --------
-    .. code-block:: python
+    ```python
+    import paleobeasts as pb
+    from paleobeasts.signal_models.stocker2003_bipolar_seesaw import (
+        Stocker2003ExtendedSeaIceSeesaw,
+    )
+    import matplotlib.pyplot as plt
 
-        import paleobeasts as pb
-        from paleobeasts.signal_models.stocker2003_bipolar_seesaw import (
-            Stocker2003ExtendedSeaIceSeesaw,
-        )
 
-        T_N = pb.core.Forcing(lambda t: 1.0 if (t % 2000) < 1000 else 0.0)
-        model = Stocker2003ExtendedSeaIceSeesaw(forcing=T_N)
-        output = model.integrate(
-            t_span=(0, 10000), y0=[0.0, 0.0, 0.3, 0.0], method='RK45'
-        )
-        ts = output.to_pyleo(var_names=['T_ANT'])
+    T_N = pb.core.Forcing(lambda t: 1.0 if (t % 2000) < 1000 else 0.0)
+    model = Stocker2003ExtendedSeaIceSeesaw(forcing=T_N)
+    output = model.integrate(
+        t_span=(0, 10000), y0=[0.0, 0.0, 0.3, 0.0], method='RK45'
+    )
+    ts = output.to_pyleo(var_names=['T_ANT'])
+    ts.plot()
+    plt.savefig('docs/reference/figures/Stocker2003ExtendedSeaIceSeesaw_example.png',
+                dpi=150, bbox_inches='tight')
+    ```
     """
 
     def __init__(

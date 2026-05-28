@@ -1,114 +1,119 @@
-"""
-Module Name: noise
-Description: This module provides functions for downsampling time series data.
-Author: Alexander James
-"""
+"""Downsampling utilities for irregular paleoclimate time series."""
+
 __all__ = [
-    'downsample'
+    'downsample',
 ]
-# Import necessary modules
+
 import numpy as np
 
-def downsample(series,method='exponential',param=[1],return_index=False,seed=None):
-    '''Function to downsample a time series by randomly selecting time increments.
+
+def downsample(series, method='exponential', param=None, return_index=False, seed=None):
+    """Downsample a Pyleoclim series by drawing random time increments.
+
+    Simulates irregular sampling by generating random index increments from a
+    chosen probability distribution and selecting the corresponding time points
+    from the original series.
 
     Parameters
     ----------
-
-    series : pyleoclim.core.Series object
-        The time series to be downsampled.
-
+    series : pyleoclim.Series
+        The time series to downsample.
     method : str
-        the probability distribution of the random index increments.
-        possible choices include 'exponential', 'poisson', 'pareto', or 'random_choice'.
-        if 'exponential', `param` is expected to be a single scale parameter (traditionally denoted \lambda)
-        if 'poisson', `param` is expected to be a single parameter (rate)
-        if 'pareto', expects a 2-list with 2 scalar shape & scale parameters (in that order)
-        if 'random_choice', expects a 2-list containing the arrays:      
-            value_random_choice: 
-                elements from which the random sample is generated (e.g. [1,2])
-            random_choice: 
-                probabilities associated with each entry value_random_choice  (e.g. [.95,.05])
-            (These two arrays must be of the same size)
-            
-    param : list
-        The parameter(s) of the chosen distribution. See `delta_t_dist` for details.
+        Probability distribution used to draw index increments.  One of:
 
+        - ``'exponential'`` — exponential distribution; ``param`` is a
+          1-element list ``[scale]`` (i.e. mean gap size).
+        - ``'poisson'`` — Poisson distribution; ``param`` is ``[rate]``.
+        - ``'pareto'`` — Pareto distribution; ``param`` is
+          ``[shape, scale]``.
+        - ``'random_choice'`` — discrete distribution; ``param`` is
+          ``[values, probabilities]`` where both arrays have the same length.
+
+        Default ``'exponential'``.
+    param : list or None
+        Parameter(s) for the chosen distribution.  Default ``[1]``
+        (exponential with scale 1).
     return_index : bool
-        If True, the function returns the index of the downsampled time series.
-        If False, the function returns the downsampled time series itself
+        If ``True``, return the integer index array instead of a new series.
+        Default ``False``.
+    seed : int or None
+        Seed for the random number generator.  Pass an integer for
+        reproducible results.  Default ``None``.
 
-    seed : int
-        Seed for the random number generator.
-        
     Returns
     -------
-    
-    downsampled_series : pyleoclim.core.Series object
-        The down sampled time series.
-        
+    downsampled : pyleoclim.Series or list of int
+        Downsampled series (``return_index=False``) or list of selected
+        indices (``return_index=True``).
+
+    Raises
+    ------
+    ValueError
+        If ``method`` is not recognised, or ``param`` has the wrong shape
+        for the chosen distribution.
+
     Examples
     --------
-    
-    SOI = pyleo.utils.load_dataset('SOI')
-    SOI_downsampled = downsample(SOI,delta_t_dist='exponential',param=[1.0])
-    SOI_downsampled.plot()
-    '''
+    ```python
+    import matplotlib.pyplot as plt
+    import pyleoclim as pyleo
+    from paleobeasts.utils.resample import downsample
 
-    if seed is not None:
-        np.random.default_rng(seed)
-    
-    valid_distributions = ["exponential", "poisson", "pareto", "random_choice"]
-    if method not in valid_distributions:
-        raise ValueError("delta_t_dist must be one of: 'exponential', 'poisson', 'pareto', 'random_choice'.")    
-    
-    param = np.array(param)    
+    soi = pyleo.utils.load_dataset('SOI')
+    soi_sparse = downsample(soi, method='exponential', param=[3.0], seed=42)
+    soi_sparse.plot()
+    plt.savefig('docs/reference/figures/downsample_example.png',
+                dpi=150, bbox_inches='tight')
+    ```
+    """
+    if param is None:
+        param = [1]
+
+    valid_methods = ['exponential', 'poisson', 'pareto', 'random_choice']
+    if method not in valid_methods:
+        raise ValueError(f"method must be one of {valid_methods}.")
+
+    rng = np.random.default_rng(seed)
     n = len(series.time)
 
-    if method == "exponential":
-        # make sure that param is of len 1
-        if len(param) != 1:
-            raise ValueError('The Exponential law takes a single scale parameter.')       
-        delta_t = np.random.exponential(scale = param, size=n)
-        
-    elif method == "poisson":
-        if len(param) != 1:
-            raise ValueError('The Poisson law takes a single parameter.')       
-        delta_t = np.random.poisson(lam = param, size = n) + 1
-    elif method == "pareto":
-        if len(param) != 2:
-            raise ValueError('The Pareto law takes a shape and a scale parameter (in that order) ')
-        else:
-            delta_t = (np.random.pareto(param[0], n) + 1) * param[1]
-    elif method == "random_choice":
-        if len(param)<2 or len(param[0]) != len(param[1]):
-            raise ValueError("value_random_choice and prob_random_choice must have the same size.")
-        delta_t = np.random.choice(param[0], size=n, p=param[1])
+    if method == 'exponential':
+        p = np.asarray(param, dtype=float)
+        if p.size != 1:
+            raise ValueError("'exponential' requires a single scale parameter: param=[scale].")
+        delta_t = rng.exponential(scale=float(p[0]), size=n)
 
-    #create time index
-    delta_t_tuned = []
-    for delta in delta_t:
-        #Make sure that delta between values is greater than zero
-        if int(delta) == 0:
-            delta_t_tuned.append(1)
-        else:
-            delta_t_tuned.append(int(delta))
+    elif method == 'poisson':
+        p = np.asarray(param, dtype=float)
+        if p.size != 1:
+            raise ValueError("'poisson' requires a single rate parameter: param=[rate].")
+        delta_t = rng.poisson(lam=float(p[0]), size=n) + 1
 
-    #Get index values and make sure that the last index is less than n
-    long_index = np.cumsum(delta_t_tuned)
-    index = [value for value in long_index if value < n]
-    
+    elif method == 'pareto':
+        p = np.asarray(param, dtype=float)
+        if p.size != 2:
+            raise ValueError("'pareto' requires shape and scale parameters: param=[shape, scale].")
+        delta_t = (rng.pareto(float(p[0]), size=n) + 1) * float(p[1])
+
+    elif method == 'random_choice':
+        values = np.asarray(param[0])
+        probs = np.asarray(param[1], dtype=float)
+        if len(values) != len(probs):
+            raise ValueError(
+                "'random_choice' requires param=[values, probabilities] "
+                "where both arrays have the same length."
+            )
+        delta_t = rng.choice(values, size=n, p=probs)
+
+    # Enforce minimum gap of 1 index step
+    delta_t_int = [max(1, int(d)) for d in delta_t]
+
+    # Cumulative index; keep only those within bounds
+    index = [v for v in np.cumsum(delta_t_int) if v < n]
+
     if return_index:
         return index
-    else:
-        pass
-    
-    new_time = series.time[index]
-    new_value = series.value[index]
 
-    # re-index the time series
-    indexed_series = series.copy()
-    indexed_series.time = new_time
-    indexed_series.value = new_value
-
-    return indexed_series
+    new_series = series.copy()
+    new_series.time = series.time[index]
+    new_series.value = series.value[index]
+    return new_series

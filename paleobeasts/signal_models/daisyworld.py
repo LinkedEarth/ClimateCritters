@@ -65,16 +65,22 @@ class Daisyworld(PBModel):
 
     Examples
     --------
-    .. code-block:: python
 
-        import paleobeasts as pb
-        from paleobeasts.signal_models.daisyworld import Daisyworld
+    ```python
+    import paleobeasts as pb
+    from paleobeasts.signal_models.daisyworld import Daisyworld
+    import matplotlib.pyplot as plt
 
-        model = Daisyworld(forcing=None, L=0.9)
-        output = model.integrate(
-            t_span=(0, 500), y0=[0.2, 0.2, 295.0], method='RK45'
-        )
-        ts = output.to_pyleo(var_names=['Aw', 'Ab', 'T'])
+    model = Daisyworld(forcing=None, L=0.9)
+    output = model.integrate(
+        t_span=(0, 500), y0=[0.2, 0.2, 295.0], method='RK45'
+    )
+    ts = output.to_pyleo(var_names=['T'])
+    ts.plot()
+    plt.savefig('docs/reference/figures/Daisyworld_example.png',
+                dpi=150, bbox_inches='tight')
+    ```
+    
     """
 
     def __init__(self, forcing=None, var_name='daisyworld', alpha_w=0.75, alpha_b=0.25, alpha_g=0.5,

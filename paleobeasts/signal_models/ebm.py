@@ -224,26 +224,31 @@ class EBM0D(EBMBase):
     Examples
     --------
 
-    .. code-block:: python
+    ```python
+    import matplotlib.pyplot as plt
+    import paleobeasts as pb
+    from paleobeasts.signal_models.ebm import EBM0D
 
-        import paleobeasts as pb
-        from paleobeasts.signal_models.ebm import EBM0D
-
-        forcing = pb.core.Forcing(lambda t: 1360.0)
-        model = EBM0D(forcing=forcing)
-        output = model.integrate(t_span=(0, 500), y0=[288.0], method='RK45')
+    forcing = pb.core.Forcing(lambda t: 1360.0)
+    model = EBM0D(forcing=forcing)
+    output = model.integrate(t_span=(0, 500), y0=[288.0], method='RK45')
+    ts = output.to_pyleo(var_names=['T'])
+    ts.plot()
+    plt.savefig('docs/reference/figures/EBM0D_example.png',
+                dpi=150, bbox_inches='tight')
+    ```
 
     With a time-varying albedo and custom OLR:
 
-    .. code-block:: python
+    ```python
+    from paleobeasts.signal_models.ebm import EBM0D, albedo_func, OLR_func
 
-        from paleobeasts.signal_models.ebm import EBM0D, albedo_func, OLR_func
-
-        model = EBM0D(
-            forcing=forcing,
-            albedo=albedo_func,
-            OLR=OLR_func(pRad=600),
-        )
+    model = EBM0D(
+        forcing=forcing,
+        albedo=albedo_func,
+        OLR=OLR_func(pRad=600),
+    )
+    ```
 
     """
 
@@ -376,28 +381,38 @@ class EBM1DLat(EBMBase):
     Examples
     --------
 
-    .. code-block:: python
+    ```python
+    import matplotlib.pyplot as plt
+    import numpy as np
+    from paleobeasts.signal_models.ebm import EBM1DLat
 
-        from paleobeasts.signal_models.ebm import EBM1DLat
-
-        model = EBM1DLat(forcing=None, S0=1365.0, grid_n=50)
-        output = model.integrate(
-            t_span=(0, 200), y0=[15.0], method='rk4', dt=1.0
-        )
-        # output.diagnostic_variables['Tglobal'] gives time series of global mean T
+    grid_n = 50
+    model = EBM1DLat(forcing=None, S0=1365.0, grid_n=grid_n)
+    output = model.integrate(
+        t_span=(0, 200), y0=np.full(grid_n, 15.0), method='rk4', dt=1.0
+    )
+    # Plot the equilibrium latitude–temperature profile
+    T_final = [output.state_variables[f'T_{i}'][-1] for i in range(grid_n)]
+    phi = np.linspace(-90, 90, grid_n)
+    fig, ax = plt.subplots()
+    ax.plot(phi, T_final)
+    ax.set_xlabel('Latitude (°)'); ax.set_ylabel('Temperature (°C)')
+    plt.savefig('docs/reference/figures/EBM1DLat_example.png',
+                dpi=150, bbox_inches='tight')
+    ```
 
     With a CO2 ramp:
 
-    .. code-block:: python
+    ```python
+    import paleobeasts as pb
 
-        import paleobeasts as pb
-
-        co2_ramp = pb.core.Forcing.from_sequence([
-            pb.core.Hold(duration=100, value=0.0),
-            pb.core.Ramp(duration=100, y0=0.0, yf=4.0, shape='linear'),
-        ])
-        model = EBM1DLat(forcing=None, CO2_forcing=co2_ramp)
-        output = model.integrate(t_span=(0, 200), y0=[15.0], method='rk4', dt=1.0)
+    co2_ramp = pb.core.Forcing.from_sequence([
+        pb.core.Hold(duration=100, value=0.0),
+        pb.core.Ramp(duration=100, y0=0.0, yf=4.0, shape='linear'),
+    ])
+    model = EBM1DLat(forcing=None, CO2_forcing=co2_ramp)
+    output = model.integrate(t_span=(0, 200), y0=[15.0], method='rk4', dt=1.0)
+    ```
 
     """
 

@@ -262,5 +262,13 @@ fabric.properties
 .idea/caches/build_file_checksums.ser
 
 /paleobeasts/signal_models/insolation.py
-/.idea/
 /scratchwork/
+
+# # Quarto / quartodoc build outputs
+# _site/
+# docs/reference/_styles-quartodoc.css
+# .quarto/
+# docs/reference/*.qmd
+
+# /.quarto/
+# **/*.quarto_ipynb

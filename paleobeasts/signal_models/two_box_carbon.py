@@ -47,16 +47,20 @@ class TwoBoxCarbon(PBModel):
 
     Examples
     --------
-    .. code-block:: python
+    ```python
+    import paleobeasts as pb
+    from paleobeasts.signal_models.two_box_carbon import TwoBoxCarbon
+    import matplotlib.pyplot as plt
 
-        import paleobeasts as pb
-        from paleobeasts.signal_models.two_box_carbon import TwoBoxCarbon
-
-        model = TwoBoxCarbon(forcing=None, k=0.1, V_atm=1.0, V_surf=50.0)
-        output = model.integrate(
-            t_span=(0, 200), y0=[800.0, 38000.0], method='RK45'
-        )
-        ts = output.to_pyleo(var_names=['A', 'S'])
+    model = TwoBoxCarbon(forcing=None, k=0.1, V_atm=1.0, V_surf=50.0)
+    output = model.integrate(
+        t_span=(0, 200), y0=[800.0, 38000.0], method='RK45'
+    )
+    ts = output.to_pyleo(var_names=['A'])
+    ts.plot()
+    plt.savefig('docs/reference/figures/TwoBoxCarbon_example.png',
+                dpi=150, bbox_inches='tight')
+    ```
     """
 
     def __init__(

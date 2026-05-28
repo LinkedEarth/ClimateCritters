@@ -1,0 +1,48 @@
+---
+title: Downsampling
+sidebar: get-started
+---
+
+Paleoclimate archives are almost never evenly sampled. Sediment accumulation rates vary, ice cores compress with depth, and dating uncertainties compound over long records. Model output, by contrast, comes out on a regular grid. `paleobeasts.utils.resample.downsample()` bridges that gap by drawing random index increments from a probability distribution and selecting the corresponding time points from a series.
+
+Irregular sampling is worth taking seriously when evaluating time-series methods: interpolation schemes, spectral estimators, and wavelet transforms all have assumptions about sampling regularity that can affect results in ways that are not always obvious from the method's documentation. Generating downsampled versions of a known synthetic signal is one way to probe those sensitivities.
+
+## Basic usage
+
+```python
+from paleobeasts.utils.resample import downsample
+
+# ts is a Pyleoclim Series derived from model output
+ts_sparse = downsample(ts, method='exponential', param=[3.0], seed=42)
+ts_sparse.plot()
+```
+
+The `method` argument controls the distribution of gaps between selected points:
+
+| Method | `param` | Character |
+|---|---|---|
+| `'exponential'` | `[scale]` | Memoryless gaps; average spacing equal to scale |
+| `'poisson'` | `[rate]` | Discrete gap counts drawn from a Poisson distribution |
+| `'pareto'` | `[shape, scale]` | Heavy-tailed; produces occasional large hiatuses |
+| `'random_choice'` | `[values, probs]` | Custom discrete gap distribution |
+
+Exponential is a reasonable starting point for many sediment records. Pareto can approximate records with punctuated depositional gaps.
+
+## Reproducibility
+
+A `seed` argument makes results reproducible:
+
+```python
+ts_a = downsample(ts, method='exponential', param=[2.0], seed=0)
+ts_b = downsample(ts, method='exponential', param=[2.0], seed=0)
+# ts_a and ts_b are identical
+```
+
+To inspect which indices were selected rather than returning a new series, use `return_index=True`:
+
+```python
+idx = downsample(ts, method='exponential', param=[2.0], seed=0, return_index=True)
+print(idx)   # list of integer indices into ts.time
+```
+
+For a more extended walkthrough, see the [downsampling demo notebook](../../notebooks/functionality_demos/downsample_demo.ipynb).

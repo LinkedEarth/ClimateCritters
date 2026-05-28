@@ -1,0 +1,10 @@
+_site/
+api/
+_inv/
+_sidebar.yml
+/.quarto/
+objects.json
+site_libs/
+_objects_*.json
+
+**/*.quarto_ipynb

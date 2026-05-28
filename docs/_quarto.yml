@@ -1,0 +1,220 @@
+project:
+  type: website
+  output-dir: _site
+  resources:
+    - notebooks
+    - scripts
+  # render:
+  #   - index.qmd
+  #   - get-started/*.qmd
+  #   - tutorials/*.qmd
+  #   - api/*.qmd
+  #   - notebooks/model_demos/*.ipynb
+  #   - notebooks/functionality_demos/*.ipynb
+  pre-render:
+    - python scripts/inject_doc_figures.py
+
+metadata-files:
+  - api/_sidebar.yml
+
+filters:
+  - "interlinks"
+
+interlinks:
+  fast: true
+  autolink: true
+  sources:
+    numpy:
+      url: https://numpy.org/doc/stable/
+    python:
+      url: https://docs.python.org/3/
+    pyleoclim:
+      url: https://pyleoclim-util.readthedocs.io/en/latest/
+
+
+website:
+  title: "PaleoBeasts"
+  description: "Synthetic paleoclimate signal models"
+  favicon: thumbnails/paleobeasts_logo.png
+  page-navigation: true
+  navbar:
+    left:
+      - file: get-started/installation.qmd
+        text: Get Started
+      - file: tutorials/index.qmd
+        text: Tutorials
+      - href: api/index.qmd
+        text: Reference
+  
+    right:
+      - icon: github
+        href: https://github.com/LinkedEarth/PaleoBeasts
+  
+  sidebar:
+    - id: get-started
+      title: Get Started
+      style: floating
+      align: left
+      contents:
+        - get-started/overview.qmd
+        - section: "Basic Use"
+          contents:
+          - get-started/installation.qmd
+          - get-started/quickstart.qmd
+
+        - section: "Package Design"
+          contents:
+          - section: "Core Components"
+            contents:
+            - get-started/concepts.qmd
+            - get-started/models.qmd
+
+          - section: "Utilities"
+            contents:
+              - get-started/downsampling.qmd
+              - get-started/noise.qmd
+              - get-started/solvers.qmd
+
+
+    - id: tutorials
+      title: Tutorials
+      style: floating
+      align: left      
+      contents:
+        - tutorials/index.qmd
+        - section: "Model demos"
+          contents:
+            - notebooks/model_demos/lorenz63.ipynb
+            - notebooks/model_demos/lorenz96.ipynb
+            - notebooks/model_demos/ebm_demo.ipynb
+            - notebooks/model_demos/Ganopolski2024_demo.ipynb
+
+        - section: "Functionality demos"
+          contents:
+            - notebooks/functionality_demos/noise_demo.ipynb
+            - notebooks/functionality_demos/model_noise_demo.ipynb
+            - notebooks/functionality_demos/downsample_demo.ipynb
+
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-depth: 5
+    toc-location: right
+    css:
+      - api/_styles-quartodoc.css
+      - styles.css
+
+quartodoc:
+  style: pkgdown
+  dir: api
+  package: paleobeasts
+  out_index: index.qmd
+  render_interlinks: true
+  renderer:
+    style: markdown
+    table_style: description-list  
+  # parser: numpy
+  # source_url: "https://github.com/LinkedEarth/PaleoBeasts/blob/main/"
+  sidebar: "api/_sidebar.yml"
+  css: "api/_styles-quartodoc.css"
+
+  sections:
+    - title: Core
+      desc: |
+        Base classes underlying all models.
+      contents:
+        - core.PBModel
+        - core.PBOutput
+        - core.Forcing
+
+    - title: Models
+
+    - subtitle: EBMs
+      desc: |
+        Energy balance models.
+      contents:
+        - EBMBase
+        - EBM0D
+        - EBM1DLat
+
+    - subtitle: Box Models
+      desc: |
+        Composable framework for building custom multi-reservoir models.
+      contents:
+        - BoxModelSpec
+        - TwoBoxCarbon
+
+    - subtitle: Lorenz & Roessler
+      desc: |
+        Single-scale & two-scale Lorenz atmospheric models + Roessler system.
+      contents:
+        - Lorenz63
+        - Lorenz96
+        - Roessler
+
+    - subtitle: Pendulums & Oscillators
+      desc: Mechanical oscillators ranging from simple SHM to chaotic driven pendulums.
+      contents:
+        - SimplePendulum
+        - DrivenPendulum
+        - DoublePendulum
+        - DampedSpring
+
+    - subtitle: Individual Models
+      desc: |
+        Standalone paleoclimate and dynamical systems models.
+      contents:
+        - Daisyworld
+        - ENSORechargeOscillator
+        - Model3
+        - Stocker2003BipolarSeesaw
+        - Stocker2003ExtendedSeaIceSeesaw
+        - Stommel
+
+    - title: Utils
+
+    - subtitle: Noise
+      desc: Post-hoc observation noise and stochastic process noise generation.
+      contents:
+        - utils.noise.from_series
+        - utils.noise.from_param
+
+    - subtitle: Resampling
+      desc: |
+        Irregular downsampling utilities for paleoclimate time series.
+      contents:
+        - utils.resample.downsample
+
+    - subtitle: Forcing
+      desc: |
+        Factory functions for common Forcing patterns.
+      contents:
+        - utils.forcing_utils.create_periodic_forcing_function
+        - utils.forcing_utils.create_periodic_forcing
+        - utils.forcing_utils.create_constant_forcing
+        - utils.forcing_utils.create_sinusoid_forcing
+        - utils.forcing_utils.create_piecewise_forcing
+
+    - subtitle: Solvers
+      desc: |
+        Numerical integration backends and solver helpers.
+      contents:
+        - utils.solver.Solution
+        - utils.solver.rk4_method
+        - utils.solver.euler_method
+        - utils.solver.euler_maruyama_method
+        - utils.solver.define_t_eval
+        - utils.solver.validate_monotonic_grid
+        - utils.solver.validate_layer_thicknesses
+        - utils.solver.flux_divergence
+        - utils.solver.validate_initial_state
+        - utils.solver.build_state_from_history
+
+    - subtitle: Functions
+      desc: |
+        Signal processing and interpolation utilities.
+      contents:
+        - utils.func.make_derivative_func
+        - utils.func.smooth_and_interpolate

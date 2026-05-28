@@ -62,16 +62,19 @@ class ENSORechargeOscillator(PBModel):
 
     Examples
     --------
-    .. code-block:: python
+    ```python
+    import matplotlib.pyplot as plt
+    from paleobeasts.signal_models.enso_recharge import ENSORechargeOscillator
 
-        import paleobeasts as pb
-        from paleobeasts.signal_models.enso_recharge import ENSORechargeOscillator
-
-        model = ENSORechargeOscillator(forcing=None, mu=0.75, Af=0.5, Pf=6.0)
-        output = model.integrate(
-            t_span=(0, 120), y0=[0.5, 0.0], method='RK45'
-        )
-        ts = output.to_pyleo(var_names=['T', 'h'])
+    model = ENSORechargeOscillator(forcing=None, mu=0.75, Af=0.5, Pf=6.0)
+    output = model.integrate(
+        t_span=(0, 120), y0=[0.5, 0.0], method='RK45'
+    )
+    ts = output.to_pyleo(var_names=['T'])
+    ts.plot()
+    plt.savefig('docs/reference/figures/ENSORechargeOscillator_example.png',
+                dpi=150, bbox_inches='tight')
+    ```
     """
 
     def __init__(
