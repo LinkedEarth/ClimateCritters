@@ -28,7 +28,8 @@ class TestSignalModelsG24Integrate:
         def func(x):
             return 1
         forcing = pb.core.Forcing(func)
-        model3 = g24.Model3(forcing=forcing)
+        model3 = g24.Model3()
+        model3.register_forcing('insolation', forcing)
         model3.integrate(t_span=t_span,y0=y0,method=method,dt=dt)
 
 class TestSignalModelsG24toPyleo:
@@ -39,7 +40,8 @@ class TestSignalModelsG24toPyleo:
         def func(x):
             return 1
         forcing = pb.core.Forcing(func)
-        model3 = g24.Model3(forcing=forcing)
+        model3 = g24.Model3()
+        model3.register_forcing('insolation', forcing)
         output = model3.integrate(t_span=(0,10),y0=[1,1],method=method,dt=dt)
         output.to_pyleo(var_names=var_names)
 
@@ -48,15 +50,16 @@ class TestSignalModelsG24TimeVaryingParams:
     def test_time_varying_params_match_constants_t0(self):
         forcing = pb.core.Forcing(lambda t: 1.0)
 
-        model_const = g24.Model3(forcing=forcing, f1=-16, f2=16, t1=30, t2=10, vc=1.4)
+        model_const = g24.Model3(f1=-16, f2=16, t1=30, t2=10, vc=1.4)
+        model_const.register_forcing('insolation', forcing)
         model_tv = g24.Model3(
-            forcing=forcing,
             f1=lambda t: -16,
             f2=lambda t, x: 16,
             t1=lambda t, x: 30,
             t2=lambda t, x: 10,
             vc=lambda t, x, m: 1.4,
         )
+        model_tv.register_forcing('insolation', forcing)
 
         t_span = (0, 10)
         y0 = [1, 1]
@@ -72,20 +75,19 @@ class TestSignalModelsG24TimeVaryingParams:
         forcing = pb.core.Forcing(lambda t: 1.0)
 
         model_tv = g24.Model3(
-            forcing=forcing,
             f1=lambda t: -16,
             f2=lambda t, x: 16,
             t1=lambda t, x, m: 30,
             t2=lambda t: 10,
             vc=lambda t, x: 1.4,
         )
+        model_tv.register_forcing('insolation', forcing)
 
         model_tv.integrate(t_span=(0, 10), y0=[1, 1], method='euler', dt=1)
         assert np.isfinite(model_tv.state_variables['v'][-1])
 
     def test_dfdt_attribute_assignment_updates_param_store_t2(self):
-        forcing = pb.core.Forcing(lambda t: 1.0)
-        model3 = g24.Model3(forcing=forcing)
+        model3 = g24.Model3()
         model3.dfdt = lambda t: 123.0
         assert model3.param_values['dfdt'](0.0) == 123.0
         assert model3.calc_dfdt(0.0, [1.0]) == 123.0
@@ -100,6 +102,7 @@ class TestSignalModelsG24SequenceForcing:
             ],
             label='g24_sequence',
         )
-        model3 = g24.Model3(forcing=forcing)
+        model3 = g24.Model3()
+        model3.register_forcing('insolation', forcing)
         model3.integrate(t_span=(0, 10), y0=[1, 1], method='euler', dt=1)
         assert np.isfinite(model3.state_variables['v'][-1])

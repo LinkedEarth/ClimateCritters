@@ -64,8 +64,8 @@ class Model3(PBModel):
     from paleobeasts.signal_models.g24 import Model3, calc_f
     import matplotlib.pyplot as plt
 
-    orbital_forcing = pb.core.Forcing(calc_f)
-    model = Model3(forcing=orbital_forcing)
+    model = Model3()
+    model.register_forcing('insolation', pb.core.Forcing(calc_f))
 
     output = model.integrate(
         t_span=(-2000, 0), y0=[0.0, 1], method='RK45',
@@ -78,10 +78,11 @@ class Model3(PBModel):
     ```
     """
 
-    def __init__(self, forcing, var_name='ice volume', f1=-16, f2=16, t1=30, t2=10, vc=1.4,
+    def __init__(self, var_name='ice volume', f1=-16, f2=16, t1=30, t2=10, vc=1.4,
+                 insolation=0.0,
                  state_variables=['v', 'k'], non_integrated_state_vars=['k'], diagnostic_variables=['insolation'], *args,
                  **kwargs):
-        super().__init__(forcing, var_name, state_variables=state_variables,
+        super().__init__(var_name, state_variables=state_variables,
                          non_integrated_state_vars=non_integrated_state_vars,
                          diagnostic_variables=diagnostic_variables, *args, **kwargs)
         self.f1 = f1
@@ -89,6 +90,7 @@ class Model3(PBModel):
         self.t1 = t1
         self.t2 = t2
         self.vc = vc
+        self.insolation = insolation
         self.dfdt = calc_df
         self.param_values = {
             'f1': f1,
@@ -97,6 +99,7 @@ class Model3(PBModel):
             't2': t2,
             'vc': vc,
             'dfdt': self.dfdt,
+            'insolation': insolation,
         }
         self.params = ()
 
@@ -119,7 +122,7 @@ class Model3(PBModel):
         t2 = self.get_param_value('t2', t, x)
 
         k = int(self.state_variables['k'][-1])
-        f = self.forcing.get_forcing(self.time_util(t))
+        f = self.get_param_value('insolation', t, x)
         dfdt = self.calc_dfdt(self.time_util(t), x)
 
         vc = self.get_param_value('vc', t, x)
