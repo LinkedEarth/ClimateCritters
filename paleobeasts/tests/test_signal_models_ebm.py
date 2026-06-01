@@ -28,7 +28,8 @@ class TestSignalModelsEBM0DIntegrate:
     def test_integrate_t0(self, t_span, y0, method, OLR, dt):
         '''Test integrate method'''
         forcing = pb.core.Forcing(lambda x: 1)
-        model = ebm.EBM0D(forcing=forcing, OLR=OLR)
+        model = ebm.EBM0D(OLR=OLR)
+        model.register_forcing('S0', forcing)
         model.integrate(t_span=t_span, y0=y0, method=method, dt=dt)
 
 
@@ -46,7 +47,8 @@ class TestSignalModelsEBM0DtoPyleo:
     def test_topyleo_t0(self, method, dt, var_names):
         '''Test to_pyleo method'''
         forcing = pb.core.Forcing(lambda x: 1)
-        model = ebm.EBM0D(forcing=forcing)
+        model = ebm.EBM0D()
+        model.register_forcing('S0', forcing)
         output = model.integrate(t_span=(0, 10), y0=[100], method=method, dt=dt)
         output.to_pyleo(var_names=var_names)
 
@@ -55,12 +57,13 @@ class TestSignalModelsEBM0DTimeVaryingParams:
     def test_time_varying_params_match_constants_t0(self):
         forcing = pb.core.Forcing(lambda t: 1360.0)
 
-        model_const = ebm.EBM0D(forcing=forcing, C=4.0, albedo=0.3)
+        model_const = ebm.EBM0D(C=4.0, albedo=0.3)
+        model_const.register_forcing('S0', forcing)
         model_tv = ebm.EBM0D(
-            forcing=forcing,
             C=lambda t, state, model: 4.0,
             albedo=lambda t, state: 0.3,
         )
+        model_tv.register_forcing('S0', forcing)
 
         t_span = (0, 10)
         output_const = model_const.integrate(t_span=t_span, y0=[280], method='euler', dt=1)
@@ -81,7 +84,8 @@ class TestSignalModelsEBM0DSequenceForcing:
             ],
             label='ebm_sequence',
         )
-        model = ebm.EBM0D(forcing=forcing)
+        model = ebm.EBM0D()
+        model.register_forcing('S0', forcing)
         output = model.integrate(t_span=(0, 10), y0=[280], method='euler', dt=1)
         assert len(output.time) > 1
         assert np.isfinite(output.state_variables['T'][-1])
@@ -90,7 +94,7 @@ class TestSignalModelsEBM0DSequenceForcing:
 class TestSignalModelsEBM1DLatSmoke:
     def test_ebm1dlat_integrates_t0(self):
         '''EBM1DLat is importable, integrates, and produces expected diagnostics.'''
-        model = ebm.EBM1DLat(forcing=None, S0=1365.0)
+        model = ebm.EBM1DLat(S0=1365.0)
         output = model.integrate(t_span=(0, 50), y0=[15.0])
         assert len(output.diagnostic_variables['Tglobal']) == len(output.time)
         assert np.isfinite(output.diagnostic_variables['Tglobal'][-1])
