@@ -69,7 +69,7 @@ class SimplePendulum(PBModel):
     import matplotlib.pyplot as plt
     from paleobeasts.signal_models.pendulum import SimplePendulum
 
-    model = SimplePendulum(forcing=None, L=1.0, g=9.81, damping=0.1)
+    model = SimplePendulum(L=1.0, g=9.81, damping=0.1)
     output = model.integrate(t_span=(0, 20), y0=[1.5, 0.0], method='RK45')
     ts = output.to_pyleo(var_names=['theta'])
     ts.plot()
@@ -80,7 +80,6 @@ class SimplePendulum(PBModel):
 
     def __init__(
         self,
-        forcing=None,
         var_name="simple_pendulum",
         L=1.0,
         g=9.81,
@@ -96,7 +95,6 @@ class SimplePendulum(PBModel):
             diagnostic_variables = ["energy", "omega_0"]
 
         super().__init__(
-            forcing,
             var_name,
             state_variables=state_variables,
             diagnostic_variables=diagnostic_variables,
@@ -127,7 +125,7 @@ class SimplePendulum(PBModel):
 
         omega0_sq = g / L
         dtheta = omega
-        domega = -lam * omega - omega0_sq * np.sin(theta) + self.resolve_forcing(t)
+        domega = -lam * omega - omega0_sq * np.sin(theta)
         return [dtheta, domega]
 
     def populate_diagnostics_from_history(self, time, history):
@@ -207,7 +205,7 @@ class DrivenPendulum(PBModel):
     import matplotlib.pyplot as plt
     from paleobeasts.signal_models.pendulum import DrivenPendulum
 
-    model = DrivenPendulum(forcing=None, q=0.5, A=1.2, Omega=2.0/3.0)
+    model = DrivenPendulum(q=0.5, A=1.2, Omega=2.0/3.0)
     output = model.integrate(
         t_span=(0, 500), y0=[0.0, 0.0], method='RK45',
         kwargs={'rtol': 1e-9, 'atol': 1e-11},
@@ -224,7 +222,6 @@ class DrivenPendulum(PBModel):
 
     def __init__(
         self,
-        forcing=None,
         var_name="driven_pendulum",
         q=0.5,
         A=1.2,
@@ -240,7 +237,6 @@ class DrivenPendulum(PBModel):
             diagnostic_variables = ["energy", "drive"]
 
         super().__init__(
-            forcing,
             var_name,
             state_variables=state_variables,
             diagnostic_variables=diagnostic_variables,
@@ -260,7 +256,7 @@ class DrivenPendulum(PBModel):
     def _drive(self, t):
         A = float(self.param_values["A"])
         Omega = float(self.param_values["Omega"])
-        return float(self.resolve_forcing(t, default=A * np.cos(Omega * t)))
+        return float(A * np.cos(Omega * t))
 
     def dydt(self, t, x):
         state = np.asarray(x, dtype=float).reshape(-1)
@@ -346,7 +342,7 @@ class DoublePendulum(PBModel):
     import numpy as np
     from paleobeasts.signal_models.pendulum import DoublePendulum
 
-    model = DoublePendulum(forcing=None, m1=1.0, m2=1.0, L1=1.0, L2=1.0)
+    model = DoublePendulum(m1=1.0, m2=1.0, L1=1.0, L2=1.0)
     output = model.integrate(
         t_span=(0, 60), y0=[np.pi/2, 0.0, np.pi/4, 0.0], method='RK45',
         kwargs={'rtol': 1e-10, 'atol': 1e-12},
@@ -360,7 +356,6 @@ class DoublePendulum(PBModel):
 
     def __init__(
         self,
-        forcing=None,
         var_name="double_pendulum",
         m1=1.0,
         m2=1.0,
@@ -380,7 +375,6 @@ class DoublePendulum(PBModel):
             diagnostic_variables = ["energy", "x1", "y1", "x2", "y2"]
 
         super().__init__(
-            forcing,
             var_name,
             state_variables=state_variables,
             diagnostic_variables=diagnostic_variables,
@@ -425,7 +419,7 @@ class DoublePendulum(PBModel):
             -g * (2.0 * m1 + m2) * np.sin(theta1)
             - m2 * g * np.sin(theta1 - 2.0 * theta2)
             - 2.0 * sin_d * m2 * (omega2 ** 2 * L2 + omega1 ** 2 * L1 * cos_d)
-        ) / denom - d1 * omega1 + self.resolve_forcing(t)
+        ) / denom - d1 * omega1
 
         domega2 = (
             2.0 * sin_d * (
