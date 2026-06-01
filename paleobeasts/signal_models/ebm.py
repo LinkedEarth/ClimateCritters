@@ -639,6 +639,9 @@ class EBM1DLat(EBMBase):
                 continue
 
             cold_idx = np.where(temp_side <= threshold)[0][0]
+            if cold_idx == 0:
+                hemi_edges.append(0.0)
+                continue
             warm_idx = cold_idx - 1
             t_warm = temp_side[warm_idx]
             t_cold = temp_side[cold_idx]
