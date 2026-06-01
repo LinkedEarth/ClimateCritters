@@ -59,11 +59,10 @@ class Stocker2003BipolarSeesaw(PBModel):
         Stocker2003BipolarSeesaw,
     )
 
-    # Square-wave northern forcing
-    Tn = pb.core.Forcing(lambda t: 1.0 if (t % 2000) < 1000 else -1.0)
     import matplotlib.pyplot as plt
 
-    model = Stocker2003BipolarSeesaw(forcing=Tn, tau=500.0, beta=-1.0)
+    model = Stocker2003BipolarSeesaw(tau=500.0, beta=-1.0)
+    model.register_forcing('Tn', pb.core.Forcing(lambda t: 1.0 if (t % 2000) < 1000 else -1.0))
     output = model.integrate(
         t_span=(0, 8000), y0=[0.0], method='RK45'
     )
@@ -76,7 +75,6 @@ class Stocker2003BipolarSeesaw(PBModel):
 
     def __init__(
         self,
-        forcing=None,
         var_name="stocker2003_bipolar_seesaw",
         tau=1000.0,
         beta=-1.0,
@@ -92,7 +90,6 @@ class Stocker2003BipolarSeesaw(PBModel):
             diagnostic_variables = ["Tn"]
 
         super().__init__(
-            forcing,
             var_name,
             state_variables=state_variables,
             diagnostic_variables=diagnostic_variables,
@@ -118,7 +115,7 @@ class Stocker2003BipolarSeesaw(PBModel):
         if tau <= 0:
             raise ValueError("tau must be > 0.")
         beta = float(self.get_param_value("beta", t, x))
-        Tn_t = float(self.resolve_forcing(t, default=self.get_param_value("Tn", t, x)))
+        Tn_t = float(self.get_param_value("Tn", t, x))
         dTsdt = (beta * Tn_t - Ts) / tau
         return [dTsdt]
 
@@ -127,7 +124,7 @@ class Stocker2003BipolarSeesaw(PBModel):
         history = np.asarray(history, dtype=float)
         Tn_vals = []
         for t, row in zip(time, history):
-            Tn_vals.append(float(self.resolve_forcing(t, default=self.get_param_value("Tn", t, row))))
+            Tn_vals.append(float(self.get_param_value("Tn", t, row)))
         Tn_vals = np.asarray(Tn_vals, dtype=float)
         self.diagnostic_variables = {"Tn": Tn_vals}
 
@@ -205,8 +202,8 @@ class Stocker2003ExtendedSeaIceSeesaw(PBModel):
     import matplotlib.pyplot as plt
 
 
-    T_N = pb.core.Forcing(lambda t: 1.0 if (t % 2000) < 1000 else 0.0)
-    model = Stocker2003ExtendedSeaIceSeesaw(forcing=T_N)
+    model = Stocker2003ExtendedSeaIceSeesaw()
+    model.register_forcing('T_N', pb.core.Forcing(lambda t: 1.0 if (t % 2000) < 1000 else 0.0))
     output = model.integrate(
         t_span=(0, 10000), y0=[0.0, 0.0, 0.3, 0.0], method='RK45'
     )
@@ -219,7 +216,6 @@ class Stocker2003ExtendedSeaIceSeesaw(PBModel):
 
     def __init__(
         self,
-        forcing=None,
         var_name="stocker2003_extended_seaice_seesaw",
         tau_R=300.0,
         tau_S=1200.0,
@@ -250,7 +246,6 @@ class Stocker2003ExtendedSeaIceSeesaw(PBModel):
             diagnostic_variables = ["T_N"]
 
         super().__init__(
-            forcing,
             var_name,
             state_variables=state_variables,
             diagnostic_variables=diagnostic_variables,
@@ -302,7 +297,7 @@ class Stocker2003ExtendedSeaIceSeesaw(PBModel):
     uses_post_history = True
 
     def resolve_north(self, t, state):
-        return float(self.resolve_forcing(t, default=self.get_param_value("T_N", t, state)))
+        return float(self.get_param_value("T_N", t, state))
 
     def dydt(self, t, x):
         state = np.asarray(x, dtype=float).reshape(-1)
