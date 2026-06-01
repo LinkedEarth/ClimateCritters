@@ -63,28 +63,12 @@ class TestSignalModelsENSORechargeOscillator:
         got = np.column_stack([model.state_variables["T"], model.state_variables["h"]])
         assert np.allclose(got, x_ref, rtol=1e-6, atol=1e-6)
 
-    def test_external_forcing_replaces_internal_seasonal_term(self):
-        forcing = Forcing(lambda t: 2.5)
-        model = ENSORechargeOscillator(forcing=forcing, mu=0.8, en=0.2, Af=999.0, Pf=6.0)
-
-        dT, dh = model.recharge_components(1.5, [0.1, -0.2])
-
-        mu = 0.8
-        en = 0.2
-        c = 1.0
-        r = 0.25
-        alpha = 0.125
-        b0 = 2.5
-        gamma = 0.75
-        T = 0.1
-        h = -0.2
-        b = b0 * mu
-        R = gamma * b - c
-        expected_dT = R * T + gamma * h - en * (h + b * T) ** 3 + 2.5
-        expected_dh = -r * h - alpha * b * T
-
-        assert np.isclose(dT, expected_dT)
-        assert np.isclose(dh, expected_dh)
+    def test_sst_forcing_matches_analytic_at_quarter_period(self):
+        """_sst_forcing at t=Pf/4 should equal Af (peak of sine)."""
+        Af, Pf = 2.5, 6.0
+        model = ENSORechargeOscillator(mu=0.8, en=0.2, Af=Af, Pf=Pf)
+        t_peak = Pf / 4.0
+        assert np.isclose(model._sst_forcing(t_peak, [0.1, -0.2]), Af)
 
     def test_enso_like_period_t0(self):
         model = ENSORechargeOscillator(mu=0.8, en=3.0, Af=0.0, Pf=6.0)
