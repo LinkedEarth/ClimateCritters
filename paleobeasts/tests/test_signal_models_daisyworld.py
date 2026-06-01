@@ -12,7 +12,7 @@ class TestSignalModelsDaisyworldIntegrate:
     @pytest.mark.parametrize('t_span', [(0, 2), (0, 5)])
     @pytest.mark.parametrize('method, dt', [('euler', 0.01), ('RK45', None)])
     def test_integrate_t0(self, t_span, y0, method, dt):
-        model = daisyworld.Daisyworld(forcing=None)
+        model = daisyworld.Daisyworld()
         model.integrate(t_span=t_span, y0=y0, method=method, dt=dt)
 
         assert model.state_variables.dtype.names == ('Aw', 'Ab', 'T')
@@ -23,10 +23,9 @@ class TestSignalModelsDaisyworldIntegrate:
 class TestSignalModelsDaisyworldTimeVaryingParams:
     def test_time_varying_params_match_constants_t0(self):
         model_const = daisyworld.Daisyworld(
-            forcing=None, alpha_w=0.75, alpha_b=0.25, gamma=0.3, L=1.0, C=10.0
+            alpha_w=0.75, alpha_b=0.25, gamma=0.3, L=1.0, C=10.0
         )
         model_tv = daisyworld.Daisyworld(
-            forcing=None,
             alpha_w=lambda t, x, m: 0.75,
             alpha_b=lambda t: 0.25,
             gamma=lambda t, x: 0.3,
@@ -54,8 +53,9 @@ class TestSignalModelsDaisyworldTimeVaryingParams:
 
 class TestSignalModelsDaisyworldForcing:
     def test_luminosity_forcing_changes_temperature_t0(self):
-        forced = daisyworld.Daisyworld(forcing=pb.core.Forcing(lambda t: 0.1))
-        unforced = daisyworld.Daisyworld(forcing=None)
+        forced = daisyworld.Daisyworld()
+        forced.register_forcing('L', pb.core.Forcing(lambda t: 0.1))
+        unforced = daisyworld.Daisyworld()
         t_span = (0, 0.05)
         y0 = [0.2, 0.2, 288.0]
 
