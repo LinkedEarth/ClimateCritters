@@ -35,7 +35,7 @@ class DampedSpring(PBModel):
     import matplotlib.pyplot as plt
     from paleobeasts.signal_models.damped_spring import DampedSpring
 
-    model = DampedSpring(forcing=None, m=1.0, k=4.0, c=0.4)
+    model = DampedSpring(m=1.0, k=4.0, c=0.4)
     output = model.integrate(t_span=(0, 30), y0=[1.0, 0.0], method='RK45')
     ts = output.to_pyleo(var_names=['x'])
     ts.plot()
@@ -47,11 +47,11 @@ class DampedSpring(PBModel):
 
     def __init__(
         self,
-        forcing=None,
         var_name="damped_spring",
         m=1.0,
         k=1.0,
         c=0.1,
+        F=0.0,
         state_variables=None,
         diagnostic_variables=None,
         *args,
@@ -63,7 +63,6 @@ class DampedSpring(PBModel):
             diagnostic_variables = ["energy", "omega_0"]
 
         super().__init__(
-            forcing,
             var_name,
             state_variables=state_variables,
             diagnostic_variables=diagnostic_variables,
@@ -74,10 +73,12 @@ class DampedSpring(PBModel):
         self.m = m
         self.k = k
         self.c = c
+        self.F = F
         self.param_values = {
             "m": m,
             "k": k,
             "c": c,
+            "F": F,
         }
         self.params = ()
 
@@ -100,7 +101,7 @@ class DampedSpring(PBModel):
         if k <= 0.0:
             raise ValueError("k must be > 0.")
 
-        F = float(self.resolve_forcing(t))
+        F = float(self.get_param_value("F", t, state))
 
         dxdt = vel
         dvdt = -(c / m) * vel - (k / m) * pos + F / m
