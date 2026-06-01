@@ -15,11 +15,7 @@ from paleobeasts.signal_models import lorenz
 
 class TestCorePBModelReframeTimeAxis:
     def test_reframe_time_axis_rk45_t0(self):
-        def func(x):
-            return 0
-
-        forcing = pb.core.Forcing(func)
-        model = lorenz.Lorenz63(forcing=forcing)
+        model = lorenz.Lorenz63()
         output = model.integrate(t_span=(0, 5), y0=[1, 1, 1], method='RK45')
 
         t_eval = np.linspace(0, 5, 51)
@@ -29,11 +25,7 @@ class TestCorePBModelReframeTimeAxis:
         assert set(reframed.dtype.names) == {'x', 'y', 'z'}
 
     def test_reframe_time_axis_euler_t0(self):
-        def func(x):
-            return 0
-
-        forcing = pb.core.Forcing(func)
-        model = lorenz.Lorenz63(forcing=forcing)
+        model = lorenz.Lorenz63()
         output = model.integrate(t_span=(0, 5), y0=[1, 1, 1], method='euler', dt=0.1)
 
         t_eval = np.linspace(0, 5, 26)
@@ -45,7 +37,7 @@ class TestCorePBModelReframeTimeAxis:
 
 class _PostHistoryModel(PBModel):
     def __init__(self):
-        super().__init__(forcing=None, variable_name='post_history', state_variables=['x'],
+        super().__init__(variable_name='post_history', state_variables=['x'],
                          diagnostic_variables=['x_squared'])
 
     uses_post_history = True
@@ -70,7 +62,6 @@ class TestCorePBModelPostHistoryHooks:
 class _ParamContractModel(PBModel):
     def __init__(self, coeff=1.0):
         super().__init__(
-            forcing=None,
             variable_name='param_contract',
             state_variables=['x'],
             diagnostic_variables=[],
@@ -106,7 +97,7 @@ class TestCorePBModelParameterContract:
 
 class _FunctionSwapModel(PBModel):
     def __init__(self):
-        super().__init__(forcing=None, variable_name='function_swap', state_variables=['x'])
+        super().__init__(variable_name='function_swap', state_variables=['x'])
 
     def calc_term(self, value):
         return value + 1

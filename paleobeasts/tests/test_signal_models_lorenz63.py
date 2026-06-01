@@ -26,8 +26,7 @@ class TestSignalModelsLorenz63Integrate:
     @pytest.mark.parametrize('method, dt', [('euler', 0.01), ('RK45', None)])
     def test_integrate_t0(self, t_span, y0, method, dt):
         '''Test integrate method'''
-        forcing = pb.core.Forcing(lambda t: 0)
-        model = lorenz.Lorenz63(forcing=forcing)
+        model = lorenz.Lorenz63()
         model.integrate(t_span=t_span, y0=y0, method=method, dt=dt)
 
 
@@ -36,19 +35,15 @@ class TestSignalModelsLorenz63toPyleo:
     @pytest.mark.parametrize('var_names', ['x', 'y', 'z', ['x', 'y'], ['x', 'y', 'z']])
     def test_topyleo_t0(self, method, dt, var_names):
         '''Test to_pyleo method on PBOutput'''
-        forcing = pb.core.Forcing(lambda t: 0)
-        model = lorenz.Lorenz63(forcing=forcing)
+        model = lorenz.Lorenz63()
         output = model.integrate(t_span=(0, 10), y0=[1, 1, 1], method=method, dt=dt)
         output.to_pyleo(var_names=var_names)
 
 
 class TestSignalModelsLorenz63TimeVaryingParams:
     def test_time_varying_params_match_constants_t0(self):
-        forcing = pb.core.Forcing(lambda t: 0.0)
-
-        model_const = lorenz.Lorenz63(forcing=forcing, sigma=10.0, rho=28.0, beta=8 / 3)
+        model_const = lorenz.Lorenz63(sigma=10.0, rho=28.0, beta=8 / 3)
         model_tv = lorenz.Lorenz63(
-            forcing=forcing,
             sigma=lambda t, x, m: 10.0,
             rho=lambda t: 28.0,
             beta=lambda t, x: 8 / 3,

@@ -12,7 +12,7 @@ class TestSignalModelsStommelIntegrate:
     @pytest.mark.parametrize('t_span', [(0, 2), (0, 5)])
     @pytest.mark.parametrize('method, dt', [('euler', 0.01), ('RK45', None)])
     def test_integrate_t0(self, t_span, y0, method, dt):
-        model = stommel.Stommel(forcing=None)
+        model = stommel.Stommel()
         model.integrate(t_span=t_span, y0=y0, method=method, dt=dt)
         assert model.state_variables.dtype.names == ('T', 'S')
         assert 'q' in model.diagnostic_variables
@@ -20,10 +20,7 @@ class TestSignalModelsStommelIntegrate:
 
 class TestSignalModelsStommelTimeVaryingParams:
     def test_time_varying_params_match_constants_t0(self):
-        forcing = pb.core.Forcing(lambda t: 0.0)
-
         model_const = stommel.Stommel(
-            forcing=forcing,
             alpha=1.0,
             beta=1.0,
             k=1.0,
@@ -34,7 +31,6 @@ class TestSignalModelsStommelTimeVaryingParams:
             S_star=0.0,
         )
         model_tv = stommel.Stommel(
-            forcing=forcing,
             alpha=lambda t, x, m: 1.0,
             beta=lambda t: 1.0,
             k=lambda t, x: 1.0,
@@ -58,8 +54,9 @@ class TestSignalModelsStommelTimeVaryingParams:
 
 class TestSignalModelsStommelForcing:
     def test_scalar_forcing_affects_salinity_tendency_t0(self):
-        forced = stommel.Stommel(forcing=pb.core.Forcing(lambda t: 0.1), E=0.0)
-        unforced = stommel.Stommel(forcing=None, E=0.0)
+        forced = stommel.Stommel(E=0.0)
+        forced.register_forcing('S', pb.core.Forcing(lambda t: 0.1), attachment_style='additive', timing='pre')
+        unforced = stommel.Stommel(E=0.0)
         t_span = (0, 0.05)
         y0 = [1.0, 0.1]
 
@@ -78,6 +75,7 @@ class TestSignalModelsStommelSequenceForcing:
             ],
             label='stommel_sequence',
         )
-        model = stommel.Stommel(forcing=forcing, E=0.0)
+        model = stommel.Stommel(E=0.0)
+        model.register_forcing('S', forcing, attachment_style='additive', timing='pre')
         model.integrate(t_span=(0, 0.05), y0=[1.0, 0.1], method='euler', dt=0.01)
         assert np.isfinite(model.state_variables['S'][-1])

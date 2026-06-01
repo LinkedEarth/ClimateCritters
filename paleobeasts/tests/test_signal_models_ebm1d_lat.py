@@ -20,7 +20,7 @@ from paleobeasts.signal_models import EBM1DLat
 
 class TestSignalModelsEBM1DLat:
     def test_import_and_equilibrate_t0(self):
-        model = EBM1DLat(forcing=None, S0=1365.0)
+        model = EBM1DLat(S0=1365.0)
         output = model.integrate(t_span=(0, 200), y0=[15.0])
 
         assert len(output.diagnostic_variables['Tglobal']) == len(output.time)
@@ -28,7 +28,7 @@ class TestSignalModelsEBM1DLat:
         assert np.isclose(output.diagnostic_variables['Tglobal'][-1], 15.0, atol=5.0)
 
     def test_cold_state_low_latitude_ice_t0(self):
-        model = EBM1DLat(forcing=None, S0=1200.0)
+        model = EBM1DLat(S0=1200.0)
         output = model.integrate(t_span=(0, 200), y0=[0.0])
 
         assert np.isfinite(output.diagnostic_variables['ice_line_lat'][-1])
@@ -36,7 +36,7 @@ class TestSignalModelsEBM1DLat:
 
     def test_grid_sizes_t0(self):
         for grid_n in (30, 100):
-            model = EBM1DLat(forcing=None, grid_n=grid_n, S0=1365.0)
+            model = EBM1DLat(grid_n=grid_n, S0=1365.0)
             output = model.integrate(t_span=(0, 50), y0=[15.0])
 
             assert len(output.state_variables.dtype.names) == grid_n

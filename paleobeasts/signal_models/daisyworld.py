@@ -20,8 +20,6 @@ class Daisyworld(PBModel):
 
     Parameters
     ----------
-    forcing : pb.core.Forcing or None
-        Optional luminosity perturbation added to ``L``.  Default ``None``.
     var_name : str
         Label for the model output.  Default ``'daisyworld'``.
     alpha_w : float or callable or pb.core.Forcing
@@ -42,6 +40,8 @@ class Daisyworld(PBModel):
         Solar constant (W m\ :sup:`-2`).  Default 1365.0.
     L : float or callable or pb.core.Forcing
         Normalized stellar luminosity (1.0 = present Sun).  Default 1.0.
+        Register a time-varying luminosity via
+        ``model.register_forcing('L', forcing_obj)``.
     C : float or callable or pb.core.Forcing
         Planetary heat capacity (effective, in model units).  Default 10.0.
     sigma : float or callable or pb.core.Forcing
@@ -71,7 +71,7 @@ class Daisyworld(PBModel):
     from paleobeasts.signal_models.daisyworld import Daisyworld
     import matplotlib.pyplot as plt
 
-    model = Daisyworld(forcing=None, L=0.9)
+    model = Daisyworld(L=0.9)
     output = model.integrate(
         t_span=(0, 500), y0=[0.2, 0.2, 295.0], method='RK45'
     )
@@ -83,7 +83,7 @@ class Daisyworld(PBModel):
     
     """
 
-    def __init__(self, forcing=None, var_name='daisyworld', alpha_w=0.75, alpha_b=0.25, alpha_g=0.5,
+    def __init__(self, var_name='daisyworld', alpha_w=0.75, alpha_b=0.25, alpha_g=0.5,
                  gamma=0.3, q=20.0, T_opt=295.0, beta_width=0.003265, S0=1365.0, L=1.0, C=10.0,
                  sigma=5.67051196e-8, state_variables=None, diagnostic_variables=None, *args, **kwargs):
         if state_variables is None:
@@ -91,7 +91,7 @@ class Daisyworld(PBModel):
         if diagnostic_variables is None:
             diagnostic_variables = ['A_planet', 'A_bare', 'beta_w', 'beta_b']
 
-        super().__init__(forcing, var_name, state_variables=state_variables,
+        super().__init__(var_name, state_variables=state_variables,
                          diagnostic_variables=diagnostic_variables, *args, **kwargs)
 
         self.alpha_w = alpha_w
@@ -121,10 +121,7 @@ class Daisyworld(PBModel):
         self.params = ()
 
     def _luminosity(self, t, x):
-        L_base = self.get_param_value('L', t, x)
-        if self.forcing is None:
-            return L_base
-        return L_base + self.forcing.get_forcing(self.time_util(t))
+        return self.get_param_value('L', t, x)
 
     def _growth(self, T_local, t, x):
         T_opt = self.get_param_value('T_opt', t, x)

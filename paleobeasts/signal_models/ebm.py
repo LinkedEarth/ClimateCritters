@@ -179,13 +179,11 @@ class EBM0D(EBMBase):
 
         C dT/dt = (1 - alpha) * S0/4 - OLR
 
-    where S0 is the solar constant supplied by ``forcing``, ``alpha`` is the
-    planetary albedo, and OLR is the outgoing longwave radiation.
+    where ``S0`` is the solar constant, ``alpha`` is the planetary albedo,
+    and OLR is the outgoing longwave radiation.
 
     Parameters
     ----------
-    forcing : pb.core.Forcing
-        Provides the solar constant S0 (W m⁻²) as a function of time.
     state_variables : list of str, optional
         Names of the integrated state variables.  Default is ``['T']``.
     diagnostic_variables : list of str, optional
@@ -205,15 +203,18 @@ class EBM0D(EBMBase):
     albedo : float or callable or pb.core.Forcing, optional
         Planetary albedo.  If callable, must follow the parameter callable
         contract.  Default is 0.3.
+    S0 : float or callable or pb.core.Forcing, optional
+        Solar constant (W m⁻²).  Default 1365.0.  Pass a time-varying
+        orbital signal via ``model.register_forcing('S0', forcing_obj)``.
 
     Notes
     -----
-    All parameters that support callables or Forcing objects are registered
-    in ``param_values`` (``'C'``, ``'albedo'``, ``'OLR'``) and resolved
-    at each timestep via ``get_param_value``.
+    State variable is ``T`` (global-mean surface temperature, K).  Diagnostic
+    variables ``albedo``, ``absorbed_SW``, ``OLR``, and ``solar_incoming``
+    are accumulated step-by-step during integration.
 
-    This model uses ``uses_post_history = False``: state and diagnostics are
-    accumulated step-by-step inside ``dydt``.
+    All parameters support time-varying callables or Forcing objects;
+    they are resolved at each timestep via ``get_param_value``.
 
     See also
     --------
@@ -229,8 +230,7 @@ class EBM0D(EBMBase):
     import paleobeasts as pb
     from paleobeasts.signal_models.ebm import EBM0D
 
-    forcing = pb.core.Forcing(lambda t: 1360.0)
-    model = EBM0D(forcing=forcing)
+    model = EBM0D(S0=1360.0)
     output = model.integrate(t_span=(0, 500), y0=[288.0], method='RK45')
     ts = output.to_pyleo(var_names=['T'])
     ts.plot()
@@ -243,32 +243,30 @@ class EBM0D(EBMBase):
     ```python
     from paleobeasts.signal_models.ebm import EBM0D, albedo_func, OLR_func
 
-    model = EBM0D(
-        forcing=forcing,
-        albedo=albedo_func,
-        OLR=OLR_func(pRad=600),
-    )
+    model = EBM0D(albedo=albedo_func, OLR=OLR_func(pRad=600))
     ```
 
     """
 
-    def __init__(self, forcing, var_name='temperature', state_variables=None,
-                 diagnostic_variables=None, OLR=None, C=4, albedo=0.3):
+    def __init__(self, var_name='temperature', state_variables=None,
+                 diagnostic_variables=None, OLR=None, C=4, albedo=0.3, S0=1365.0):
         if state_variables is None:
             state_variables = ['T']
         if diagnostic_variables is None:
             diagnostic_variables = ['albedo', 'absorbed_SW', 'OLR', 'solar_incoming']
 
-        super().__init__(forcing, var_name, state_variables=state_variables,
+        super().__init__(var_name, state_variables=state_variables,
                          diagnostic_variables=diagnostic_variables)
 
         self.C = C
         self.albedo = albedo
+        self.S0 = S0
         self.OLR = OLR if OLR is not None else OLR_func()
         self.param_values = {
             'C': self.C,
             'albedo': self.albedo,
             'OLR': self.OLR,
+            'S0': S0,
         }
         self.params = ()
 
@@ -293,7 +291,7 @@ class EBM0D(EBMBase):
         """
         T = float(x[0])
 
-        f_solar_incoming = self.resolve_forcing(t)
+        f_solar_incoming = self.get_param_value('S0', t, x)
         albedo = self.calc_albedo(T, t)
         absorbed_SW = (1 - albedo) * f_solar_incoming / 4
         OLR = self.calc_OLR(T, t)
@@ -330,9 +328,6 @@ class EBM1DLat(EBMBase):
 
     Parameters
     ----------
-    forcing : pb.core.Forcing or None, optional
-        Reserved for future use (e.g. external orbital forcing).
-        Default is None; solar input is controlled by ``S0`` instead.
     var_name : str, optional
         Label for the modeled quantity.  Default is ``'ebm1d_lat'``.
     grid_n : int, optional
@@ -360,17 +355,17 @@ class EBM1DLat(EBMBase):
 
     Notes
     -----
-    ``uses_post_history = True``: state variables and diagnostics are derived
-    from the full solved trajectory in ``populate_diagnostics_from_history``
-    rather than accumulated step-by-step in ``dydt``.
+    State variables are ``T_0`` through ``T_{grid_n-1}`` (one temperature per
+    latitude band, ordered from south pole to north pole).  Diagnostic
+    variables ``ice_line_lat`` and ``Tglobal`` are derived after integration.
 
     ``validate_initial_state`` accepts a scalar and broadcasts it uniformly
     to the full grid.
 
     All parameters (``C``, ``D``, ``A``, ``B``, ``S0``, ``CO2_forcing``) are
     registered in ``param_values`` and can be swapped for callables or
-    Forcing objects at any time.  Callables must follow the contract in
-    ``contracts/signal_model_contract.md``.
+    Forcing objects.  Callables must follow the contract ``(t)``,
+    ``(t, state)``, or ``(t, state, model)``.
 
     See also
     --------
@@ -387,7 +382,7 @@ class EBM1DLat(EBMBase):
     from paleobeasts.signal_models.ebm import EBM1DLat
 
     grid_n = 50
-    model = EBM1DLat(forcing=None, S0=1365.0, grid_n=grid_n)
+    model = EBM1DLat(S0=1365.0, grid_n=grid_n)
     output = model.integrate(
         t_span=(0, 200), y0=np.full(grid_n, 15.0), method='rk4', dt=1.0
     )
@@ -410,7 +405,7 @@ class EBM1DLat(EBMBase):
         pb.core.Hold(duration=100, value=0.0),
         pb.core.Ramp(duration=100, y0=0.0, yf=4.0, shape='linear'),
     ])
-    model = EBM1DLat(forcing=None, CO2_forcing=co2_ramp)
+    model = EBM1DLat(CO2_forcing=co2_ramp)
     output = model.integrate(t_span=(0, 200), y0=[15.0], method='rk4', dt=1.0)
     ```
 
@@ -418,7 +413,7 @@ class EBM1DLat(EBMBase):
 
     uses_post_history = True
 
-    def __init__(self, forcing=None, var_name='ebm1d_lat', grid_n=50, C=10.0, D=0.55,
+    def __init__(self, var_name='ebm1d_lat', grid_n=50, C=10.0, D=0.55,
                  A=210.0, B=2.0, S0=1365.0, CO2_forcing=0.0,
                  state_variables=None, diagnostic_variables=None):
         self.grid_n = int(grid_n)
@@ -433,7 +428,7 @@ class EBM1DLat(EBMBase):
         if diagnostic_variables is None:
             diagnostic_variables = ['ice_line_lat', 'Tglobal']
 
-        super().__init__(forcing, var_name, state_variables=state_variables,
+        super().__init__(var_name, state_variables=state_variables,
                          diagnostic_variables=diagnostic_variables)
 
         self.C = C
@@ -644,6 +639,9 @@ class EBM1DLat(EBMBase):
                 continue
 
             cold_idx = np.where(temp_side <= threshold)[0][0]
+            if cold_idx == 0:
+                hemi_edges.append(0.0)
+                continue
             warm_idx = cold_idx - 1
             t_warm = temp_side[warm_idx]
             t_cold = temp_side[cold_idx]
