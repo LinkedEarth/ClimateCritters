@@ -62,7 +62,7 @@ class Stommel(PBModel):
     from paleobeasts.signal_models.stommel import Stommel
     import matplotlib.pyplot as plt
 
-    model = Stommel(forcing=None, E=0.3, T_star=1.0, S_star=0.0)
+    model = Stommel(E=0.3, T_star=1.0, S_star=0.0)
     output = model.integrate(
         t_span=(0, 50), y0=[1.0, 0.0], method='RK45'
     )
@@ -73,7 +73,7 @@ class Stommel(PBModel):
     ```
     """
 
-    def __init__(self, forcing=None, var_name='stommel', alpha=1.0, beta=1.0, k=1.0, E=0.0,
+    def __init__(self, var_name='stommel', alpha=1.0, beta=1.0, k=1.0, E=0.0,
                  lambda_T=1.0, lambda_S=1.0, T_star=1.0, S_star=0.0, state_variables=None,
                  diagnostic_variables=None, *args, **kwargs):
         if state_variables is None:
@@ -81,7 +81,7 @@ class Stommel(PBModel):
         if diagnostic_variables is None:
             diagnostic_variables = ['q']
 
-        super().__init__(forcing, var_name, state_variables=state_variables,
+        super().__init__(var_name, state_variables=state_variables,
                          diagnostic_variables=diagnostic_variables, *args, **kwargs)
 
         self.alpha = alpha
@@ -104,16 +104,6 @@ class Stommel(PBModel):
         }
         self.params = ()
 
-    def _forcing_vector(self, t):
-        f_val = self.resolve_forcing(t)
-        if np.isscalar(f_val):
-            return np.array([0.0, float(f_val)])
-
-        f_arr = np.asarray(f_val, dtype=float)
-        if f_arr.size != 2:
-            raise ValueError("Forcing must be a scalar or an array-like with 2 entries.")
-        return f_arr.reshape(2,)
-
     def overturning(self, t, x):
         T, S = x[0], x[1]
         alpha = self.get_param_value('alpha', t, x)
@@ -134,10 +124,8 @@ class Stommel(PBModel):
         lambda_S = self.get_param_value('lambda_S', t, x)
         T_star = self.get_param_value('T_star', t, x)
         S_star = self.get_param_value('S_star', t, x)
-        f_vec = self._forcing_vector(t)
-
-        dTdt = -lambda_T * (T - T_star) - adv * T + f_vec[0]
-        dSdt = E - lambda_S * (S - S_star) - adv * S + f_vec[1]
+        dTdt = -lambda_T * (T - T_star) - adv * T
+        dSdt = E - lambda_S * (S - S_star) - adv * S
 
         return [dTdt, dSdt]
 
