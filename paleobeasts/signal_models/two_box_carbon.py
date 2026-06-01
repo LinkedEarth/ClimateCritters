@@ -18,10 +18,6 @@ class TwoBoxCarbon(PBModel):
 
     Parameters
     ----------
-    forcing : pb.core.Forcing or None
-        Optional prescribed carbon source flux ``R(t)`` (same units as
-        ``R``).  If provided it overrides the constant ``R`` parameter.
-        Default ``None``.
     var_name : str
         Label for the model output.  Default ``'two_box_carbon'``.
     k : float or callable or pb.core.Forcing
@@ -29,7 +25,8 @@ class TwoBoxCarbon(PBModel):
         Default 0.2.
     R : float or callable or pb.core.Forcing
         Constant carbon source flux into the atmosphere (mass per time).
-        Default 0.0.
+        Default 0.0.  Register a time-varying source via
+        ``model.register_forcing('R', forcing_obj)``.
     l_s : float or callable or pb.core.Forcing
         First-order atmospheric loss coefficient.  Default 0.0.
     V_atm : float or callable or pb.core.Forcing

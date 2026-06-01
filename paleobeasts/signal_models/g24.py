@@ -20,8 +20,6 @@ class Model3(PBModel):
 
     Parameters
     ----------
-    forcing : pb.core.Forcing
-        Orbital insolation forcing ``f(t)`` (W m\ :sup:`-2`).  Required.
     var_name : str
         Label for the model output.  Default ``'ice volume'``.
     f1 : float or callable or pb.core.Forcing
@@ -43,6 +41,11 @@ class Model3(PBModel):
     State variables are ``v`` (ice volume, normalised) and ``k`` (regime
     index, non-integrated).  The diagnostic variable ``insolation`` records
     ``f(t)`` at each output step.
+
+    The ``insolation`` parameter (default 0.0) provides the orbital forcing
+    value used by the model.  Register a time-varying orbital signal via::
+
+        model.register_forcing('insolation', pb.core.Forcing(calc_f))
 
     The internal derivative of forcing ``dfdt`` is computed via
     :func:`calc_df` by default; supply a custom callable or

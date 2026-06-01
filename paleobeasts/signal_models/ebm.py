@@ -179,13 +179,11 @@ class EBM0D(EBMBase):
 
         C dT/dt = (1 - alpha) * S0/4 - OLR
 
-    where S0 is the solar constant supplied by ``forcing``, ``alpha`` is the
-    planetary albedo, and OLR is the outgoing longwave radiation.
+    where ``S0`` is the solar constant, ``alpha`` is the planetary albedo,
+    and OLR is the outgoing longwave radiation.
 
     Parameters
     ----------
-    forcing : pb.core.Forcing
-        Provides the solar constant S0 (W m⁻²) as a function of time.
     state_variables : list of str, optional
         Names of the integrated state variables.  Default is ``['T']``.
     diagnostic_variables : list of str, optional
@@ -205,15 +203,18 @@ class EBM0D(EBMBase):
     albedo : float or callable or pb.core.Forcing, optional
         Planetary albedo.  If callable, must follow the parameter callable
         contract.  Default is 0.3.
+    S0 : float or callable or pb.core.Forcing, optional
+        Solar constant (W m⁻²).  Default 1365.0.  Pass a time-varying
+        orbital signal via ``model.register_forcing('S0', forcing_obj)``.
 
     Notes
     -----
-    All parameters that support callables or Forcing objects are registered
-    in ``param_values`` (``'C'``, ``'albedo'``, ``'OLR'``) and resolved
-    at each timestep via ``get_param_value``.
+    State variable is ``T`` (global-mean surface temperature, K).  Diagnostic
+    variables ``albedo``, ``absorbed_SW``, ``OLR``, and ``solar_incoming``
+    are accumulated step-by-step during integration.
 
-    This model uses ``uses_post_history = False``: state and diagnostics are
-    accumulated step-by-step inside ``dydt``.
+    All parameters support time-varying callables or Forcing objects;
+    they are resolved at each timestep via ``get_param_value``.
 
     See also
     --------
@@ -327,9 +328,6 @@ class EBM1DLat(EBMBase):
 
     Parameters
     ----------
-    forcing : pb.core.Forcing or None, optional
-        Reserved for future use (e.g. external orbital forcing).
-        Default is None; solar input is controlled by ``S0`` instead.
     var_name : str, optional
         Label for the modeled quantity.  Default is ``'ebm1d_lat'``.
     grid_n : int, optional
@@ -357,17 +355,17 @@ class EBM1DLat(EBMBase):
 
     Notes
     -----
-    ``uses_post_history = True``: state variables and diagnostics are derived
-    from the full solved trajectory in ``populate_diagnostics_from_history``
-    rather than accumulated step-by-step in ``dydt``.
+    State variables are ``T_0`` through ``T_{grid_n-1}`` (one temperature per
+    latitude band, ordered from south pole to north pole).  Diagnostic
+    variables ``ice_line_lat`` and ``Tglobal`` are derived after integration.
 
     ``validate_initial_state`` accepts a scalar and broadcasts it uniformly
     to the full grid.
 
     All parameters (``C``, ``D``, ``A``, ``B``, ``S0``, ``CO2_forcing``) are
     registered in ``param_values`` and can be swapped for callables or
-    Forcing objects at any time.  Callables must follow the contract in
-    ``contracts/signal_model_contract.md``.
+    Forcing objects.  Callables must follow the contract ``(t)``,
+    ``(t, state)``, or ``(t, state, model)``.
 
     See also
     --------

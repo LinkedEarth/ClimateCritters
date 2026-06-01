@@ -10,10 +10,6 @@ class DampedSpring(PBModel):
 
     Parameters
     ----------
-    forcing:
-        Optional external driving force F(t).  Pass a ``Forcing`` object;
-        ``get_forcing(t)`` should return force in Newtons.  If ``None``,
-        the undriven damped oscillator is simulated.
     var_name:
         Human-readable label for the model.
     m:
@@ -23,16 +19,27 @@ class DampedSpring(PBModel):
     c:
         Linear damping coefficient in N·s/m.  ``c=0`` gives undamped SHM;
         ``c < 2*sqrt(k*m)`` gives underdamped (oscillatory) decay.
+    F : float or callable or pb.core.Forcing
+        External driving force (N).  Default 0.0 (undriven).  For a
+        time-varying drive use ``model.register_forcing('F', forcing_obj)``.
     state_variables:
         Names for the two integrated state variables (position, velocity).
     diagnostic_variables:
         Names for post-integration diagnostics.
 
+    Notes
+    -----
+    State variables are ``x`` (position) and ``v`` (velocity) in that order.
+    Diagnostic variables ``energy`` and ``omega_0`` are computed after
+    integration.
+
     Examples
     --------
 
     ```python
+    import numpy as np
     import matplotlib.pyplot as plt
+    import paleobeasts as pb
     from paleobeasts.signal_models.damped_spring import DampedSpring
 
     model = DampedSpring(m=1.0, k=4.0, c=0.4)
@@ -41,6 +48,16 @@ class DampedSpring(PBModel):
     ts.plot()
     plt.savefig('docs/reference/figures/DampedSpring_example.png',
                 dpi=150, bbox_inches='tight')
+    ```
+
+    With resonant driving (external force at ω₀):
+
+    ```python
+    m, k = 1.0, 4.0
+    omega_0 = np.sqrt(k / m)
+    model = DampedSpring(m=m, k=k, c=0.0)
+    model.register_forcing('F', pb.core.Forcing(lambda t: np.cos(omega_0 * t)))
+    output = model.integrate(t_span=(0, 30), y0=[0.0, 0.0], method='RK45')
     ```
 
     """

@@ -24,10 +24,6 @@ class Stocker2003BipolarSeesaw(PBModel):
 
     Parameters
     ----------
-    forcing : pb.core.Forcing or None
-        Optional time-varying northern temperature anomaly ``Tn(t)``
-        (model units).  If ``None``, the constant ``Tn`` parameter is used.
-        Default ``None``.
     var_name : str
         Label for the model output.  Default ``'stocker2003_bipolar_seesaw'``.
     tau : float or callable or pb.core.Forcing
@@ -36,8 +32,8 @@ class Stocker2003BipolarSeesaw(PBModel):
         Amplitude ratio relating southern to northern anomaly.  Default -1.0
         (antiphase seesaw).
     Tn : float or callable or pb.core.Forcing
-        Constant northern temperature anomaly used when no forcing is
-        provided.  Default 0.0.
+        Northern temperature anomaly.  Default 0.0.  Register a
+        time-varying signal via ``model.register_forcing('Tn', forcing_obj)``.
 
     Notes
     -----
@@ -147,9 +143,6 @@ class Stocker2003ExtendedSeaIceSeesaw(PBModel):
 
     Parameters
     ----------
-    forcing : pb.core.Forcing or None
-        Optional time-varying northern temperature anomaly ``T_N(t)``.  If
-        ``None``, the constant ``T_N`` parameter is used.  Default ``None``.
     var_name : str
         Label for the model output.  Default
         ``'stocker2003_extended_seaice_seesaw'``.
@@ -181,8 +174,8 @@ class Stocker2003ExtendedSeaIceSeesaw(PBModel):
     T_c : float
         Critical temperature for the sea-ice feedback.  Default 0.0.
     T_N : float
-        Constant northern temperature when no forcing is provided.
-        Default 0.0.
+        Northern temperature anomaly.  Default 0.0.  Register a
+        time-varying signal via ``model.register_forcing('T_N', forcing_obj)``.
     epsilon_R, epsilon_S, epsilon_A, epsilon_ANT : float
         Constant additive noise / bias terms.  All default to 0.0.
 

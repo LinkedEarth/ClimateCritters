@@ -15,16 +15,11 @@ class Stommel(PBModel):
 
     and the prognostic equations are:
 
-        dT/dt = -lambda_T * (T - T_star) - |q|*T + f_T(t)
-        dS/dt =  E - lambda_S * (S - S_star) - |q|*S + f_S(t)
+        dT/dt = -lambda_T * (T - T_star) - |q|*T
+        dS/dt =  E - lambda_S * (S - S_star) - |q|*S
 
     Parameters
     ----------
-    forcing : pb.core.Forcing or None
-        Optional external forcing.  If the forcing value is scalar it is
-        applied as a freshwater perturbation added to ``dS/dt``.  If
-        array-like with 2 entries, it is added to ``(dT/dt, dS/dt)``
-        respectively.  Default ``None``.
     var_name : str
         Label for the model output.  Default ``'stommel'``.
     alpha : float or callable or pb.core.Forcing
@@ -54,6 +49,17 @@ class Stommel(PBModel):
     ----------
     Stommel, H. (1961). Thermohaline convection with two stable regimes of
     flow. Tellus, 13(2), 224–230.
+
+    Notes
+    -----
+    State variables are ``T`` and ``S`` (in that order).  Diagnostic
+    variable is ``q`` (overturning strength), computed after integration.
+
+    To drive the salinity equation with an external freshwater forcing::
+
+        model = Stommel(E=0.0)
+        model.register_forcing('S', pb.core.Forcing(lambda t: 0.1),
+                               attachment_style='additive', timing='pre')
 
     Examples
     --------

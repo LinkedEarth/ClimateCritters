@@ -46,10 +46,6 @@ class SimplePendulum(PBModel):
 
     Parameters
     ----------
-    forcing:
-        Optional external torque applied additively to ``dω/dt``.  A scalar
-        ``Forcing`` value is added directly; if ``None``, the unforced
-        dynamics are used.
     var_name:
         Human-readable label.
     L:
@@ -62,6 +58,12 @@ class SimplePendulum(PBModel):
         Names for [angle, angular velocity].
     diagnostic_variables:
         Names for post-integration diagnostics.
+
+    Notes
+    -----
+    State variables are ``theta`` (angle, rad) and ``omega`` (angular velocity,
+    rad/s) in that order.  Diagnostic variables ``energy`` and ``omega_0`` are
+    computed after integration.
 
     Examples
     --------
@@ -181,19 +183,14 @@ class DrivenPendulum(PBModel):
 
     Parameters
     ----------
-    forcing:
-        Optional external drive.  If provided, ``forcing.get_forcing(t)``
-        replaces the built-in cosine term entirely, allowing arbitrary drive
-        waveforms.  When ``None``, the cosine drive ``A cos(Ω t)`` is used.
     var_name:
         Human-readable label.
     q:
         Damping coefficient (dimensionless).
     A:
-        Driving amplitude (dimensionless).  Ignored when ``forcing`` is set.
+        Driving amplitude (dimensionless).
     Omega:
-        Driving angular frequency (dimensionless rad/time).  Ignored when
-        ``forcing`` is set.
+        Driving angular frequency (dimensionless rad/time).
     state_variables:
         Names for [angle, angular velocity].
     diagnostic_variables:
@@ -306,10 +303,6 @@ class DoublePendulum(PBModel):
 
     Parameters
     ----------
-    forcing:
-        Optional external torque applied additively to ``dω₁/dt`` (the first
-        bob).  A scalar ``Forcing`` value is added directly; if ``None``, the
-        unforced dynamics are used.
     var_name:
         Human-readable label.
     m1, m2:
@@ -324,16 +317,15 @@ class DoublePendulum(PBModel):
 
     Notes
     -----
+    State variables are ``theta1``, ``omega1``, ``theta2``, ``omega2`` in
+    that order.  Diagnostic variables ``energy``, ``x1``, ``y1``, ``x2``,
+    ``y2`` are computed after integration.
+
     The double pendulum is chaotic.  RK45 with default tolerances can show
     significant energy drift for long or large-amplitude runs.  Use tight
     tolerances for accurate energy tracking::
 
         model.integrate(..., kwargs={'rtol': 1e-10, 'atol': 1e-12})
-
-    state_variables:
-        Names for [θ₁, ω₁, θ₂, ω₂].
-    diagnostic_variables:
-        Names for post-integration diagnostics.
 
     Examples
     --------

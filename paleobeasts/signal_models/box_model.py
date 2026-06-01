@@ -401,9 +401,6 @@ class GenericBoxModel(PBModel):
     ----------
     spec : BoxModelSpec
         The validated specification object.
-    forcing : pb.core.Forcing or None
-        Optional external forcing passed through to registered input
-        channels.  Default ``None``.
     var_name : str or None
         Override for the model name.  Defaults to ``spec.name``.
     kwargs : dict

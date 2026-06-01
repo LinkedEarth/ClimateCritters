@@ -19,9 +19,6 @@ class Lorenz96(PBModel):
 
     Parameters
     ----------
-    forcing : pb.core.Forcing or None
-        Optional forcing object providing F(t).  If ``None``, the constant
-        ``F`` parameter is used as the slow-scale forcing.
     var_name : str
         Label for the model output.  Default ``'lorenz96'``.
     n : int
@@ -30,7 +27,8 @@ class Lorenz96(PBModel):
         Fast variables per slow variable.  ``J=0`` (default) gives the
         single-scale system; ``J>0`` activates the two-scale system.
     F : float or callable or pb.core.Forcing
-        Slow-scale forcing amplitude.  Default 8.0.
+        Slow-scale forcing amplitude.  Default 8.0.  Pass a time-varying
+        signal via ``model.register_forcing('F', forcing_obj)``.
     h : float
         Coupling coefficient between X and Y layers (two-scale only).
         Default 1.0.
@@ -190,11 +188,6 @@ class Lorenz63(PBModel):
 
     Parameters
     ----------
-    forcing : pb.core.Forcing or None
-        External forcing, which must be provided explicitly but may be
-        ``None``. If the forcing value ``f(t)`` is scalar it is added to
-        ``dx/dt``; if it is array-like with 3 entries it is added to
-        ``(dx/dt, dy/dt, dz/dt)``.
     var_name : str
         Label for the model output.  Default ``'lorenz63'``.
     sigma : float or callable or pb.core.Forcing

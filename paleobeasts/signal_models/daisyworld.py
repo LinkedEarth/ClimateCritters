@@ -20,8 +20,6 @@ class Daisyworld(PBModel):
 
     Parameters
     ----------
-    forcing : pb.core.Forcing or None
-        Optional luminosity perturbation added to ``L``.  Default ``None``.
     var_name : str
         Label for the model output.  Default ``'daisyworld'``.
     alpha_w : float or callable or pb.core.Forcing
@@ -42,6 +40,8 @@ class Daisyworld(PBModel):
         Solar constant (W m\ :sup:`-2`).  Default 1365.0.
     L : float or callable or pb.core.Forcing
         Normalized stellar luminosity (1.0 = present Sun).  Default 1.0.
+        Register a time-varying luminosity via
+        ``model.register_forcing('L', forcing_obj)``.
     C : float or callable or pb.core.Forcing
         Planetary heat capacity (effective, in model units).  Default 10.0.
     sigma : float or callable or pb.core.Forcing

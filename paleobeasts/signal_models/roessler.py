@@ -14,10 +14,6 @@ class Roessler(PBModel):
 
     Parameters
     ----------
-    forcing : pb.core.Forcing or None
-        External forcing applied additively to the equations.  If the value
-        at time t is scalar it is added to dx/dt only; if it is a 3-element
-        array it is added component-wise.  Default ``None``.
     var_name : str
         Label for the model output.  Default ``'roessler'``.
     a : float or callable or pb.core.Forcing
