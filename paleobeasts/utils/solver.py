@@ -207,7 +207,7 @@ def build_state_from_history(time, history, state_variables_names):
     return history
 
 
-def rk4_method(f, t_span, y0, dt, si=None, args=()):
+def rk4_method(f, t_span, y0, dt, si=None, args=(), post_step=None):
     """Fixed-step 4th-order Runge-Kutta integrator.
 
     Parameters
@@ -226,6 +226,10 @@ def rk4_method(f, t_span, y0, dt, si=None, args=()):
         (every step is saved).
     args : tuple
         Extra positional arguments forwarded to ``f``.
+    post_step : callable or None
+        Optional hook called after each accepted sub-step with signature
+        ``post_step(t, y) -> y``.  The returned array replaces the current
+        state, allowing post-step corrections (e.g. state nudging).
 
     Returns
     -------
@@ -272,13 +276,15 @@ def rk4_method(f, t_span, y0, dt, si=None, args=()):
             k3 = np.asarray(f(t_curr + 0.5 * dt, y + 0.5 * dt * k2, *args), dtype=float)
             k4 = np.asarray(f(t_curr + dt, y + dt * k3, *args), dtype=float)
             y = y + (dt / 6.0) * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
+            if post_step is not None:
+                y = np.asarray(post_step(t_curr + dt, y), dtype=float)
         history[step + 1] = y
         times[step + 1] = t0 + (step + 1) * si
 
     return Solution(times, history)
 
 
-def euler_method(f, t_span, y0, dt, args=()):
+def euler_method(f, t_span, y0, dt, args=(), post_step=None):
     """Fixed-step forward Euler integrator.
 
     Parameters
@@ -293,6 +299,10 @@ def euler_method(f, t_span, y0, dt, args=()):
         Fixed timestep.
     args : tuple
         Extra positional arguments forwarded to ``f``.
+    post_step : callable or None
+        Optional hook called after each accepted step with signature
+        ``post_step(t, y) -> y``.  The returned array replaces the current
+        state, allowing post-step corrections (e.g. state nudging).
 
     Returns
     -------
@@ -312,11 +322,13 @@ def euler_method(f, t_span, y0, dt, args=()):
     for i in range(1, n_steps):
         dy = f(t[i - 1], y[i - 1], *args)
         y[i] = y[i - 1] + np.multiply(dy, dt)
+        if post_step is not None:
+            y[i] = np.asarray(post_step(t[i], y[i]), dtype=float)
 
     return Solution(t, y)
 
 
-def euler_maruyama_method(f, t_span, y0, dt, noise_func=None, rng=None, args=()):
+def euler_maruyama_method(f, t_span, y0, dt, noise_func=None, rng=None, args=(), post_step=None):
     """Fixed-step Euler-Maruyama integrator for stochastic differential equations.
 
     Solves:
@@ -344,6 +356,10 @@ def euler_maruyama_method(f, t_span, y0, dt, noise_func=None, rng=None, args=())
         created if ``None``.
     args : tuple
         Extra positional arguments forwarded to ``f``.
+    post_step : callable or None
+        Optional hook called after each accepted step with signature
+        ``post_step(t, y) -> y``.  The returned array replaces the current
+        state, allowing post-step corrections (e.g. state nudging).
 
     Returns
     -------
@@ -381,5 +397,7 @@ def euler_maruyama_method(f, t_span, y0, dt, noise_func=None, rng=None, args=())
 
         dW = rng.normal(0.0, 1.0, size=len(y_prev)) * sqrt_dt
         y[i] = y_prev + dy * dt + diffusion * dW
+        if post_step is not None:
+            y[i] = np.asarray(post_step(t[i], y[i]), dtype=float)
 
     return Solution(t, y)
