@@ -375,18 +375,17 @@ class BoxModelSpec:
         if missing:
             raise ValueError(f"Missing tendency relations for state variables: {missing}")
 
-    def make_model(self, forcing=None, var_name=None, **parameter_overrides):
+    def make_model(self, var_name=None, **parameter_overrides):
         """Instantiate a :class:`GenericBoxModel` from this spec."""
         self.validate()
         return GenericBoxModel(
             self,
-            forcing=forcing,
             var_name=var_name if var_name is not None else self.name,
             **parameter_overrides,
         )
 
-    def make_boxmodel(self, forcing=None, var_name=None, **parameter_overrides):
-        return self.make_model(forcing=forcing, var_name=var_name, **parameter_overrides)
+    def make_boxmodel(self, var_name=None, **parameter_overrides):
+        return self.make_model(var_name=var_name, **parameter_overrides)
 
 
 class GenericBoxModel(PBModel):
@@ -412,14 +411,13 @@ class GenericBoxModel(PBModel):
         ``spec.parameter_defaults``.
     """
 
-    def __init__(self, spec, forcing=None, var_name=None, *args, **kwargs):
+    def __init__(self, spec, var_name=None, *args, **kwargs):
         self.spec = spec
         kwargs.pop("parameter_contract", None)
         param_values = dict(spec.parameter_defaults)
         param_values.update(kwargs)
 
         super().__init__(
-            forcing=forcing,
             variable_name=var_name if var_name is not None else spec.name,
             state_variables=list(spec.state_variables),
             diagnostic_variables=list(spec.diagnostic_variables),
@@ -436,25 +434,19 @@ class GenericBoxModel(PBModel):
         return True
 
     def resolve_input(self, name, t, state):
-        """Resolve a registered input from forcing or fallback parameter."""
+        """Resolve a registered input from its fallback parameter.
+
+        To drive an input with a time-varying external signal, register a
+        forcing on the corresponding fallback parameter::
+
+            model.register_forcing('fallback_param_name', forcing_obj)
+        """
         if name not in self.spec.input_specs:
             raise KeyError(f"Input '{name}' is not registered on this BoxModelSpec.")
 
         input_spec = self.spec.input_specs[name]
-        if self.forcing is not None:
-            value = self.forcing.get_forcing(self.time_util(t))
-            if len(self.spec.input_specs) == 1:
-                return value
-            if isinstance(value, dict):
-                if name not in value:
-                    raise KeyError(f"Forcing dict does not include input '{name}'.")
-                return value[name]
-            raise ValueError(
-                "Multi-input generic box models require forcing values to be dict-like."
-            )
-
         if input_spec.fallback_param is None:
-            raise ValueError(f"Input '{name}' has no forcing and no fallback parameter.")
+            raise ValueError(f"Input '{name}' has no fallback parameter defined.")
         return self.get_param_value(input_spec.fallback_param, t, state)
 
     def resolve_box_volume(self, name, t, state):

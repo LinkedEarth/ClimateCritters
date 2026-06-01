@@ -6,7 +6,7 @@ from paleobeasts.signal_models import BoxModelSpec, TwoBoxCarbon
 
 class TestSignalModelsTwoBoxCarbon:
     def test_import_and_integrate_t0(self):
-        model = TwoBoxCarbon(forcing=None, k=0.2, R=0.0, l_s=0.0)
+        model = TwoBoxCarbon(k=0.2, R=0.0, l_s=0.0)
         model.integrate(t_span=(0, 10), y0=[100.0, 50.0])
 
         assert model.state_variables.dtype.names == ("A", "S")
@@ -14,14 +14,14 @@ class TestSignalModelsTwoBoxCarbon:
         assert np.all(np.isfinite(model.diagnostic_variables["net_flux"]))
 
     def test_closed_system_conserves_mass_t0(self):
-        model = TwoBoxCarbon(forcing=None, k=0.2, R=0.0, l_s=0.0, V_atm=1.0, V_surf=50.0)
+        model = TwoBoxCarbon(k=0.2, R=0.0, l_s=0.0, V_atm=1.0, V_surf=50.0)
         model.integrate(t_span=(0, 100), y0=[100.0, 200.0], method="RK45")
 
         total = model.state_variables["A"] + model.state_variables["S"]
         assert np.max(np.abs(total - total[0])) < 1e-8
 
     def test_forced_system_reaches_steady_state_t0(self):
-        model = TwoBoxCarbon(forcing=None, k=0.2, R=1.0, l_s=0.05)
+        model = TwoBoxCarbon(k=0.2, R=1.0, l_s=0.05)
         model.integrate(t_span=(0, 100), y0=[0.0, 0.0], method="RK45")
 
         A_eq = 1.0 / 0.05
@@ -70,7 +70,8 @@ class TestSignalModelsGenericBoxModel:
         })
 
         north = pb.Forcing(lambda t: 1.0)
-        model = spec.make_boxmodel(forcing=north)
+        model = spec.make_boxmodel()
+        model.register_forcing('Tn', north)
         model.integrate(t_span=(0, 100), y0=[0.0], method="RK45")
 
         assert model.state_variables.dtype.names == ("Ts",)

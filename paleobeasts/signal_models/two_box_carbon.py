@@ -52,7 +52,7 @@ class TwoBoxCarbon(PBModel):
     from paleobeasts.signal_models.two_box_carbon import TwoBoxCarbon
     import matplotlib.pyplot as plt
 
-    model = TwoBoxCarbon(forcing=None, k=0.1, V_atm=1.0, V_surf=50.0)
+    model = TwoBoxCarbon(k=0.1, V_atm=1.0, V_surf=50.0)
     output = model.integrate(
         t_span=(0, 200), y0=[800.0, 38000.0], method='RK45'
     )
@@ -65,7 +65,6 @@ class TwoBoxCarbon(PBModel):
 
     def __init__(
         self,
-        forcing=None,
         var_name="two_box_carbon",
         k=0.2,
         R=0.0,
@@ -83,7 +82,6 @@ class TwoBoxCarbon(PBModel):
             diagnostic_variables = ["net_flux"]
 
         super().__init__(
-            forcing,
             var_name,
             state_variables=state_variables,
             diagnostic_variables=diagnostic_variables,
@@ -109,8 +107,6 @@ class TwoBoxCarbon(PBModel):
         return True
 
     def source_flux(self, t, state):
-        if self.forcing is not None:
-            return float(self.forcing.get_forcing(self.time_util(t)))
         return float(self.get_param_value("R", t, state))
 
     def tendencies(self, t, state):
