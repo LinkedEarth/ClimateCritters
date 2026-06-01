@@ -8,29 +8,46 @@ from ..utils.solver import (euler_method, euler_maruyama_method, rk4_method, Sol
                             validate_initial_state as _validate_initial_state,
                             build_state_from_history as _build_state_from_history)
 from .pboutput import PBOutput
+from .forcing import ForcingSpec
 
 
 class PBModel:
-    '''The overarching model structure for Paleobeasts. 
-    
-    PBModel serves as the archetype/parent class for models within the signal_models directory.
-    This class is not meant to be instantiated, but rather to be inherited by other classes.
+    """The overarching model structure for PaleoBeasts.
+
+    PBModel serves as the archetype/parent class for models within the
+    ``signal_models`` directory.  It is not meant to be instantiated directly.
 
     Parameter handling
     ------------------
-    Models may define a ``param_values`` dict that maps parameter names to either:
-    - constants (floats/ints)
-    - callables (time/state/model aware)
-    - objects with ``get_forcing`` (e.g., ``pb.core.Forcing``)
+    Models may define a ``param_values`` dict that maps parameter names to
+    constants, callables, or ``Forcing`` objects.  Use
+    ``get_param_value(name, t, state)`` inside ``dydt`` to resolve any of these
+    uniformly.
 
-    Use ``get_param(name, t, state)`` inside ``dydt`` to resolve time-varying parameters.
-    
-    '''
+    To make a parameter state- or time-dependent after construction, assign a
+    callable via ``set_param_value``::
+
+        model.set_param_value('rho', lambda t, state: 28.0 + 0.1 * state[0])
+
+    To replace a *computation method* (e.g. ``calc_albedo``) on a single
+    instance without subclassing, use ``set_function``.
+
+    External forcings
+    -----------------
+    Use ``register_forcing`` to attach a time-varying external driver to any
+    named parameter or state variable after construction::
+
+        model.register_forcing('S0', forcing_obj)                         # parameter
+        model.register_forcing('x', forcing_obj, 'additive', timing='pre')  # state
+
+    See ``register_forcing`` for the full contract and default timing rules.
+    """
 
     def __init__(self, forcing, variable_name, state_variables=None, non_integrated_state_vars=None,
                  diagnostic_variables=None):
         self.variable_name = variable_name
         self.forcing = forcing
+        self._forcings: dict = {}
 
         if state_variables is None:
             state_variables = []
@@ -76,11 +93,14 @@ class PBModel:
         A plain shallow copy would share the ``diagnostic_variables`` lists
         between the original and the copy, so appends during integration would
         corrupt both.  Resetting them here ensures a copied model starts with
-        no accumulated output from the original's run.
+        no accumulated output from the original's run.  The ``_forcings``
+        registry is copied shallowly so the copy shares the same
+        ``ForcingSpec`` objects (they are immutable).
         """
         new_obj = type(self)(self.forcing, self.variable_name)
         new_obj.__dict__.update(self.__dict__)
         new_obj.diagnostic_variables = {var: [] for var in self.diagnostic_variables}
+        new_obj._forcings = {k: list(v) for k, v in self._forcings.items()}
         return new_obj
 
     def _resolve_param(self, param, t, state):
@@ -245,7 +265,146 @@ class PBModel:
         setattr(self, name, replacement)
         return getattr(self, name)
 
+    def register_forcing(self, var_name: str, forcing_object, attachment_style: str = None,
+                         timing: str = None):
+        """Attach an external forcing to a named parameter or state variable.
 
+        Parameters
+        ----------
+        var_name : str
+            Name of the target.  Must exist in ``param_values`` (parameter
+            namespace) or ``state_variables_names`` (state namespace).  If the
+            name appears in both, a ``ValueError`` is raised — this is a model
+            design issue worth resolving explicitly.
+        forcing_object :
+            A ``Forcing`` instance, a callable ``f(t)`` → scalar/array, or any
+            object with a ``get_forcing(t)`` method.
+        attachment_style : {"replacement", "additive"}, optional
+            How the forcing value is applied.
+
+            * Parameters default to ``"replacement"`` (the only meaningful
+              operation: a parameter has no dynamics of its own).
+            * State variables have **no default** — ``attachment_style`` is
+              required.  This is intentional: injecting into a live state
+              variable is a significant physical choice that should be explicit.
+        timing : {"pre", "post"}, optional
+            When the forcing is applied relative to the integration step.
+            Derived automatically in most cases:
+
+            * parameter + replacement → ``"pre"`` (always; no override)
+            * state + replacement     → ``"post"`` (always; warns if ``"pre"`` passed)
+            * state + additive        → **required**; raise if not provided
+
+        Raises
+        ------
+        ValueError
+            If ``var_name`` is not found, if ``attachment_style`` is missing for
+            a state variable, if ``timing`` is missing for state + additive, or
+            if a second ``"replacement"`` is registered on the same variable.
+        """
+        in_params = var_name in self.param_values
+        in_state = var_name in self.state_variables_names
+
+        if in_params and in_state:
+            raise ValueError(
+                f"'{var_name}' appears in both param_values and state_variables_names. "
+                "Resolve this ambiguity in the model definition before registering a forcing."
+            )
+        if not in_params and not in_state:
+            valid = sorted(list(self.param_values.keys()) + list(self.state_variables_names))
+            raise ValueError(
+                f"'{var_name}' not found in this model's parameters or state variables. "
+                f"Valid names: {valid}"
+            )
+
+        if in_params:
+            if attachment_style is None:
+                attachment_style = "replacement"
+            if attachment_style != "replacement":
+                raise ValueError(
+                    f"Parameters only support attachment_style='replacement'; "
+                    f"got {attachment_style!r} for '{var_name}'."
+                )
+            resolved_timing = "pre"
+            if timing is not None and timing != "pre":
+                raise ValueError(
+                    f"Parameter forcings are always applied pre-step; "
+                    f"timing='{timing}' is not valid for '{var_name}'."
+                )
+
+        else:  # state variable
+            if attachment_style is None:
+                raise ValueError(
+                    f"attachment_style is required when forcing a state variable ('{var_name}'). "
+                    "Choose 'replacement' (post-step correction to x) or "
+                    "'additive' (pre- or post-step injection — specify timing)."
+                )
+            if attachment_style == "replacement":
+                if timing is not None and timing != "post":
+                    warnings.warn(
+                        f"State variable replacement is always applied post-step. "
+                        f"Ignoring timing='{timing}' for '{var_name}'.",
+                        UserWarning,
+                        stacklevel=2,
+                    )
+                resolved_timing = "post"
+            elif attachment_style == "additive":
+                if timing is None:
+                    raise ValueError(
+                        f"timing is required for additive state forcing on '{var_name}'. "
+                        "Choose 'pre' (adds to dx/dt inside the RHS) or "
+                        "'post' (adds to x after each integration step)."
+                    )
+                resolved_timing = timing
+            else:
+                raise ValueError(
+                    f"attachment_style must be 'replacement' or 'additive'; "
+                    f"got {attachment_style!r}."
+                )
+
+        # conflict check: two replacements on the same variable
+        existing = self._forcings.get(var_name, [])
+        if attachment_style == "replacement" and any(
+            s.attachment_style == "replacement" for s in existing
+        ):
+            raise ValueError(
+                f"A replacement forcing is already registered for '{var_name}'. "
+                "Remove it before registering another, or use attachment_style='additive'."
+            )
+
+        spec = ForcingSpec(
+            forcing_object=forcing_object,
+            attachment_style=attachment_style,
+            timing=resolved_timing,
+        )
+        self._forcings.setdefault(var_name, []).append(spec)
+
+    def get_forcings(self, var_name: str = None):
+        """Return registered forcings, optionally filtered by variable name.
+
+        Parameters
+        ----------
+        var_name : str, optional
+            If given, return the list of ``ForcingSpec`` objects for that
+            variable.  If omitted, return the full ``_forcings`` dict.
+        """
+        if var_name is None:
+            return dict(self._forcings)
+        return list(self._forcings.get(var_name, []))
+
+    def clear_forcings(self, var_name: str = None):
+        """Remove registered forcings.
+
+        Parameters
+        ----------
+        var_name : str, optional
+            If given, clear only the forcings for that variable.
+            If omitted, clear all forcings on the model.
+        """
+        if var_name is None:
+            self._forcings.clear()
+        else:
+            self._forcings.pop(var_name, None)
 
     def dydt(self, t, y):
         """Define the system of differential equations.
