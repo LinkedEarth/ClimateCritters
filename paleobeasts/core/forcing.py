@@ -525,6 +525,72 @@ class Forcing:
         return self.forcing_func(t)
 
 
+_VALID_ATTACHMENT_STYLES = {"replacement", "additive"}
+_VALID_TIMINGS = {"pre", "post"}
+
+
+@dataclass
+class ForcingSpec:
+    """Registration record for a single forcing attachment on a model variable.
+
+    Created internally by ``PBModel.set_forcing``; users do not construct this
+    directly.  All fields are validated at construction time.
+
+    Parameters
+    ----------
+    forcing_object :
+        A ``Forcing`` instance, a callable ``f(t)`` → scalar/array, or any
+        object with a ``get_forcing(t)`` method.
+    attachment_style : {"replacement", "additive"}
+        How the forcing value is applied to the target variable.
+        ``"replacement"`` substitutes the current parameter or state value.
+        ``"additive"`` adds the forcing value to the existing value or to
+        ``dx/dt`` for state variables.
+    timing : {"pre", "post"}
+        When the forcing is applied relative to the integration step.
+        ``"pre"`` — applied inside the RHS before the integrator advances.
+        ``"post"`` — applied as a correction after the integrator step.
+
+    Notes
+    -----
+    Derivation rules (enforced by ``set_forcing``, not here):
+
+    * parameter + replacement  →  timing always ``"pre"``
+    * state + replacement      →  timing always ``"post"``
+    * state + additive         →  timing required from caller
+    """
+
+    forcing_object: object
+    attachment_style: str
+    timing: str
+
+    def __post_init__(self):
+        if self.attachment_style not in _VALID_ATTACHMENT_STYLES:
+            valid = ", ".join(sorted(_VALID_ATTACHMENT_STYLES))
+            raise ValueError(
+                f"attachment_style must be one of {{{valid}}}; "
+                f"got {self.attachment_style!r}."
+            )
+        if self.timing not in _VALID_TIMINGS:
+            valid = ", ".join(sorted(_VALID_TIMINGS))
+            raise ValueError(
+                f"timing must be one of {{{valid}}}; got {self.timing!r}."
+            )
+        if not (
+            callable(self.forcing_object)
+            or hasattr(self.forcing_object, "get_forcing")
+        ):
+            raise TypeError(
+                "forcing_object must be callable or have a get_forcing method."
+            )
+
+    def evaluate(self, t):
+        """Return the forcing value at time ``t``."""
+        if hasattr(self.forcing_object, "get_forcing"):
+            return self.forcing_object.get_forcing(t)
+        return self.forcing_object(t)
+
+
 __all__ = [
     "ResolvedSegment",
     "ForcingElement",
@@ -533,4 +599,5 @@ __all__ = [
     "Harmonic",
     "ForcingSequence",
     "Forcing",
+    "ForcingSpec",
 ]

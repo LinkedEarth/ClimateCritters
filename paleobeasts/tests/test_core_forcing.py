@@ -103,6 +103,60 @@ class TestForcingSequence:
             pb.Ramp(duration=1.0, y0=0.0, yf=1.0, shape="sigmoid")
 
 
+class TestForcingSpec:
+    def _make(self, **kwargs):
+        defaults = dict(
+            forcing_object=pb.Forcing(lambda t: 1.0),
+            attachment_style="replacement",
+            timing="pre",
+        )
+        defaults.update(kwargs)
+        from paleobeasts.core.forcing import ForcingSpec
+        return ForcingSpec(**defaults)
+
+    def test_valid_replacement_pre_t0(self):
+        spec = self._make(attachment_style="replacement", timing="pre")
+        assert spec.attachment_style == "replacement"
+        assert spec.timing == "pre"
+
+    def test_valid_additive_post_t1(self):
+        spec = self._make(attachment_style="additive", timing="post")
+        assert spec.timing == "post"
+
+    def test_invalid_attachment_style_raises_t2(self):
+        with pytest.raises(ValueError, match="attachment_style"):
+            self._make(attachment_style="multiply")
+
+    def test_invalid_timing_raises_t3(self):
+        with pytest.raises(ValueError, match="timing"):
+            self._make(timing="during")
+
+    def test_non_callable_forcing_object_raises_t4(self):
+        with pytest.raises(TypeError, match="forcing_object"):
+            self._make(forcing_object=42)
+
+    def test_evaluate_callable_t5(self):
+        from paleobeasts.core.forcing import ForcingSpec
+        spec = ForcingSpec(forcing_object=lambda t: t * 2.0, attachment_style="replacement", timing="pre")
+        assert np.isclose(spec.evaluate(3.0), 6.0)
+
+    def test_evaluate_forcing_object_t6(self):
+        from paleobeasts.core.forcing import ForcingSpec
+        spec = ForcingSpec(forcing_object=pb.Forcing(lambda t: t + 1.0), attachment_style="additive", timing="post")
+        assert np.isclose(spec.evaluate(4.0), 5.0)
+
+    def test_object_with_get_forcing_method_accepted_t7(self):
+        """Any object with get_forcing is valid, not just pb.Forcing."""
+        from paleobeasts.core.forcing import ForcingSpec
+
+        class CustomForcing:
+            def get_forcing(self, t):
+                return 99.0
+
+        spec = ForcingSpec(forcing_object=CustomForcing(), attachment_style="replacement", timing="pre")
+        assert np.isclose(spec.evaluate(0.0), 99.0)
+
+
 class TestForcingModelIntegration:
     def test_stommel_sequence_forcing_t0(self):
         forcing = pb.Forcing.from_sequence(
