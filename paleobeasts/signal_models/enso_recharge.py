@@ -5,6 +5,39 @@ import numpy as np
 from paleobeasts.core.pbmodel import PBModel
 
 
+def seasonal_forcing(t, Af=0.5, Pf=6.0):
+    """Standard sinusoidal seasonal forcing for the ENSO recharge oscillator.
+
+    Returns the seasonal SST forcing term ``Af * sin(2π t / Pf)``, which can
+    be wrapped in a ``Forcing`` object and registered on the model::
+
+        import paleobeasts as pb
+        from paleobeasts.signal_models.enso_recharge import (
+            ENSORechargeOscillator, seasonal_forcing)
+        from functools import partial
+
+        model = ENSORechargeOscillator()
+        sf = partial(seasonal_forcing, Af=0.5, Pf=6.0)
+        model.register_forcing('T', pb.core.Forcing(sf),
+                               attachment_style='additive', timing='pre')
+
+    Parameters
+    ----------
+    t : float
+        Time (model units, e.g. months).
+    Af : float
+        Seasonal forcing amplitude.  Default 0.5.
+    Pf : float
+        Seasonal forcing period (same units as ``t``).  Default 6.0.
+
+    Returns
+    -------
+    float
+        Seasonal forcing value at time ``t``.
+    """
+    return Af * np.sin(2.0 * np.pi * t / Pf)
+
+
 class ENSORechargeOscillator(PBModel):
     """Jin-style ENSO recharge oscillator.
 
@@ -16,12 +49,20 @@ class ENSORechargeOscillator(PBModel):
 
     where ``b = b0*mu`` and ``R = gamma*b - c``.
 
+    By default ``Af=0`` so the model runs without any seasonal forcing.
+    To add the standard seasonal cycle, register it externally::
+
+        from functools import partial
+        sf = partial(seasonal_forcing, Af=0.5, Pf=6.0)
+        model.register_forcing('T', pb.core.Forcing(sf),
+                               attachment_style='additive', timing='pre')
+
+    Alternatively, set ``Af`` to a non-zero value to drive seasonal forcing
+    internally through the ``_sst_forcing`` helper without registering an
+    external forcing.
+
     Parameters
     ----------
-    forcing : pb.core.Forcing or None
-        External forcing used in ``dT/dt``. If provided it replaces the
-        internal seasonal term ``Af*sin(2*pi*t/Pf)`` entirely. Default
-        ``None``.
     var_name : str
         Label for the model output.  Default ``'enso_recharge_oscillator'``.
     mu : float or callable or pb.core.Forcing
@@ -29,11 +70,9 @@ class ENSORechargeOscillator(PBModel):
     en : float or callable or pb.core.Forcing
         Nonlinear damping coefficient.  Default 0.0 (linear limit).
     Af : float or callable or pb.core.Forcing
-        Seasonal forcing amplitude used only when ``forcing`` is ``None``.
-        Default 0.0.
+        Internal seasonal forcing amplitude.  Default 0.0 (no seasonal forcing).
     Pf : float or callable or pb.core.Forcing
-        Seasonal forcing period (model time units), used only when
-        ``forcing`` is ``None``. Default 6.0.
+        Internal seasonal forcing period (model time units).  Default 6.0.
     c : float or callable or pb.core.Forcing
         Newtonian cooling rate of SST.  Default 1.0.
     r : float or callable or pb.core.Forcing
@@ -51,8 +90,8 @@ class ENSORechargeOscillator(PBModel):
     this is baked in but does not affect ``t`` directly as the equations are
     already in the dimensionless form used in the worksheet.
 
-    State variables are ``T`` and ``h`` in that order. ``Pf`` must be
-    non-zero when the internal seasonal forcing is used (raises
+    State vector: ``[T, h]`` — eastern Pacific SST anomaly and thermocline
+    depth anomaly.  ``Pf`` must be non-zero when ``Af != 0`` (raises
     ``ValueError`` otherwise).
 
     References
@@ -66,7 +105,7 @@ class ENSORechargeOscillator(PBModel):
     import matplotlib.pyplot as plt
     from paleobeasts.signal_models.enso_recharge import ENSORechargeOscillator
 
-    model = ENSORechargeOscillator(forcing=None, mu=0.75, Af=0.5, Pf=6.0)
+    model = ENSORechargeOscillator(mu=0.75, Af=0.5, Pf=6.0)
     output = model.integrate(
         t_span=(0, 120), y0=[0.5, 0.0], method='RK45'
     )
@@ -79,7 +118,6 @@ class ENSORechargeOscillator(PBModel):
 
     def __init__(
         self,
-        forcing=None,
         var_name="enso_recharge_oscillator",
         mu=0.7,
         en=0.0,
@@ -101,7 +139,6 @@ class ENSORechargeOscillator(PBModel):
             diagnostic_variables = []
 
         super().__init__(
-            forcing,
             var_name,
             state_variables=state_variables,
             diagnostic_variables=diagnostic_variables,
@@ -137,11 +174,12 @@ class ENSORechargeOscillator(PBModel):
 
     def _sst_forcing(self, t, state):
         Af = float(self.get_param_value("Af", t, state))
+        if Af == 0.0:
+            return 0.0
         Pf = float(self.get_param_value("Pf", t, state))
         if Pf == 0.0:
-            raise ValueError("Pf must be non-zero.")
-        seasonal = Af * np.sin(2.0 * np.pi * t / Pf)
-        return float(self.resolve_forcing(t, default=seasonal))
+            raise ValueError("Pf must be non-zero when Af != 0.")
+        return float(Af * np.sin(2.0 * np.pi * t / Pf))
 
     def recharge_components(self, t, state):
         T, h = [float(v) for v in np.asarray(state, dtype=float).reshape(-1)]

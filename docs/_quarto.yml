@@ -4,14 +4,8 @@ project:
   resources:
     - notebooks
     - scripts
-  # render:
-  #   - index.qmd
-  #   - get-started/*.qmd
-  #   - tutorials/*.qmd
-  #   - api/*.qmd
-  #   - notebooks/model_demos/*.ipynb
-  #   - notebooks/functionality_demos/*.ipynb
   pre-render:
+    - python scripts/sync_notebooks.py
     - python scripts/inject_doc_figures.py
 
 metadata-files:

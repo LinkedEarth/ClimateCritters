@@ -19,9 +19,6 @@ class Lorenz96(PBModel):
 
     Parameters
     ----------
-    forcing : pb.core.Forcing or None
-        Optional forcing object providing F(t).  If ``None``, the constant
-        ``F`` parameter is used as the slow-scale forcing.
     var_name : str
         Label for the model output.  Default ``'lorenz96'``.
     n : int
@@ -30,7 +27,8 @@ class Lorenz96(PBModel):
         Fast variables per slow variable.  ``J=0`` (default) gives the
         single-scale system; ``J>0`` activates the two-scale system.
     F : float or callable or pb.core.Forcing
-        Slow-scale forcing amplitude.  Default 8.0.
+        Slow-scale forcing amplitude.  Default 8.0.  Pass a time-varying
+        signal via ``model.register_forcing('F', forcing_obj)``.
     h : float
         Coupling coefficient between X and Y layers (two-scale only).
         Default 1.0.
@@ -69,14 +67,14 @@ class Lorenz96(PBModel):
     from paleobeasts.signal_models.lorenz import Lorenz96
 
     # Single-scale system
-    model = Lorenz96(forcing=None, n=40, F=8.0)
+    model = Lorenz96(n=40, F=8.0)
     y0 = np.random.randn(40) + 8.0
     output = model.integrate(t_span=(0, 10), y0=y0, method='rk4', dt=0.01)
     ts = output.to_pyleo(var_names=['x0'])
 
     # Two-scale system
     K, J = 36, 10
-    model2 = Lorenz96(forcing=None, n=K, J=J, F=10.0)
+    model2 = Lorenz96(n=K, J=J, F=10.0)
     y0_2 = np.concatenate([np.random.randn(K) + 10.0,
                             np.random.randn(K * J) * 0.01])
     output2 = model2.integrate(t_span=(0, 10), y0=y0_2,
@@ -89,7 +87,7 @@ class Lorenz96(PBModel):
     ```
     """
 
-    def __init__(self, forcing=None, var_name='lorenz96', n=40, J=0,
+    def __init__(self, var_name='lorenz96', n=40, J=0,
                  F=8.0, h=1.0, b=10.0, c=10.0, exact_rhs=False,
                  state_variables=None, diagnostic_variables=None,
                  *args, **kwargs):
@@ -100,7 +98,7 @@ class Lorenz96(PBModel):
         if diagnostic_variables is None:
             diagnostic_variables = []
 
-        super().__init__(forcing, var_name, state_variables=state_variables,
+        super().__init__(var_name, state_variables=state_variables,
                          diagnostic_variables=diagnostic_variables,
                          *args, **kwargs)
 
@@ -115,7 +113,7 @@ class Lorenz96(PBModel):
         self.params = ()
 
     def _forcing_value(self, t, x):
-        return self.resolve_forcing(t, default=self.get_param_value('F', t, x))
+        return self.get_param_value('F', t, x)
 
     def dydt(self, t, x):
         x = np.asarray(x, dtype=float)
@@ -190,11 +188,6 @@ class Lorenz63(PBModel):
 
     Parameters
     ----------
-    forcing : pb.core.Forcing or None
-        External forcing, which must be provided explicitly but may be
-        ``None``. If the forcing value ``f(t)`` is scalar it is added to
-        ``dx/dt``; if it is array-like with 3 entries it is added to
-        ``(dx/dt, dy/dt, dz/dt)``.
     var_name : str
         Label for the model output.  Default ``'lorenz63'``.
     sigma : float or callable or pb.core.Forcing
@@ -224,7 +217,7 @@ class Lorenz63(PBModel):
     import paleobeasts as pb
     from paleobeasts.signal_models.lorenz import Lorenz63
 
-    model = Lorenz63(forcing=pb.core.Forcing(lambda t: 0.0))
+    model = Lorenz63()
     output = model.integrate(
         t_span=(0, 100), y0=[-8.0, 8.0, 27.0], method='RK45'
     )
@@ -237,14 +230,14 @@ class Lorenz63(PBModel):
     ```
     """
 
-    def __init__(self, forcing=None, var_name='lorenz63', sigma=10.0, rho=28.0, beta=8 / 3,
+    def __init__(self, var_name='lorenz63', sigma=10.0, rho=28.0, beta=8 / 3,
                  state_variables=None, diagnostic_variables=None, *args, **kwargs):
         if state_variables is None:
             state_variables = ['x', 'y', 'z']
         if diagnostic_variables is None:
             diagnostic_variables = []
 
-        super().__init__(forcing, var_name, state_variables=state_variables,
+        super().__init__(var_name, state_variables=state_variables,
                          diagnostic_variables=diagnostic_variables, *args, **kwargs)
 
         self.sigma = sigma
@@ -257,28 +250,15 @@ class Lorenz63(PBModel):
         }
         self.params = ()
 
-    def _forcing_vector(self, t):
-        f_val = self.resolve_forcing(t)
-
-        if np.isscalar(f_val):
-            return np.array([f_val, 0.0, 0.0])
-
-        f_arr = np.asarray(f_val, dtype=float)
-        if f_arr.size != 3:
-            raise ValueError("Forcing must be a scalar or an array-like with 3 entries.")
-
-        return f_arr.reshape(3,)
-
     def dydt(self, t, x):
         x_val, y_val, z_val = x[0], x[1], x[2]
         sigma = self.get_param_value('sigma', t, x)
         rho = self.get_param_value('rho', t, x)
         beta = self.get_param_value('beta', t, x)
-        f_vec = self._forcing_vector(t)
 
-        dxdt = sigma * (y_val - x_val) + f_vec[0]
-        dydt = x_val * (rho - z_val) - y_val + f_vec[1]
-        dzdt = x_val * y_val - beta * z_val + f_vec[2]
+        dxdt = sigma * (y_val - x_val)
+        dydt = x_val * (rho - z_val) - y_val
+        dzdt = x_val * y_val - beta * z_val
 
         new_row = np.array([(x_val, y_val, z_val)], dtype=self.dtypes)
         self.state_variables = np.concatenate([self.state_variables, new_row], axis=0)

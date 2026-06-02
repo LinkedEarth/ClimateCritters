@@ -18,10 +18,6 @@ class TwoBoxCarbon(PBModel):
 
     Parameters
     ----------
-    forcing : pb.core.Forcing or None
-        Optional prescribed carbon source flux ``R(t)`` (same units as
-        ``R``).  If provided it overrides the constant ``R`` parameter.
-        Default ``None``.
     var_name : str
         Label for the model output.  Default ``'two_box_carbon'``.
     k : float or callable or pb.core.Forcing
@@ -29,7 +25,8 @@ class TwoBoxCarbon(PBModel):
         Default 0.2.
     R : float or callable or pb.core.Forcing
         Constant carbon source flux into the atmosphere (mass per time).
-        Default 0.0.
+        Default 0.0.  Register a time-varying source via
+        ``model.register_forcing('R', forcing_obj)``.
     l_s : float or callable or pb.core.Forcing
         First-order atmospheric loss coefficient.  Default 0.0.
     V_atm : float or callable or pb.core.Forcing
@@ -52,7 +49,7 @@ class TwoBoxCarbon(PBModel):
     from paleobeasts.signal_models.two_box_carbon import TwoBoxCarbon
     import matplotlib.pyplot as plt
 
-    model = TwoBoxCarbon(forcing=None, k=0.1, V_atm=1.0, V_surf=50.0)
+    model = TwoBoxCarbon(k=0.1, V_atm=1.0, V_surf=50.0)
     output = model.integrate(
         t_span=(0, 200), y0=[800.0, 38000.0], method='RK45'
     )
@@ -65,7 +62,6 @@ class TwoBoxCarbon(PBModel):
 
     def __init__(
         self,
-        forcing=None,
         var_name="two_box_carbon",
         k=0.2,
         R=0.0,
@@ -83,7 +79,6 @@ class TwoBoxCarbon(PBModel):
             diagnostic_variables = ["net_flux"]
 
         super().__init__(
-            forcing,
             var_name,
             state_variables=state_variables,
             diagnostic_variables=diagnostic_variables,
@@ -109,8 +104,6 @@ class TwoBoxCarbon(PBModel):
         return True
 
     def source_flux(self, t, state):
-        if self.forcing is not None:
-            return float(self.forcing.get_forcing(self.time_util(t)))
         return float(self.get_param_value("R", t, state))
 
     def tendencies(self, t, state):

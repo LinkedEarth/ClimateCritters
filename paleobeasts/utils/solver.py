@@ -1,8 +1,9 @@
 """Numerical integrators and solver support utilities.
 
-Provides fixed-step (RK4, Euler, Euler-Maruyama) integrators that return a
-:class:`Solution` object, plus internal helpers used by :class:`~paleobeasts.core.PBModel`
-for state validation and history reconstruction.
+Provides fixed-step (RK4, Euler, Euler-Maruyama, Heun-Maruyama, Milstein)
+integrators that return a :class:`Solution` object, plus internal helpers
+used by :class:`~paleobeasts.core.PBModel` for state validation and history
+reconstruction.
 """
 
 import numpy as np
@@ -207,7 +208,7 @@ def build_state_from_history(time, history, state_variables_names):
     return history
 
 
-def rk4_method(f, t_span, y0, dt, si=None, args=()):
+def rk4_method(f, t_span, y0, dt, si=None, args=(), post_step=None):
     """Fixed-step 4th-order Runge-Kutta integrator.
 
     Parameters
@@ -226,6 +227,10 @@ def rk4_method(f, t_span, y0, dt, si=None, args=()):
         (every step is saved).
     args : tuple
         Extra positional arguments forwarded to ``f``.
+    post_step : callable or None
+        Optional hook called after each accepted sub-step with signature
+        ``post_step(t, y) -> y``.  The returned array replaces the current
+        state, allowing post-step corrections (e.g. state nudging).
 
     Returns
     -------
@@ -272,13 +277,15 @@ def rk4_method(f, t_span, y0, dt, si=None, args=()):
             k3 = np.asarray(f(t_curr + 0.5 * dt, y + 0.5 * dt * k2, *args), dtype=float)
             k4 = np.asarray(f(t_curr + dt, y + dt * k3, *args), dtype=float)
             y = y + (dt / 6.0) * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
+            if post_step is not None:
+                y = np.asarray(post_step(t_curr + dt, y), dtype=float)
         history[step + 1] = y
         times[step + 1] = t0 + (step + 1) * si
 
     return Solution(times, history)
 
 
-def euler_method(f, t_span, y0, dt, args=()):
+def euler_method(f, t_span, y0, dt, args=(), post_step=None):
     """Fixed-step forward Euler integrator.
 
     Parameters
@@ -293,6 +300,10 @@ def euler_method(f, t_span, y0, dt, args=()):
         Fixed timestep.
     args : tuple
         Extra positional arguments forwarded to ``f``.
+    post_step : callable or None
+        Optional hook called after each accepted step with signature
+        ``post_step(t, y) -> y``.  The returned array replaces the current
+        state, allowing post-step corrections (e.g. state nudging).
 
     Returns
     -------
@@ -312,11 +323,13 @@ def euler_method(f, t_span, y0, dt, args=()):
     for i in range(1, n_steps):
         dy = f(t[i - 1], y[i - 1], *args)
         y[i] = y[i - 1] + np.multiply(dy, dt)
+        if post_step is not None:
+            y[i] = np.asarray(post_step(t[i], y[i]), dtype=float)
 
     return Solution(t, y)
 
 
-def euler_maruyama_method(f, t_span, y0, dt, noise_func=None, rng=None, args=()):
+def euler_maruyama_method(f, t_span, y0, dt, noise_func=None, rng=None, args=(), post_step=None):
     """Fixed-step Euler-Maruyama integrator for stochastic differential equations.
 
     Solves:
@@ -344,6 +357,10 @@ def euler_maruyama_method(f, t_span, y0, dt, noise_func=None, rng=None, args=())
         created if ``None``.
     args : tuple
         Extra positional arguments forwarded to ``f``.
+    post_step : callable or None
+        Optional hook called after each accepted step with signature
+        ``post_step(t, y) -> y``.  The returned array replaces the current
+        state, allowing post-step corrections (e.g. state nudging).
 
     Returns
     -------
@@ -381,5 +398,217 @@ def euler_maruyama_method(f, t_span, y0, dt, noise_func=None, rng=None, args=())
 
         dW = rng.normal(0.0, 1.0, size=len(y_prev)) * sqrt_dt
         y[i] = y_prev + dy * dt + diffusion * dW
+        if post_step is not None:
+            y[i] = np.asarray(post_step(t[i], y[i]), dtype=float)
+
+    return Solution(t, y)
+
+
+def heun_maruyama_method(f, t_span, y0, dt, noise_func=None, rng=None, args=()):
+    """Fixed-step Heun-Maruyama integrator for stochastic differential equations.
+
+    A predictor-corrector scheme that achieves strong order 1.0 for SDEs with
+    additive noise (diffusion independent of state) and weak order 2.0.  This
+    is a meaningful improvement over :func:`euler_maruyama_method` (strong
+    order 0.5) when transition timing is the quantity of interest, as in
+    bistable climate models.
+
+    Solves:
+
+        dy = f(t, y) dt + g(t, y) dW
+
+    using the two-stage Heun scheme::
+
+        ỹ  = y  + f(t, y) dt + g(t, y) dW          (Euler predictor)
+        y' = y  + ½[f(t, y) + f(t+dt, ỹ)] dt
+                + ½[g(t, y) + g(t+dt, ỹ)] dW       (Heun corrector)
+
+    A single Wiener increment ``dW`` is shared between predictor and corrector
+    steps, which is the standard approach for strong convergence.
+
+    Parameters
+    ----------
+    f : callable
+        Drift function with signature ``f(t, y, *args)``.
+    t_span : tuple of float
+        ``(t0, tf)`` integration bounds.
+    y0 : array-like
+        Initial state vector.
+    dt : float
+        Fixed timestep.
+    noise_func : callable or None
+        Diffusion function with signature ``noise_func(t, y)``, returning a
+        vector of per-state diffusion scales.  If ``None``, the stochastic
+        term is zero and the Heun deterministic ODE solver is recovered.
+    rng : numpy.random.Generator or None
+        Random generator for Wiener increments.  A fresh generator is
+        created if ``None``.
+    args : tuple
+        Extra positional arguments forwarded to ``f``.
+
+    Returns
+    -------
+    solution : Solution
+        Object with attributes ``t`` (time axis) and ``y`` (state trajectory).
+
+    Raises
+    ------
+    ValueError
+        If ``noise_func`` returns a vector whose shape does not match the
+        state vector.
+
+    Notes
+    -----
+    For purely additive noise (``g`` constant or state-independent) this
+    scheme achieves strong order 1.0.  For multiplicative noise (``g``
+    depends on ``y``) strong order drops back toward 0.5 but weak order 2.0
+    is retained, still outperforming Euler-Maruyama in distribution-level
+    statistics.  See Rößler (2010) for a full convergence analysis.
+    """
+    n_steps = int((t_span[1] - t_span[0]) / dt) + 1
+    t = np.linspace(t_span[0], t_span[1], n_steps)
+    y = np.zeros((n_steps, len(y0)))
+    y[0] = y0
+
+    if rng is None:
+        rng = np.random.default_rng()
+
+    sqrt_dt = np.sqrt(dt)
+
+    for i in range(1, n_steps):
+        t_curr, y_curr = t[i - 1], y[i - 1]
+        t_next = t_curr + dt
+
+        f0 = np.asarray(f(t_curr, y_curr, *args), dtype=float)
+
+        if noise_func is None:
+            g0 = np.zeros_like(y_curr, dtype=float)
+        else:
+            g0 = np.asarray(noise_func(t_curr, y_curr), dtype=float)
+            if g0.shape != y_curr.shape:
+                raise ValueError(
+                    "noise_func must return a diffusion vector with the same shape as the state."
+                )
+
+        dW = rng.normal(0.0, 1.0, size=len(y_curr)) * sqrt_dt
+
+        # Euler predictor
+        y_pred = y_curr + f0 * dt + g0 * dW
+
+        # Evaluate drift and diffusion at predicted state
+        f1 = np.asarray(f(t_next, y_pred, *args), dtype=float)
+
+        if noise_func is None:
+            g1 = np.zeros_like(y_curr, dtype=float)
+        else:
+            g1 = np.asarray(noise_func(t_next, y_pred), dtype=float)
+
+        # Heun corrector
+        y[i] = y_curr + 0.5 * (f0 + f1) * dt + 0.5 * (g0 + g1) * dW
+
+    return Solution(t, y)
+
+
+def milstein_method(f, t_span, y0, dt, noise_func=None, rng=None, args=()):
+    """Fixed-step Milstein integrator for stochastic differential equations.
+
+    Achieves strong order 1.0 for both additive *and* multiplicative noise
+    (diagonal diffusion), making it the right choice when ``sde_noise``
+    depends on the state.  For additive noise it reduces to Euler-Maruyama
+    plus a zero correction; prefer :func:`heun_maruyama_method` in that case
+    as it also improves the drift approximation.
+
+    Solves:
+
+        dy = f(t, y) dt + g(t, y) dW
+
+    using the Milstein correction::
+
+        y' = y + f dt + g dW + ½ g (∂g/∂y)(dW² - dt)
+
+    The derivative ``∂g/∂y`` is approximated element-wise by a forward
+    finite difference with step ``h = √ε · max(1, |y|)``, so no analytical
+    Jacobian is required from the model author.
+
+    Parameters
+    ----------
+    f : callable
+        Drift function with signature ``f(t, y, *args)``.
+    t_span : tuple of float
+        ``(t0, tf)`` integration bounds.
+    y0 : array-like
+        Initial state vector.
+    dt : float
+        Fixed timestep.
+    noise_func : callable or None
+        Diffusion function with signature ``noise_func(t, y)``, returning a
+        vector of per-state diffusion scales.  If ``None``, the stochastic
+        term is zero and forward Euler is recovered.
+    rng : numpy.random.Generator or None
+        Random generator for Wiener increments.  A fresh generator is
+        created if ``None``.
+    args : tuple
+        Extra positional arguments forwarded to ``f``.
+
+    Returns
+    -------
+    solution : Solution
+        Object with attributes ``t`` (time axis) and ``y`` (state trajectory).
+
+    Raises
+    ------
+    ValueError
+        If ``noise_func`` returns a vector whose shape does not match the
+        state vector.
+
+    Notes
+    -----
+    The finite-difference step uses ``h = √(machine_eps) · max(1, |yᵢ|)``
+    per component, which balances truncation and floating-point cancellation
+    errors.  For SDEs where an exact ``∂g/∂y`` is available, accuracy can be
+    improved by subclassing and overriding the correction directly, but the
+    finite-difference approximation is adequate for all current PaleoBeasts
+    use cases.
+    """
+    n_steps = int((t_span[1] - t_span[0]) / dt) + 1
+    t = np.linspace(t_span[0], t_span[1], n_steps)
+    y = np.zeros((n_steps, len(y0)))
+    y[0] = y0
+
+    if rng is None:
+        rng = np.random.default_rng()
+
+    sqrt_dt = np.sqrt(dt)
+    _fd_eps = np.sqrt(np.finfo(float).eps)   # ~1.5e-8; finite-difference base step
+
+    for i in range(1, n_steps):
+        t_curr, y_curr = t[i - 1], y[i - 1]
+
+        f0 = np.asarray(f(t_curr, y_curr, *args), dtype=float)
+        dW = rng.normal(0.0, 1.0, size=len(y_curr)) * sqrt_dt
+
+        if noise_func is None:
+            y[i] = y_curr + f0 * dt
+            continue
+
+        g0 = np.asarray(noise_func(t_curr, y_curr), dtype=float)
+        if g0.shape != y_curr.shape:
+            raise ValueError(
+                "noise_func must return a diffusion vector with the same shape as the state."
+            )
+
+        # Element-wise finite-difference approximation of ∂g/∂y (diagonal only)
+        h = _fd_eps * np.maximum(1.0, np.abs(y_curr))
+        dgdy = np.zeros_like(y_curr)
+        for j in range(len(y_curr)):
+            y_pert = y_curr.copy()
+            y_pert[j] += h[j]
+            g_pert = np.asarray(noise_func(t_curr, y_pert), dtype=float)
+            dgdy[j] = (g_pert[j] - g0[j]) / h[j]
+
+        # Milstein correction: ½ g (∂g/∂y)(dW² - dt)
+        milstein_correction = 0.5 * g0 * dgdy * (dW ** 2 - dt)
+
+        y[i] = y_curr + f0 * dt + g0 * dW + milstein_correction
 
     return Solution(t, y)
