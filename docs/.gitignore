@@ -6,5 +6,6 @@ _sidebar.yml
 objects.json
 site_libs/
 _objects_*.json
+notebooks/
 
 **/*.quarto_ipynb
