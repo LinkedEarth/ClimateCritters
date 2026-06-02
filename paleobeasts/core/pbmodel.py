@@ -4,7 +4,8 @@ import warnings
 from types import MethodType
 import numpy as np
 
-from ..utils.solver import (euler_method, euler_maruyama_method, rk4_method, Solution,
+from ..utils.solver import (euler_method, euler_maruyama_method, heun_maruyama_method,
+                            rk4_method, Solution,
                             validate_initial_state as _validate_initial_state,
                             build_state_from_history as _build_state_from_history)
 from .pboutput import PBOutput
@@ -271,7 +272,11 @@ class PBModel:
             state variables.
         method : str
             Solver to use: ``'RK45'`` (default), ``'euler'``, ``'euler_maruyama'``,
-            ``'rk4'``, or any method accepted by ``scipy.integrate.solve_ivp``.
+            ``'heun_maruyama'``, ``'rk4'``, or any method accepted by
+            ``scipy.integrate.solve_ivp``.  Prefer ``'heun_maruyama'`` over
+            ``'euler_maruyama'`` for bistable or transition-sensitive SDEs —
+            it achieves strong order 1.0 (vs 0.5) for additive noise at the
+            same cost per step.
         dt : float, optional
             Fixed timestep for ``euler``, ``euler_maruyama``, and ``rk4``.
             Required for those methods.
@@ -306,7 +311,7 @@ class PBModel:
             kwargs.pop('dt', None)  # drop if accidentally supplied in both places
 
         # --- validate dt for fixed-step methods ---
-        if method in ('euler', 'euler_maruyama', 'rk4'):
+        if method in ('euler', 'euler_maruyama', 'heun_maruyama', 'rk4'):
             if dt is None:
                 raise ValueError(f"method='{method}' requires a timestep; pass dt=<value>.")
             dt = float(dt)
@@ -344,6 +349,17 @@ class PBModel:
             if not callable(noise_func):
                 noise_func = lambda _t, x: np.zeros_like(np.asarray(x, dtype=float))
             solution = euler_maruyama_method(
+                self.dydt, t_span, y0_integrated, dt,
+                noise_func=noise_func, rng=self.rng, args=self.params,
+            )
+
+        elif method == 'heun_maruyama':
+            seed = kwargs.pop('random_seed', None)
+            self.rng = np.random.default_rng(seed) if seed is not None else np.random.default_rng()
+            noise_func = getattr(self, 'sde_noise', None)
+            if not callable(noise_func):
+                noise_func = lambda _t, x: np.zeros_like(np.asarray(x, dtype=float))
+            solution = heun_maruyama_method(
                 self.dydt, t_span, y0_integrated, dt,
                 noise_func=noise_func, rng=self.rng, args=self.params,
             )
