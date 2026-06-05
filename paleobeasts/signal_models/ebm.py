@@ -305,7 +305,7 @@ class EBM0D(EBMBase):
         self.diagnostic_variables['OLR'].append(OLR)
         self.diagnostic_variables['solar_incoming'].append(f_solar_incoming)
 
-        if t > 0:
+        if t > self.t_span[0]:
             self.time.append(t)
 
         return [dTdt]
@@ -384,7 +384,7 @@ class EBM1DLat(EBMBase):
     grid_n = 50
     model = EBM1DLat(S0=1365.0, grid_n=grid_n)
     output = model.integrate(
-        t_span=(0, 200), y0=np.full(grid_n, 15.0), method='rk4', dt=1.0
+        t_span=(0, 200), y0=np.full(grid_n, 15.0), method='RK45'
     )
     # Plot the equilibrium latitude–temperature profile
     T_final = [output.state_variables[f'T_{i}'][-1] for i in range(grid_n)]
@@ -406,7 +406,7 @@ class EBM1DLat(EBMBase):
         pb.core.Ramp(duration=100, y0=0.0, yf=4.0, shape='linear'),
     ])
     model = EBM1DLat(CO2_forcing=co2_ramp)
-    output = model.integrate(t_span=(0, 200), y0=[15.0], method='rk4', dt=1.0)
+    output = model.integrate(t_span=(0, 200), y0=[15.0], method='RK45')
     ```
 
     """
@@ -630,6 +630,14 @@ class EBM1DLat(EBMBase):
             order = np.argsort(phi_side)
             phi_side = phi_side[order]
             temp_side = temp_side[order]
+
+            # Guard against NaN values (e.g. from unstable integrations)
+            valid = np.isfinite(temp_side)
+            if not np.any(valid):
+                hemi_edges.append(90.0)
+                continue
+            phi_side  = phi_side[valid]
+            temp_side = temp_side[valid]
 
             if np.all(temp_side > threshold):
                 hemi_edges.append(90.0)
