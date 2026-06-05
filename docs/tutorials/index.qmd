@@ -7,14 +7,22 @@ The tutorials below are executable Jupyter notebooks demonstrating PaleoBeasts
 models and utilities. Each notebook can be run locally after
 [installing the package](../get-started/installation.qmd).
 
+## Getting started
+
+| Notebook | What it shows |
+|---|---|
+| [PBModel basics](../../notebooks/base_classes/pbmodel_basics.ipynb) | Base class interface: construction, `param_values`, integration, `PBOutput`, callable parameters, `register_forcing`, `set_function`, copying, `to_pyleo` |
+| [Forcing](../../notebooks/base_classes/forcing.ipynb) | All four `Forcing` construction patterns; `Hold`, `Ramp`, `Harmonic` elements; bundled datasets; `register_forcing` options |
+
 ## Model demos
+
+These notebooks each cover a single model: setup, parameters, forcing, and output.
 
 | Notebook | Model | What it shows |
 |---|---|---|
-| [Lorenz 63](../../notebooks/model_demos/lorenz63.ipynb) | `Lorenz63` | Chaotic attractor, sensitivity to initial conditions, strange attractor visualization |
-| [Lorenz 96](../../notebooks/model_demos/lorenz96.ipynb) | `Lorenz96` | Single-scale and two-scale atmospheric emulator, multi-variable output |
-| [EBM](../../notebooks/model_demos/ebm_demo.ipynb) | `EBM` | Zero-dimensional energy balance model, ice-albedo feedback, multiple steady states |
-| [Ganopolski 2024](../../notebooks/model_demos/Ganopolski2024_demo.ipynb) | `Model3` | Glacial cycle emulation, orbital forcing, ice volume variability |
+| [Stommel THC](../../notebooks/model_demos/stommel.ipynb) | `Stommel` | Two-box thermohaline circulation, overturning diagnostic, two forcing attachment styles |
+| [EBM0D](../../notebooks/model_demos/ebm0d.ipynb) | `EBM0D` | Zero-dimensional EBM, albedo options (constant / `albedo_func` / custom callable), OLR, time-varying parameters, Euler vs RK45 |
+| [EBM1DLat](../../notebooks/model_demos/ebm1d_lat.ipynb) | `EBM1DLat` | Diffusive latitudinal EBM, ice-line, multi-axis latitude profiles, custom albedo via `set_function` |
 
 ## Functionality demos
 
