@@ -1,8 +1,9 @@
 """Convenience factories for common :class:`~paleobeasts.core.Forcing` patterns.
 
 All public functions return either a plain callable or a
-:class:`~paleobeasts.core.Forcing` object ready to pass to any
-``PBModel`` constructor.
+:class:`~paleobeasts.core.Forcing` object.  Attach the result to a model
+parameter or state variable after construction using
+``model.register_forcing(var_name, forcing_obj)``.
 """
 
 import numpy as np
@@ -129,12 +130,13 @@ def create_periodic_forcing(periods_powers, desired_amplitude=1, y0=0):
     Examples
     --------
     ```python
-    import paleobeasts as pb
     from paleobeasts.utils.forcing_utils import create_periodic_forcing
     from paleobeasts.signal_models.stommel import Stommel
 
     orbital = create_periodic_forcing([(100, 0.6), (41, 0.4)], desired_amplitude=0.3)
-    model = Stommel(forcing=orbital)
+    model = Stommel(E=0.0, T_star=1.0, S_star=0.0)
+    model.register_forcing('E', orbital)
+    output = model.integrate(t_span=(0, 500), y0=[1.0, 0.0], method='RK45')
     ```
     """
     func = create_periodic_forcing_function(
@@ -160,9 +162,10 @@ def create_constant_forcing(value):
     --------
     ```python
     from paleobeasts.utils.forcing_utils import create_constant_forcing
-    from paleobeasts.signal_models.lorenz import Lorenz63
 
-    model = Lorenz63(forcing=create_constant_forcing(0.0))
+    f = create_constant_forcing(8.0)
+    print(f.get_forcing(0.0))    # 8.0
+    print(f.get_forcing(999.9))  # 8.0
     ```
     """
     def _constant(t):
@@ -204,11 +207,13 @@ def create_sinusoid_forcing(A, period, y0=0.0):
     Examples
     --------
     ```python
+    import numpy as np
     from paleobeasts.utils.forcing_utils import create_sinusoid_forcing
-    from paleobeasts.signal_models.enso_recharge import ENSORechargeOscillator
 
     seasonal = create_sinusoid_forcing(A=0.5, period=1.0)
-    model = ENSORechargeOscillator(forcing=seasonal)
+    t = np.linspace(0, 2, 100)
+    values = np.array([seasonal.get_forcing(ti) for ti in t])
+    print(f"amplitude: {values.max():.2f}, min: {values.min():.2f}")
     ```
     """
     A = float(A)
@@ -256,13 +261,16 @@ def create_piecewise_forcing(elements, y0=0.0, label="forcing"):
     Examples
     --------
     ```python
+    import paleobeasts as pb
     from paleobeasts.utils.forcing_utils import create_piecewise_forcing
 
     forcing = create_piecewise_forcing(
-        [{"type": "ramp", "t_start": 0, "t_end": 100, "value": 1.0},
-         {"type": "hold", "t_start": 100, "t_end": 500, "value": 1.0}],
+        [pb.core.Hold(duration=50,  value=0.0),
+         pb.core.Ramp(duration=100, y0=0.0, yf=4.0),
+         pb.core.Hold(duration=50,  value=4.0)],
         label="CO2 ramp"
     )
+    print(forcing.get_forcing(75.0))   # mid-ramp value
     ```
     """
     return Forcing.from_elements(elements=elements, y0=y0, label=label)
