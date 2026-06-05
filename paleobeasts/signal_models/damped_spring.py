@@ -53,11 +53,22 @@ class DampedSpring(PBModel):
     With resonant driving (external force at ω₀):
 
     ```python
+    import numpy as np
+    import matplotlib.pyplot as plt
+    import paleobeasts as pb
+    from paleobeasts.signal_models.damped_spring import DampedSpring
+
     m, k = 1.0, 4.0
     omega_0 = np.sqrt(k / m)
     model = DampedSpring(m=m, k=k, c=0.0)
     model.register_forcing('F', pb.core.Forcing(lambda t: np.cos(omega_0 * t)))
     output = model.integrate(t_span=(0, 30), y0=[0.0, 0.0], method='RK45')
+    fig, ax = plt.subplots()
+    ax.plot(output.time, output.state_variables['x'])
+    ax.set_xlabel('time'); ax.set_ylabel('x')
+    ax.set_title('DampedSpring — resonant driving at ω₀')
+    plt.savefig('docs/reference/figures/DampedSpring_resonance_example.png',
+                dpi=150, bbox_inches='tight')
     ```
 
     """

@@ -138,9 +138,13 @@ class Model3(PBModel):
         elif k == 2:
             dvdt = -vc / t2
 
-        if t>0:
-            new_row = np.array([(v, k)], dtype=self.dtypes)
-            self.state_variables = np.concatenate([self.state_variables, new_row], axis=0)
+        # Always append state so that [1:] in integrate() removes the initial
+        # y0 setup row and leaves state_variables aligned with self.time.
+        # Only append to time for t > t_span[0] (the initial time is
+        # pre-seeded in self.time by integrate()).
+        new_row = np.array([(v, k)], dtype=self.dtypes)
+        self.state_variables = np.concatenate([self.state_variables, new_row], axis=0)
+        if t > self.t_span[0]:
             self.time.append(t)
         self.diagnostic_variables['insolation'].append(f)
 

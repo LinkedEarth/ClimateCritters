@@ -24,13 +24,15 @@ SUBDIRS = [
 ]
 
 def sync():
+    SUBDIRS = [x.name for x in SRC.iterdir() if x.is_dir()]
+
     for subdir in SUBDIRS:
         src_dir = SRC / subdir
         dst_dir = DST / subdir
         if not src_dir.exists():
             continue
         dst_dir.mkdir(parents=True, exist_ok=True)
-        for nb in src_dir.glob("*.ipynb"):
+        for nb in sorted(src_dir.glob("*.ipynb")) + sorted(src_dir.glob("*.qmd")):
             dst = dst_dir / nb.name
             if not dst.exists() or nb.stat().st_mtime > dst.stat().st_mtime:
                 shutil.copy2(nb, dst)

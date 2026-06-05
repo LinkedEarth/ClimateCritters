@@ -58,17 +58,21 @@ def make_derivative_func(method='numpy', derivative=None, data=None, time=None):
     import numpy as np
     import paleobeasts as pb
     from paleobeasts.utils.func import make_derivative_func
+    from paleobeasts.signal_models.g24 import Model3, calc_f
 
-    # Build derivative from a Forcing object's underlying data arrays
-    orb_forcing = pb.core.Forcing(some_callable)
-    dfdt = make_derivative_func(
-        method='numpy', data=orb_forcing.data, time=orb_forcing.time
-    )
+    # Build a Forcing from a data array (gives access to .data and .time)
+    t_axis = np.linspace(-2000, 0, 4000)
+    f_vals = np.array([calc_f(t) for t in t_axis])
+    orb_forcing = pb.core.Forcing(data=f_vals, time=t_axis)
 
-    # Attach to Model3 for use in regime-switch logic
-    from paleobeasts.signal_models.g24 import Model3
-    model = Model3(forcing=orb_forcing)
-    model.dfdt = dfdt
+    # Compute a smooth derivative and attach it to Model3
+    dfdt = make_derivative_func(method='scipy', data=orb_forcing.data,
+                                time=orb_forcing.time)
+    model = Model3()
+    model.register_forcing('insolation', orb_forcing)
+    model.set_param_value('dfdt', dfdt)
+    output = model.integrate(t_span=(-2000, 0), y0=[0.0, 1], method='RK45',
+                             kwargs={'max_step': 0.5})
     ```
     """
     if derivative is not None:

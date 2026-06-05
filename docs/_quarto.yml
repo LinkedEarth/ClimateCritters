@@ -25,6 +25,8 @@ interlinks:
     pyleoclim:
       url: https://pyleoclim-util.readthedocs.io/en/latest/
 
+execute:
+  freeze: true
 
 website:
   title: "PaleoBeasts"
@@ -76,12 +78,16 @@ website:
       align: left      
       contents:
         - tutorials/index.qmd
+        - section: "Getting started"
+          contents:
+            - notebooks/base_classes/pbmodel_basics.ipynb
+            - notebooks/base_classes/forcing.ipynb
+
         - section: "Model demos"
           contents:
-            - notebooks/model_demos/lorenz63.ipynb
-            - notebooks/model_demos/lorenz96.ipynb
-            - notebooks/model_demos/ebm_demo.ipynb
-            - notebooks/model_demos/Ganopolski2024_demo.ipynb
+            - notebooks/model_demos/stommel.ipynb
+            - notebooks/model_demos/ebm0d.ipynb
+            - notebooks/model_demos/ebm1d_lat.ipynb
 
         - section: "Functionality demos"
           contents:
