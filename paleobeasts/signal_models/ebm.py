@@ -399,14 +399,22 @@ class EBM1DLat(EBMBase):
     With a CO2 ramp:
 
     ```python
+    import matplotlib.pyplot as plt
     import paleobeasts as pb
+    from paleobeasts.signal_models.ebm import EBM1DLat
 
     co2_ramp = pb.core.Forcing.from_sequence([
         pb.core.Hold(duration=100, value=0.0),
         pb.core.Ramp(duration=100, y0=0.0, yf=4.0, shape='linear'),
     ])
-    model = EBM1DLat(CO2_forcing=co2_ramp)
-    output = model.integrate(t_span=(0, 200), y0=[15.0], method='RK45')
+    model_co2 = EBM1DLat(CO2_forcing=co2_ramp, D=0.35)
+    output_co2 = model_co2.integrate(t_span=(0, 200), y0=[15.0], method='RK45')
+    fig, ax = plt.subplots()
+    ax.plot(output_co2.time, output_co2.diagnostic_variables['Tglobal'])
+    ax.set_xlabel('time'); ax.set_ylabel('T_global (°C)')
+    ax.set_title('EBM1DLat — CO₂ ramp forcing')
+    plt.savefig('docs/reference/figures/EBM1DLat_co2_example.png',
+                dpi=150, bbox_inches='tight')
     ```
 
     """
