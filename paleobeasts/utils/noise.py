@@ -103,11 +103,19 @@ def from_param(method='uar1', noise_param=None, length=50, number=1,
     Examples
     --------
     ```python
+    import matplotlib.pyplot as plt
     from paleobeasts.utils.noise import from_param
 
     # Ten AR(1) realizations with tau=5, sigma=0.5
     surr = from_param(method='ar1sim', noise_param=[5, 0.5],
                       length=200, number=10, seed=0)
+    fig, ax = plt.subplots(figsize=(8, 3))
+    for s in surr.series_list:
+        ax.plot(s.time, s.value, lw=0.7, alpha=0.5)
+    ax.set_xlabel('time'); ax.set_ylabel('value')
+    ax.set_title('AR(1) surrogate realizations (τ=5, σ=0.5)')
+    plt.savefig('docs/reference/figures/from_param_example.png',
+                dpi=150, bbox_inches='tight')
     ```
     """
     if noise_param is None:

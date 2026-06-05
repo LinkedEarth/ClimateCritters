@@ -75,13 +75,21 @@ def create_periodic_forcing_function(periods_powers, desired_amplitude=1, y0=0):
     Examples
     --------
     ```python
+    import numpy as np
+    import matplotlib.pyplot as plt
     from paleobeasts.utils.forcing_utils import create_periodic_forcing_function
 
     # Milankovitch-like forcing: 100 kyr + 41 kyr components
     f = create_periodic_forcing_function(
         [(100, 0.6), (41, 0.4)], desired_amplitude=25.0
     )
-    print(f(0.0))   # offset at t=0
+    t = np.linspace(0, 500, 1000)
+    fig, ax = plt.subplots(figsize=(8, 3))
+    ax.plot(t, [f(ti) for ti in t])
+    ax.set_xlabel('time (kyr)'); ax.set_ylabel('forcing')
+    ax.set_title('Composite periodic forcing (100 + 41 kyr)')
+    plt.savefig('docs/reference/figures/create_periodic_forcing_function_example.png',
+                dpi=150, bbox_inches='tight')
     ```
     """
     pairs, total_max_amplitude = _validate_periods_powers(periods_powers)
@@ -130,6 +138,7 @@ def create_periodic_forcing(periods_powers, desired_amplitude=1, y0=0):
     Examples
     --------
     ```python
+    import matplotlib.pyplot as plt
     from paleobeasts.utils.forcing_utils import create_periodic_forcing
     from paleobeasts.signal_models.stommel import Stommel
 
@@ -137,6 +146,13 @@ def create_periodic_forcing(periods_powers, desired_amplitude=1, y0=0):
     model = Stommel(E=0.0, T_star=1.0, S_star=0.0)
     model.register_forcing('E', orbital)
     output = model.integrate(t_span=(0, 500), y0=[1.0, 0.0], method='RK45')
+    fig, ax = plt.subplots(figsize=(8, 3))
+    ax.plot(output.time, output.diagnostic_variables['q'])
+    ax.axhline(0, color='k', lw=0.8, ls='--')
+    ax.set_xlabel('time'); ax.set_ylabel('q (overturning)')
+    ax.set_title('Stommel with periodic freshwater forcing')
+    plt.savefig('docs/reference/figures/create_periodic_forcing_example.png',
+                dpi=150, bbox_inches='tight')
     ```
     """
     func = create_periodic_forcing_function(
@@ -208,12 +224,17 @@ def create_sinusoid_forcing(A, period, y0=0.0):
     --------
     ```python
     import numpy as np
+    import matplotlib.pyplot as plt
     from paleobeasts.utils.forcing_utils import create_sinusoid_forcing
 
     seasonal = create_sinusoid_forcing(A=0.5, period=1.0)
-    t = np.linspace(0, 2, 100)
-    values = np.array([seasonal.get_forcing(ti) for ti in t])
-    print(f"amplitude: {values.max():.2f}, min: {values.min():.2f}")
+    t = np.linspace(0, 3, 300)
+    fig, ax = plt.subplots(figsize=(7, 3))
+    ax.plot(t, [seasonal.get_forcing(ti) for ti in t])
+    ax.set_xlabel('time'); ax.set_ylabel('forcing')
+    ax.set_title('Sinusoidal forcing (A=0.5, period=1)')
+    plt.savefig('docs/reference/figures/create_sinusoid_forcing_example.png',
+                dpi=150, bbox_inches='tight')
     ```
     """
     A = float(A)
@@ -261,6 +282,8 @@ def create_piecewise_forcing(elements, y0=0.0, label="forcing"):
     Examples
     --------
     ```python
+    import numpy as np
+    import matplotlib.pyplot as plt
     import paleobeasts as pb
     from paleobeasts.utils.forcing_utils import create_piecewise_forcing
 
@@ -270,7 +293,13 @@ def create_piecewise_forcing(elements, y0=0.0, label="forcing"):
          pb.core.Hold(duration=50,  value=4.0)],
         label="CO2 ramp"
     )
-    print(forcing.get_forcing(75.0))   # mid-ramp value
+    t = np.linspace(0, 200, 500)
+    fig, ax = plt.subplots(figsize=(7, 3))
+    ax.plot(t, [forcing.get_forcing(ti) for ti in t])
+    ax.set_xlabel('time'); ax.set_ylabel('forcing (W m⁻²)')
+    ax.set_title('Piecewise CO₂ ramp forcing')
+    plt.savefig('docs/reference/figures/create_piecewise_forcing_example.png',
+                dpi=150, bbox_inches='tight')
     ```
     """
     return Forcing.from_elements(elements=elements, y0=y0, label=label)
