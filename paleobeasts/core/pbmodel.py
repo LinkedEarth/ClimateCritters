@@ -1,5 +1,7 @@
 from scipy.integrate import solve_ivp
 import inspect
+import re
+import textwrap
 import warnings
 from types import MethodType
 import numpy as np
@@ -10,6 +12,65 @@ from ..utils.solver import (euler_method, euler_maruyama_method, heun_maruyama_m
                             build_state_from_history as _build_state_from_history)
 from .pboutput import PBOutput
 from .forcing import ForcingSpec
+
+
+def _parse_docstring_params(cls):
+    """Collect {name: description} from NumPy-style Parameters sections in the MRO.
+
+    Walks the MRO from base to derived so that subclass entries override base
+    class entries for the same parameter name.
+    """
+    result = {}
+    for klass in reversed(cls.__mro__):
+        raw = inspect.getdoc(klass)
+        if not raw:
+            continue
+        lines = raw.splitlines()
+        i = 0
+        while i < len(lines):
+            # NumPy section header: word(s) followed by a line of dashes
+            if (lines[i].strip() == 'Parameters'
+                    and i + 1 < len(lines)
+                    and re.match(r'^-{3,}\s*$', lines[i + 1])):
+                i += 2  # skip "Parameters" + dashes
+                while i < len(lines):
+                    line = lines[i]
+                    # Next section starts: non-indented text followed by dashes
+                    if (line.strip()
+                            and not line[0].isspace()
+                            and i + 1 < len(lines)
+                            and re.match(r'^-{3,}\s*$', lines[i + 1])):
+                        break
+                    # Parameter entry: "name : ..." not indented
+                    m = re.match(r'^(\w+)\s*:', line)
+                    if m and not line[0].isspace():
+                        name = m.group(1)
+                        i += 1
+                        desc_parts = []
+                        while i < len(lines) and (
+                                not lines[i].strip() or lines[i][0].isspace()):
+                            stripped = lines[i].strip()
+                            if stripped:
+                                desc_parts.append(stripped)
+                            i += 1
+                        result[name] = ' '.join(desc_parts)
+                    else:
+                        i += 1
+                break
+            i += 1
+    return result
+
+
+def _format_value(v):
+    """Return a compact display string for a parameter value."""
+    if callable(v) and not hasattr(v, 'get_forcing'):
+        name = getattr(v, '__name__', None) or getattr(type(v), '__name__', None)
+        return f'<callable: {name}>' if name else '<callable>'
+    if hasattr(v, 'get_forcing'):
+        return f'<{type(v).__name__}>'
+    if isinstance(v, float):
+        return f'{v:g}'
+    return repr(v)
 
 
 class PBModel:
@@ -537,7 +598,12 @@ class PBModel:
                 Passing ``dt`` inside ``kwargs`` is deprecated.  Use the
                 explicit ``dt`` parameter instead.
         """
-        kwargs = dict(kwargs) if kwargs is not None else {}
+        
+        if method == 'RK45' and kwargs is None: 
+            kwargs ={'rtol': 1e-8, 'atol': 1e-10}
+        else:
+            kwargs = dict(kwargs) if kwargs is not None else {}
+            
 
         # --- dt backward compatibility ---
         if dt is None and 'dt' in kwargs:
@@ -558,7 +624,10 @@ class PBModel:
             dt = float(dt)
 
         # --- reset accumulators for a fresh run ---
-        self.time = [0]
+        # Use the actual start time, not a hardcoded 0, so that models with
+        # t_span starting at negative times (e.g. palaeoclimate BP conventions)
+        # accumulate correctly.
+        self.time = [float(t_span[0])]
         self.diagnostic_variables = {var: [] for var in self.diagnostic_variables}
 
         # --- validate and normalise initial state ---
@@ -664,6 +733,36 @@ class PBModel:
             self.time = np.array(self.time)
             self.diagnostic_variables = {var: np.asarray(vals)
                                          for var, vals in self.diagnostic_variables.items()}
+            # Sort and deduplicate by time.  Adaptive solvers (e.g. RK45) call
+            # dydt at every stage evaluation including rejected steps that are
+            # retried with a smaller dt.  Those ghost evaluations leave duplicate
+            # or out-of-order timestamps in any arrays accumulated inside dydt.
+            # np.unique returns the *first* occurrence of each unique time value,
+            # which preserves the forward-integration entry over any retry.
+            if len(self.state_variables) > 0:
+                _, _unique_idx = np.unique(self.time, return_index=True)
+                self.time = self.time[_unique_idx]
+                self.state_variables = self.state_variables[_unique_idx]
+                self.diagnostic_variables = {
+                    k: v[_unique_idx] for k, v in self.diagnostic_variables.items()
+                }
+            # For scipy adaptive solvers, further restrict to the accepted step
+            # endpoints stored in solution.t.  Adaptive methods (RK45, DOP853,
+            # etc.) evaluate dydt at multiple intermediate stage points per step;
+            # those intermediate values can stray far outside the physical range
+            # before the solver corrects itself, producing spurious transients in
+            # any arrays accumulated step-by-step inside dydt.
+            # Fixed-step methods (euler, rk4, etc.) call dydt exactly once per
+            # step so no further filtering is needed for those.
+            if dt == 'variable':
+                accepted_t = np.round(np.asarray(solution.t, dtype=float), 10)
+                keep = np.isin(np.round(self.time, 10), accepted_t)
+                if keep.sum() > 0:
+                    self.time = self.time[keep]
+                    self.state_variables = self.state_variables[keep]
+                    self.diagnostic_variables = {
+                        k: v[keep] for k, v in self.diagnostic_variables.items()
+                    }
 
         output = PBOutput(
             time=self.time,
@@ -720,6 +819,137 @@ class PBModel:
         self.diagnostic_variables = {var: np.asarray(vals)
                                      for var, vals in self.diagnostic_variables.items()}
 
+
+    # ------------------------------------------------------------------
+    # Discovery / documentation helpers
+    # ------------------------------------------------------------------
+
+    _VALID_LIST_TARGETS = ('state_variables', 'parameters', 'diagnostic_variables')
+
+    def list(self, list_target):
+        """Return a list of names for the requested category.
+
+        Parameters
+        ----------
+        list_target : {'state_variables', 'parameters', 'diagnostic_variables'}
+            The category to enumerate.
+
+        Returns
+        -------
+        names : list of str
+        """
+        if list_target not in self._VALID_LIST_TARGETS:
+            raise ValueError(
+                f"list_target must be one of {self._VALID_LIST_TARGETS!r}; "
+                f"got {list_target!r}."
+            )
+        if list_target == 'state_variables':
+            return list(self.state_variables_names)
+        if list_target == 'parameters':
+            return list(self.param_values.keys())
+        return list(self.diagnostic_variables.keys())
+
+    def doc(self, print_target):
+        """Pretty-print documentation for the requested category.
+
+        Descriptions are parsed from the NumPy-style docstrings of the class
+        and its base classes.  For parameters the current value is also shown.
+
+        Parameters
+        ----------
+        print_target : {'state_variables', 'parameters', 'diagnostic_variables'}
+            The category to document.
+        """
+        if print_target not in self._VALID_LIST_TARGETS:
+            raise ValueError(
+                f"print_target must be one of {self._VALID_LIST_TARGETS!r}; "
+                f"got {print_target!r}."
+            )
+
+        class_name = type(self).__name__
+        descriptions = _parse_docstring_params(type(self))
+
+        if print_target == 'parameters':
+            names = list(self.param_values.keys())
+            header = f'Parameters — {class_name}'
+            columns = ('Name', 'Current value', 'Description')
+            rows = []
+            for name in names:
+                val_str = _format_value(self.param_values[name])
+                desc = descriptions.get(name, '')
+                rows.append((name, val_str, desc))
+
+        elif print_target == 'state_variables':
+            names = list(self.state_variables_names)
+            header = f'State variables — {class_name}'
+            columns = ('Name', 'Kind', 'Description')
+            rows = []
+            for name in names:
+                kind = ('non-integrated' if name in self.non_integrated_state_vars
+                        else 'integrated')
+                desc = descriptions.get(name, '')
+                rows.append((name, kind, desc))
+
+        else:  # diagnostic_variables
+            names = list(self.diagnostic_variables.keys())
+            header = f'Diagnostic variables — {class_name}'
+            columns = ('Name', 'Description')
+            rows = [(name, descriptions.get(name, '')) for name in names]
+
+        self._print_table(header, columns, rows)
+
+    @staticmethod
+    def _print_table(header, columns, rows):
+        """Render a fixed-width text table to stdout."""
+        desc_col = len(columns) - 1   # last column always wraps
+        max_desc_width = 52
+
+        # Compute column widths (all but the last description column)
+        col_widths = [len(col) for col in columns]
+        for row in rows:
+            for i, cell in enumerate(row[:-1]):
+                col_widths[i] = max(col_widths[i], len(cell))
+
+        # Build a format template for fixed columns
+        fixed_fmt = '  '.join(f'{{:<{w}}}' for w in col_widths[:-1])
+        total_fixed = sum(col_widths[:-1]) + 2 * (len(col_widths) - 2)
+
+        desc_header_pad = max(len(columns[-1]), 0)
+        total_width = total_fixed + 2 + max(desc_header_pad, max_desc_width)
+
+        sep = '─' * total_width
+        thick = '═' * total_width
+
+        print()
+        print(header)
+        print(thick)
+
+        # Header row
+        if len(columns) > 1:
+            header_fixed = fixed_fmt.format(*[c for c in columns[:-1]])
+            print(f'{header_fixed}  {columns[-1]}')
+        else:
+            print(columns[0])
+        print(sep)
+
+        for row in rows:
+            fixed_cells = row[:-1]
+            desc = row[-1]
+
+            wrapped = textwrap.wrap(desc, width=max_desc_width) if desc else ['']
+            if len(columns) > 1:
+                fixed_str = fixed_fmt.format(*fixed_cells)
+                print(f'{fixed_str}  {wrapped[0]}')
+                indent = ' ' * (total_fixed + 2)
+                for extra in wrapped[1:]:
+                    print(f'{indent}{extra}')
+            else:
+                print(f'{fixed_cells[0]}  {wrapped[0]}')
+                for extra in wrapped[1:]:
+                    print(f'{"":>{len(fixed_cells[0])+2}}{extra}')
+
+        print(thick)
+        print()
 
     # def add_noise(self, var_name, noise_ts):
     #     """Add noise to a variable in the latest output.
