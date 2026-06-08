@@ -4,6 +4,7 @@ project:
   resources:
     - notebooks
     - scripts
+    - figures
   pre-render:
     - python scripts/sync_notebooks.py
     - python scripts/inject_doc_figures.py

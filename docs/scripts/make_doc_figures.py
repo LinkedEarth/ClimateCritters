@@ -50,7 +50,7 @@ import griffe
 SCRIPT_DIR  = Path(__file__).resolve().parent
 DOCS_DIR    = SCRIPT_DIR.parent          # docs/
 PROJECT_DIR = DOCS_DIR.parent            # project root — contains paleobeasts/
-FIGURE_DIR  = DOCS_DIR / 'api' / 'figures'
+FIGURE_DIR  = DOCS_DIR  / 'figures'
 
 # Ensure the package is importable from exec'd example code.
 if str(PROJECT_DIR) not in sys.path:
