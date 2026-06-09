@@ -7,13 +7,13 @@ sidebar: get-started
 
 ## Adaptive solvers (SciPy)
 
-Passing any SciPy solver name — `'RK45'`, `'DOP853'`, `'Radau'`, `'LSODA'` — delegates to `scipy.integrate.solve_ivp`. The solver adapts its step size internally to meet an error tolerance, so `dt` is not required. This is a reasonable default for most smooth systems.
+Passing any SciPy solver name — `'RK45'`, `'DOP853'`, `'Radau'`, `'LSODA'` — delegates to `scipy.integrate.solve_ivp`. The solver adapts its step size internally to meet an error tolerance, so `dt` is not required. This is a reasonable default for most smooth, well-behaved systems.
 
 ```python
 output = model.integrate(t_span=(0, 100), y0=[1.0, 0.5], method='RK45')
 ```
 
-When a forcing has fine temporal structure that an adaptive solver might step over, `max_step` can be passed as a keyword argument to cap the step size:
+Good choices for smooth ODEs like `Stommel`, `EBM0D`, or `ENSORechargeOscillator`. When a forcing has fine temporal structure that an adaptive solver might step over, `max_step` can be passed via `kwargs` to cap the step size:
 
 ```python
 output = model.integrate(
@@ -24,46 +24,97 @@ output = model.integrate(
 
 ## Fixed-step RK4
 
-`method='rk4'` uses a custom fourth-order Runge-Kutta integrator with a fixed timestep `dt`. A separate sampling interval `si` can be specified to save output less frequently than the integration step — useful when a fine `dt` is needed for accuracy but coarser output is sufficient:
+`method='rk4'` uses a custom fourth-order Runge-Kutta integrator with a fixed timestep `dt`. A separate sampling interval `si` can be specified via `kwargs` to save output less frequently than the integration step — useful when a fine `dt` is needed for accuracy but coarser output is sufficient:
 
 ```python
 output = model.integrate(
     t_span=(0, 1000), y0=[1.0, 0.5], method='rk4',
-    dt=0.05, si=1.0   # integrate at dt=0.05, save every 1.0
+    dt=0.005, kwargs={'si': 0.05}   # integrate at dt=0.005, save every 0.05
 )
 ```
 
-Both constraints must hold: `t_span` length must be an integer multiple of `si`, and `si` must be an integer multiple of `dt`.
+`rk4` is the recommended method for `Lorenz96`, particularly for the two-scale system (`J > 0`) where the fast Y-layer dynamics require a small, controlled step size — adaptive solvers evaluate `dydt` at unpredictable sub-steps that can corrupt accumulated diagnostics. It is also appropriate for `Lorenz63` when fine trajectory accuracy matters.
+
+::: {.callout-note}
+`rk4` requires `uses_post_history = True` on the subclass. Models that accumulate state step-by-step inside `dydt` (the default) should use `euler` or an adaptive solver instead.
+:::
 
 ## Forward Euler
 
-`method='euler'` is a first-order forward Euler scheme. It is straightforward and fast, but accumulates error more quickly than higher-order methods and can become unstable for stiff systems or large step sizes.
+`method='euler'` is a first-order forward Euler scheme. It is the simplest fixed-step integrator: fast and transparent, but it accumulates error more quickly than higher-order methods and can become unstable for stiff systems or large step sizes.
 
 ```python
 output = model.integrate(t_span=(0, 100), y0=[1.0], method='euler', dt=0.1)
 ```
 
-## Euler–Maruyama (stochastic)
+A reasonable choice for quick exploratory runs on simple, non-stiff models like `DampedSpring` or `Stommel`, or as a baseline to compare against higher-order integrators.
 
-`method='euler_maruyama'` solves stochastic differential equations of the form:
+## Stochastic solvers
+
+For models that define a diffusion term via a `sde_noise(t, y)` method, three SDE integrators are available. Each solves equations of the form:
 
 $$\mathrm{d}y = f(t, y)\,\mathrm{d}t + g(t, y)\,\mathrm{d}W$$
 
-where $\mathrm{d}W$ is a Wiener increment. A `noise_func` callable must be supplied; it takes `(t, y)` and returns a diffusion vector with the same shape as the state:
+where $\mathrm{d}W$ is a Wiener increment and $g$ is provided by `sde_noise`. All three accept an optional `random_seed` via `kwargs` for reproducibility.
+
+### Euler–Maruyama
+
+`method='euler_maruyama'` is the stochastic analogue of forward Euler (strong order 0.5). It is the simplest SDE integrator and a useful baseline.
+
+```python
+output = model.integrate(
+    t_span=(0, 500), y0=[1.0, 0.5],
+    method='euler_maruyama', dt=0.1,
+    kwargs={'random_seed': 42},
+)
+```
+
+### Heun–Maruyama
+
+`method='heun_maruyama'` achieves strong order 1.0 for **additive noise** (diffusion independent of state). It is the preferred stochastic solver for models where $g(t, y) = g(t)$, such as `Stocker2003ExtendedSeaIceSeesaw`, where constant noise terms are added to each state variable.
+
+```python
+output = model.integrate(
+    t_span=(0, 500), y0=[1.0, 0.5],
+    method='heun_maruyama', dt=0.1,
+    kwargs={'random_seed': 42},
+)
+```
+
+### Milstein
+
+`method='milstein'` achieves strong order 1.0 for **multiplicative noise** (diffusion depends on state). It uses a finite-difference approximation of $\partial g / \partial y$, so no analytical Jacobian is required.
+
+```python
+output = model.integrate(
+    t_span=(0, 500), y0=[1.0, 0.5],
+    method='milstein', dt=0.1,
+    kwargs={'random_seed': 42},
+)
+```
+
+### Implementing `sde_noise`
+
+To use any stochastic solver, define `sde_noise` on your model subclass. It receives the current time and state and returns a diffusion vector with the same shape as the integrated state:
 
 ```python
 import numpy as np
 
-def noise_func(t, y):
-    return np.array([0.05, 0.01])   # per-variable diffusion scale
-
-output = model.integrate(
-    t_span=(0, 500), y0=[1.0, 0.5],
-    method='euler_maruyama', dt=0.1,
-    noise_func=noise_func, seed=42,
-)
+class MyModel(PBModel):
+    def sde_noise(self, t, y):
+        return np.array([0.05, 0.01])   # per-variable diffusion scale
 ```
 
-If `noise_func` is omitted, the stochastic term is zero and deterministic Euler is recovered. See [Noise](noise.qmd) for more on the distinction between process and observation noise.
+If `sde_noise` is absent or not callable, the diffusion term is zero and the stochastic integrators reduce to their deterministic equivalents. See [Noise](noise.qmd) for more on the distinction between process and observation noise.
 
-The full solver API — including `validate_monotonic_grid`, `flux_divergence`, and other internal utilities — is documented in the [Reference](../api/index.qmd) under Utils → Solvers.
+## Choosing a solver
+
+| Method | Step size | Order | Use when |
+|---|---|---|---|
+| `RK45` / `DOP853` | adaptive | 4–5 | smooth ODEs, default choice |
+| `Radau` / `LSODA` | adaptive | varies | stiff systems |
+| `rk4` | fixed | 4 | chaotic/multiscale systems, `uses_post_history` models |
+| `euler` | fixed | 1 | simple models, debugging, baselines |
+| `euler_maruyama` | fixed | 0.5 (strong) | SDEs, baseline stochastic |
+| `heun_maruyama` | fixed | 1.0 (additive noise) | SDEs with state-independent diffusion |
+| `milstein` | fixed | 1.0 (multiplicative noise) | SDEs with state-dependent diffusion |
