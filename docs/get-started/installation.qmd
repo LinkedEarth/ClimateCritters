@@ -5,37 +5,37 @@ sidebar: get-started
 
 ## Requirements
 
-PaleoBeasts requires Python ≥ 3.12.
+ClimateCritters requires Python ≥ 3.12.
 
 ## Install from PyPI
 
 ```bash
-pip install paleobeasts
+pip install climatecritters
 ```
 
 ## Install from source
 
 ```bash
-git clone https://github.com/your-org/PaleoBeasts.git
-cd PaleoBeasts
+git clone https://github.com/LinkedEarth/ClimateCritters.git
+cd ClimateCritters
 pip install -e .
 ```
 
 ## Conda environment (recommended)
 
-A pre-configured environment file is provided that includes PaleoBeasts
+A pre-configured environment file is provided that includes ClimateCritters
 and its full scientific stack including [Pyleoclim](https://pyleoclim-util.readthedocs.io/):
 
 ```bash
-conda env create -f env_jpl.yml
-conda activate pb_env_jpl
+conda env create -f env.yml
+conda activate cc_env
 ```
 
 ## Verify the installation
 
 ```python
-import paleobeasts as pb
-print(pb.__version__)
+import climatecritters as cc
+print(cc.__version__)
 ```
 
 ## Dependencies

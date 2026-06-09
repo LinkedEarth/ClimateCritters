@@ -1,7 +1,7 @@
 [project]
-name = "paleobeasts"
+name = "climatecritters"
 version = "0.1.0"
-description = "PaleoBeasts: A package for generating synthetic paleoclimate data"
+description = "ClimateCritters: A package for generating synthetic paleoclimate data"
 requires-python = ">=3.12"
 readme = "README.md"
 license = { text = "GPL-3.0" }
@@ -11,7 +11,6 @@ authors = [
 
 dependencies = [
     "pandas",
-    "pyarrow",
     "matplotlib",
     "seaborn",
     "PyYAML",
@@ -25,7 +24,7 @@ dependencies = [
 #@ git+https://github.com/jordanplanders/pyEDM.git@5defad56bab1d673a38f6b375a78d7319ac1c8e1
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["paleobeasts"]
+include = ["climatecritters"]
 #exclude = ["archive2*"]
 
 [build-system]

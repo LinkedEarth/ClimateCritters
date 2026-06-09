@@ -1,7 +1,7 @@
-"""Generate static figures for the PaleoBeasts reference documentation.
+"""Generate static figures for the ClimateCritters reference documentation.
 
 Dynamically discovers every fenced ``python`` code block in the
-``paleobeasts`` docstrings (via griffe), executes those that contain a
+``climatecritters`` docstrings (via griffe), executes those that contain a
 ``plt.savefig(...)`` call, and writes the resulting figures into
 ``docs/api/figures/``.
 
@@ -49,7 +49,7 @@ import griffe
 
 SCRIPT_DIR  = Path(__file__).resolve().parent
 DOCS_DIR    = SCRIPT_DIR.parent          # docs/
-PROJECT_DIR = DOCS_DIR.parent            # project root — contains paleobeasts/
+PROJECT_DIR = DOCS_DIR.parent            # project root — contains climatecritters/
 FIGURE_DIR  = DOCS_DIR  / 'figures'
 
 # Ensure the package is importable from exec'd example code.
@@ -106,7 +106,7 @@ def _iter_objects(obj, _seen=None):
         yield from _iter_objects(member, _seen)
 
 
-def collect_examples(package: str = 'paleobeasts') -> dict[str, str]:
+def collect_examples(package: str = 'climatecritters') -> dict[str, str]:
     """Return ``{figure_stem: code_block}`` for every example with savefig.
 
     Loads *package* statically with griffe, walks all objects, and finds
@@ -120,7 +120,7 @@ def collect_examples(package: str = 'paleobeasts') -> dict[str, str]:
     Parameters
     ----------
     package : str
-        Importable package name to scan.  Default: ``'paleobeasts'``.
+        Importable package name to scan.  Default: ``'climatecritters'``.
 
     Returns
     -------
@@ -207,7 +207,7 @@ def main() -> None:
     args = parser.parse_args()
 
     print('Scanning docstrings with griffe…')
-    all_examples = collect_examples('paleobeasts')
+    all_examples = collect_examples('climatecritters')
 
     if not all_examples:
         print('No plt.savefig examples found in docstrings.')

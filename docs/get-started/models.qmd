@@ -3,7 +3,7 @@ title: Model Catalogue
 sidebar: get-started
 ---
 
-PaleoBeasts currently includes models from several families, organized here by the type of dynamics they exhibit. The Reference section has full API documentation for each; this page is meant as a starting point for choosing a model.
+ClimateCritters currently includes models from several families, organized here by the type of dynamics they exhibit. The Reference section has full API documentation for each; this page is meant as a starting point for choosing a model.
 
 For method-evaluation purposes, the most relevant initial question is usually structural — does the model produce periodic output, chaotic output, intermittent transitions, or something else? Noise and sampling complications come later. The notes below try to flag those structural characteristics concisely.
 

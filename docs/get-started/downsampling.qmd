@@ -3,14 +3,14 @@ title: Downsampling
 sidebar: get-started
 ---
 
-Paleoclimate archives are almost never evenly sampled. Sediment accumulation rates vary, ice cores compress with depth, and dating uncertainties compound over long records. Model output, by contrast, comes out on a regular grid. `paleobeasts.utils.resample.downsample()` bridges that gap by drawing random index increments from a probability distribution and selecting the corresponding time points from a series.
+Paleoclimate archives are almost never evenly sampled. Sediment accumulation rates vary, ice cores compress with depth, and dating uncertainties compound over long records. Model output, by contrast, comes out on a regular grid. `climatecritters.utils.resample.downsample()` bridges that gap by drawing random index increments from a probability distribution and selecting the corresponding time points from a series.
 
 Irregular sampling is worth taking seriously when evaluating time-series methods: interpolation schemes, spectral estimators, and wavelet transforms all have assumptions about sampling regularity that can affect results in ways that are not always obvious from the method's documentation. Generating downsampled versions of a known synthetic signal is one way to probe those sensitivities.
 
 ## Basic usage
 
 ```python
-from paleobeasts.utils.resample import downsample
+from climatecritters.utils.resample import downsample
 
 # ts is a Pyleoclim Series derived from model output
 ts_sparse = downsample(ts, method='exponential', param=[3.0], seed=42)

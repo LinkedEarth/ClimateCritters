@@ -3,7 +3,7 @@ title: Solvers
 sidebar: get-started
 ---
 
-`PBModel.integrate()` supports several solvers, selectable via the `method` argument. The choice affects step-size control, numerical accuracy, and whether stochastic forcing is possible.
+`CCModel.integrate()` supports several solvers, selectable via the `method` argument. The choice affects step-size control, numerical accuracy, and whether stochastic forcing is possible.
 
 ## Adaptive solvers (SciPy)
 
@@ -100,7 +100,7 @@ To use any stochastic solver, define `sde_noise` on your model subclass. It rece
 ```python
 import numpy as np
 
-class MyModel(PBModel):
+class MyModel(CCModel):
     def sde_noise(self, t, y):
         return np.array([0.05, 0.01])   # per-variable diffusion scale
 ```

@@ -30,7 +30,7 @@ execute:
   freeze: true
 
 website:
-  title: "PaleoBeasts"
+  title: "ClimateCritters"
   description: "Synthetic paleoclimate signal models"
   favicon: thumbnails/paleobeasts_logo.png
   page-navigation: true
@@ -45,7 +45,7 @@ website:
   
     right:
       - icon: github
-        href: https://github.com/LinkedEarth/PaleoBeasts
+        href: https://github.com/LinkedEarth/ClimateCritters
   
   sidebar:
     - id: get-started
@@ -82,7 +82,7 @@ website:
         - section: "Getting started"
           contents:
             - text: "CCModel Basics"
-              href: notebooks/base_classes/pbmodel_basics.ipynb
+              href: notebooks/base_classes/ccmodel_basics.ipynb
             - text: "Forcing Basics"
               href: notebooks/base_classes/forcing.ipynb
 
@@ -146,14 +146,14 @@ format:
 quartodoc:
   style: pkgdown
   dir: api
-  package: paleobeasts
+  package: climatecritters
   out_index: index.qmd
   render_interlinks: true
   renderer:
     style: markdown
     table_style: description-list  
   # parser: numpy
-  # source_url: "https://github.com/LinkedEarth/PaleoBeasts/blob/main/"
+  # source_url: "https://github.com/LinkedEarth/ClimateCritters/blob/main/"
   sidebar: "api/_sidebar.yml"
   css: "api/_styles-quartodoc.css"
 
@@ -164,8 +164,8 @@ quartodoc:
       desc: |
         Base classes underlying all models.
       contents:
-        - core.PBModel
-        - core.PBOutput
+        - core.CCModel
+        - core.CCOutput
         - core.Forcing
 
     - subtitle: Forcing

@@ -31,7 +31,7 @@ The class docstring lives on the class body (not `__init__`).
 ### 2a. Template
 
 ```python
-class MyModel(PBModel):
+class MyModel(CCModel):
     """One-sentence description of the model.
 
     Optional one-to-three sentence elaboration — governing equation,
@@ -43,9 +43,9 @@ class MyModel(PBModel):
 
     Parameters
     ----------
-    forcing : pb.core.Forcing
+    forcing : cc.core.Forcing
         Description of what this forcing represents and its units.
-    param_a : float or callable or pb.core.Forcing
+    param_a : float or callable or cc.core.Forcing
         Description.  Default is X.
     param_b : int, optional
         Description.  Default is Y.
@@ -60,17 +60,17 @@ class MyModel(PBModel):
 
     See also
     --------
-    pb.core.PBModel : Base class.
+    cc.core.CCModel : Base class.
     OtherModel : Related model.
 
     Examples
     --------
     .. code-block:: python
 
-        import paleobeasts as pb
-        from paleobeasts.signal_models.ebm import MyModel
+        import climatecritters as cc
+        from climatecritters.model_critters.ebm import MyModel
 
-        forcing = pb.core.Forcing(lambda t: 1360.0)
+        forcing = cc.core.Forcing(lambda t: 1360.0)
         model = MyModel(forcing=forcing, param_a=4.0)
         output = model.integrate(t_span=(0, 1000), y0=[288.0], method='RK45')
 
@@ -83,7 +83,7 @@ class MyModel(PBModel):
 |------|-----------|
 | Include the governing equation as an indented code block | Readers understand the physics at a glance |
 | List every `__init__` parameter (except `self`) | pyleoclim puts all parameter docs on the class, not `__init__` |
-| For `float or callable or pb.core.Forcing` params, always note the default | Avoids source-diving |
+| For `float or callable or cc.core.Forcing` params, always note the default | Avoids source-diving |
 | Put contract/invariant details in **Notes**, not the summary | Keeps the summary scannable |
 
 ---
@@ -132,7 +132,7 @@ def my_method(self, T, t):
 
 ### 3c. `dydt` methods
 
-`dydt` has a standard structure shared across all PBModel subclasses.
+`dydt` has a standard structure shared across all CCModel subclasses.
 Always document its **side effects** (appending to internal accumulators)
 and whether the model sets `uses_post_history = True`.
 
@@ -175,8 +175,8 @@ name : type
 ```
 
 - `type` should be specific: `float`, `int`, `array-like`, `str`,
-  `callable`, `pb.core.Forcing`, `bool`, or a union like
-  `float or callable or pb.core.Forcing`.
+  `callable`, `cc.core.Forcing`, `bool`, or a union like
+  `float or callable or cc.core.Forcing`.
 - Append `Default is X.` to the description (not a separate line).
 - For optional parameters, write `name : type, optional`.
 
@@ -212,10 +212,10 @@ Examples
 
 .. code-block:: python
 
-    import paleobeasts as pb
-    from paleobeasts.signal_models.ebm import EBM0D
+    import climatecritters as cc
+    from climatecritters.signal_models.ebm import EBM0D
 
-    forcing = pb.core.Forcing(lambda t: 1360.0)
+    forcing = cc.core.Forcing(lambda t: 1360.0)
     model = EBM0D(forcing=forcing)
     output = model.integrate(t_span=(0, 500), y0=[288.0], method='RK45')
     output.plot('T')
@@ -230,7 +230,7 @@ Examples
 Whenever a parameter accepts a callable, mention the contract:
 
 ```
-param : float or callable or pb.core.Forcing
+param : float or callable or cc.core.Forcing
     Heat capacity.  If callable, must follow the signature contract in
     ``contracts/signal_model_contract.md``: ``(t)``, ``(t, state)``,
     or ``(t, state, model)`` with the first argument named ``t`` or
@@ -276,7 +276,7 @@ Class docstring
   ├── Extended description (governing equation)
   ├── Parameters (all __init__ args except self)
   ├── Notes (uses_post_history flag, callable contract, param_values)
-  ├── See also (PBModel, related models)
+  ├── See also (CCModel, related models)
   └── Examples (construct → integrate → output)
 
 calc_* helpers
