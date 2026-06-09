@@ -45,4 +45,4 @@ idx = downsample(ts, method='exponential', param=[2.0], seed=0, return_index=Tru
 print(idx)   # list of integer indices into ts.time
 ```
 
-For a more extended walkthrough, see the [downsampling demo notebook](../../notebooks/functionality_demos/downsample_demo.ipynb).
+For a more extended walkthrough, see the [downsampling demo notebook](../../notebooks/functionality_demos/downsample_starter.ipynb).

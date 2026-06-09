@@ -65,4 +65,4 @@ Because noise enters at every timestep, the trajectory itself is altered. Near a
 
 The two approaches can be layered: integrate with `euler_maruyama` to produce a stochastic trajectory, then add observation noise on top to simulate what an archive would actually record. Whether that is the right decomposition depends on the system and the question being asked.
 
-For a more extended walkthrough, see the [noise demo notebook](../../notebooks/functionality_demos/noise_demo.ipynb) and the [model noise demo](../../notebooks/functionality_demos/model_noise_demo.ipynb).
+For a more extended walkthrough, see the [noise demo notebook](../../notebooks/functionality_demos/noise_demo.ipynb) and the [model noise demo](../../notebooks/functionality_demos/model_noise_starter.ipynb).
