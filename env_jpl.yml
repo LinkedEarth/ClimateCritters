@@ -6,7 +6,6 @@ dependencies:
 #  - python=3.13.0
   - scikit-learn
   - xarray
-  - pooch
   - jupyter
   - jupyterlab
   - ipykernel
@@ -17,5 +16,4 @@ dependencies:
     - fitter
 #    - git+https://github.com/LinkedEarth/Pyleoclim_util.git
     - pandas>=2.0.0
-    - climlab
 #    - .
