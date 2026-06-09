@@ -81,21 +81,57 @@ website:
         - tutorials/index.qmd
         - section: "Getting started"
           contents:
-            - notebooks/base_classes/pbmodel_basics.ipynb
-            - notebooks/base_classes/forcing.ipynb
+            - text: "CCModel Basics"
+              href: notebooks/base_classes/pbmodel_basics.ipynb
+            - text: "Forcing Basics"
+              href: notebooks/base_classes/forcing.ipynb
 
         - section: "Model demos"
           contents:
-            - notebooks/model_demos/stommel.ipynb
-            - notebooks/model_demos/ebm0d.ipynb
-            - notebooks/model_demos/ebm1d_lat.ipynb
+            - section: Energy Balance Models
+              contents:
+                - text: 0D
+                  href: notebooks/model_demos/ebm0d.ipynb
+                - text: "1D (latitude)"
+                  href: notebooks/model_demos/ebm1d_lat.ipynb
+            - section: Oscillators
+              contents:
+                - text: "SimplePendulum & Spring"
+                  href: notebooks/model_demos/pendulums_and_spring.ipynb
+                - text: "Double Pendulum"
+                  href: notebooks/model_demos/double_pendulum.ipynb
+            - section: Climate 
+              contents:
+                - text: "ENSO"
+                  href: notebooks/model_demos/enso_recharge.ipynb
+                - text: "Ganopolski 2024, Model 3"
+                  href: notebooks/model_demos/g24.ipynb
+                - text: Stommel
+                  href: notebooks/model_demos/stommel.ipynb
+            - section: Attrctors
+              contents:
+                - text: "Roessler"
+                  href: notebooks/model_demos/roessler.ipynb
+                - text: "Lorenz63"
+                  href: notebooks/model_demos/lorenz63.ipynb
+                - text: "Lorenz96"
+                  href: notebooks/model_demos/lorenz96.ipynb
+            - section: Box Models
+              contents:
+                - text: "Carbon Cycle Demo"
+                  href: notebooks/model_demos/box_models_carbon.ipynb
+
 
         - section: "Functionality demos"
           contents:
-            - notebooks/functionality_demos/noise_demo.ipynb
-            - notebooks/functionality_demos/model_noise_demo.ipynb
-            - notebooks/functionality_demos/downsample_demo.ipynb
-
+            - section: "Noise"
+              contents: 
+                - notebooks/functionality_demos/noise_demo.ipynb
+                - notebooks/functionality_demos/model_noise_starter.ipynb
+            - text: "Downsampling"
+              href: notebooks/functionality_demos/downsample_starter.ipynb
+            - text: "Solvers"
+              href: notebooks/functionality_demos/solver_demo.ipynb
 
 format:
   html:
@@ -123,12 +159,25 @@ quartodoc:
 
   sections:
     - title: Core
+
+    - subtitle: Base Classes
       desc: |
         Base classes underlying all models.
       contents:
         - core.PBModel
         - core.PBOutput
         - core.Forcing
+
+    - subtitle: Forcing
+      desc: |
+        Forcing elements.
+      contents:
+        - core.forcing.ForcingElement
+        - core.forcing.ResolvedSegment
+        - core.forcing.ForcingSequence
+        - core.forcing.Hold
+        - core.forcing.Ramp
+        - core.forcing.Harmonic
 
     - title: Models
 
@@ -159,7 +208,6 @@ quartodoc:
       desc: Mechanical oscillators ranging from simple SHM to chaotic driven pendulums.
       contents:
         - SimplePendulum
-        - DrivenPendulum
         - DoublePendulum
         - DampedSpring
 
@@ -167,7 +215,6 @@ quartodoc:
       desc: |
         Standalone paleoclimate and dynamical systems models.
       contents:
-        - Daisyworld
         - ENSORechargeOscillator
         - Model3
         - Stocker2003BipolarSeesaw
@@ -192,7 +239,6 @@ quartodoc:
       desc: |
         Factory functions for common Forcing patterns.
       contents:
-        - utils.forcing_utils.create_periodic_forcing_function
         - utils.forcing_utils.create_periodic_forcing
         - utils.forcing_utils.create_constant_forcing
         - utils.forcing_utils.create_sinusoid_forcing
@@ -206,6 +252,9 @@ quartodoc:
         - utils.solver.rk4_method
         - utils.solver.euler_method
         - utils.solver.euler_maruyama_method
+        - utils.solver.heun_maruyama_method
+        - utils.solver.milstein_method
+
         - utils.solver.define_t_eval
         - utils.solver.validate_monotonic_grid
         - utils.solver.validate_layer_thicknesses
