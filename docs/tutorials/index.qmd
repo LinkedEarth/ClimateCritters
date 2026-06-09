@@ -3,15 +3,13 @@ title: Tutorials
 sidebar: tutorials
 ---
 
-The tutorials below are executable Jupyter notebooks demonstrating PaleoBeasts
-models and utilities. Each notebook can be run locally after
-[installing the package](../get-started/installation.qmd).
+The tutorials below are executable Jupyter notebooks demonstrating ClimateCritters models and utilities. Each notebook can be run locally after [installing the package](../get-started/installation.qmd).
 
 ## Getting started
 
 | Notebook | What it shows |
 |---|---|
-| [CCModel Basics](../../notebooks/base_classes/pbmodel_basics.ipynb) | Base class interface: construction, `param_values`, integration, `PBOutput`, callable parameters, `register_forcing`, `set_function`, copying, `to_pyleo` |
+| [CCModel Basics](../../notebooks/base_classes/ccmodel_basics.ipynb) | Base class interface: construction, `param_values`, integration, `CCOutput`, callable parameters, `register_forcing`, `set_function`, copying, `to_pyleo` |
 | [Forcing Basics](../../notebooks/base_classes/forcing.ipynb) | All four `Forcing` construction patterns; `Hold`, `Ramp`, `Harmonic` elements; bundled datasets; `register_forcing` options |
 
 ## Model demos

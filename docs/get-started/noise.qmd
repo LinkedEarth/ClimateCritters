@@ -3,16 +3,16 @@ title: Noise
 sidebar: get-started
 ---
 
-Noise in paleoclimate records comes from at least two distinct sources, and keeping them separate tends to be useful: variability that was part of the *dynamics themselves* (process noise), and noise introduced *after* a signal has been recorded — measurement error, archive-level degradation, bioturbation (observation noise). PaleoBeasts supports both.
+Noise in paleoclimate records comes from at least two distinct sources, and keeping them separate tends to be useful: variability that was part of the *dynamics themselves* (process noise), and noise introduced *after* a signal has been recorded — measurement error, archive-level degradation, bioturbation (observation noise). ClimateCritters supports both.
 
 ## Observation noise
 
-Observation noise sits outside the model — it is added to output after integration. The `paleobeasts.utils.noise` module provides two functions for generating surrogate series to use this way.
+Observation noise sits outside the model — it is added to output after integration. The `climatecritters.utils.noise` module provides two functions for generating surrogate series to use this way.
 
 `from_param()` generates surrogates from a parametric noise model:
 
 ```python
-from paleobeasts.utils.noise import from_param
+from climatecritters.utils.noise import from_param
 
 # Ten AR(1) surrogates with decorrelation time tau=5, amplitude sigma=0.5
 surr = from_param(method='ar1sim', noise_param=[5, 0.5], length=200, number=10, seed=0)
@@ -21,7 +21,7 @@ surr = from_param(method='ar1sim', noise_param=[5, 0.5], length=200, number=10, 
 `from_series()` fits a surrogate to an existing Pyleoclim series, preserving its autocorrelation or spectral structure:
 
 ```python
-from paleobeasts.utils.noise import from_series
+from climatecritters.utils.noise import from_series
 
 # Phase-randomised surrogates preserving the power spectrum of a target series
 surr = from_series(target_series=ts, method='phaseran', number=20)
@@ -33,7 +33,7 @@ To add observation noise to model output, generate a surrogate of the appropriat
 
 Process noise enters during integration — it is part of the dynamics, not added afterwards. This is the appropriate representation for stochastic atmospheric forcing, internal ocean variability, or any mechanism where randomness drives the system rather than merely obscuring it.
 
-PaleoBeasts supports this through the `euler_maruyama` solver, which implements the Euler–Maruyama scheme for stochastic differential equations:
+ClimateCritters supports this through the `euler_maruyama` solver, which implements the Euler–Maruyama scheme for stochastic differential equations:
 
 $$\mathrm{d}y = f(t, y)\,\mathrm{d}t + g(t, y)\,\mathrm{d}W$$
 
@@ -41,8 +41,8 @@ where $\mathrm{d}W$ is a Wiener increment and $g(t, y)$ (the `noise_func` argume
 
 ```python
 import numpy as np
-from paleobeasts.signal_models.stommel import Stommel
-from paleobeasts.utils.forcing_utils import create_constant_forcing
+from climatecritters.signal_models.stommel import Stommel
+from climatecritters.utils.forcing_utils import create_constant_forcing
 
 model = Stommel(forcing=create_constant_forcing(0.0))
 

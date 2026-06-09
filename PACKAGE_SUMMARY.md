@@ -1,9 +1,9 @@
-# PaleoBeasts — Package Summary
+# ClimateCritters — Package Summary
 
 ## Package Structure
 
 ```
-paleobeasts/
+climatecritters/
 ├── core/                   — Base class and forcing framework
 ├── signal_models/          — Physical/climate ODE models
 ├── utils/                  — Solvers, noise, plotting, resampling
@@ -16,7 +16,7 @@ paleobeasts/
 
 ## Core Framework (`core/`)
 
-### `PBModel` ([paleobeasts/core/pbmodel.py](paleobeasts/core/pbmodel.py))
+### `CCModel` ([climatecritters/core/ccmodel.py](climatecritters/core/ccmodel.py))
 
 The abstract base class for all signal models. Subclasses must implement `dydt(t, x)`. Key capabilities:
 
@@ -27,7 +27,7 @@ The abstract base class for all signal models. Subclasses must implement `dydt(t
 - **Pyleoclim integration** — `to_pyleo()` converts any state or diagnostic variable to a `pyleoclim.Series`.
 - **Noise and resampling** — `add_noise()` / `remove_noise()` layer externally generated noise onto a variable; `reframe_time_axis()` resamples the solution to a new time grid.
 
-### `Forcing` and Forcing Elements ([paleobeasts/core/forcing.py](paleobeasts/core/forcing.py))
+### `Forcing` and Forcing Elements ([climatecritters/core/forcing.py](climatecritters/core/forcing.py))
 
 A unified forcing wrapper that accepts callables, time-series arrays, or composable `ForcingElement` sequences. Three element types are provided:
 
@@ -47,28 +47,28 @@ A unified forcing wrapper that accepts callables, time-series arrays, or composa
 
 | Model | Class | File | State Variables | Key Physics |
 |---|---|---|---|---|
-| Ganopolski (2024) | `Model3` | [g24.py](paleobeasts/signal_models/g24.py) | `v`, `k` | Ice volume with orbital forcing and glacial–interglacial bifurcation |
-| Energy Balance | `EBM` | [ebm.py](paleobeasts/signal_models/ebm.py) | `T` | 0D radiative balance (albedo, OLR, solar constant) |
-| Latitudinal EBM | `LatitudinalEBM` | [latitudinal_ebm.py](paleobeasts/signal_models/latitudinal_ebm.py) | `T_0…T_n` | 1D diffusive EBM on a latitude grid with ice-line feedback |
-| Two-Box Carbon | `TwoBoxCarbon` | [two_box_carbon.py](paleobeasts/signal_models/two_box_carbon.py) | `A`, `S` | Atmosphere–surface-ocean carbon exchange with volume-aware fluxes |
-| Generic Box Model | `GenericBoxModel` via `BoxModelSpec` | [box_model.py](paleobeasts/signal_models/box_model.py) | configurable | Declarative multi-box ODE builder; supports reciprocal exchange and directed transport |
-| ENSO Recharge | `ENSORechargeOscillator` | [enso_recharge.py](paleobeasts/signal_models/enso_recharge.py) | `T`, `h` | Jin-style ENSO recharge oscillator with seasonal forcing |
-| Stommel THC | `Stommel` | [stommel.py](paleobeasts/signal_models/stommel.py) | `T`, `S` | 2-box thermohaline circulation; diagnostic: overturning strength `q` |
-| Daisyworld | `Daisyworld` | [daisyworld.py](paleobeasts/signal_models/daisyworld.py) | `Aw`, `Ab`, `T` | Biosphere–climate feedback through daisy-coverage-mediated albedo |
-| Bipolar Seesaw (minimal) | `Stocker2003BipolarSeesaw` | [stocker2003_bipolar_seesaw.py](paleobeasts/signal_models/stocker2003_bipolar_seesaw.py) | `Ts` | Single-variable thermal relaxation to prescribed northern forcing |
-| Bipolar Seesaw (extended) | `Stocker2003ExtendedSeaIceSeesaw` | [stocker2003_bipolar_seesaw.py](paleobeasts/signal_models/stocker2003_bipolar_seesaw.py) | `T_R`, `T_S`, `A`, `T_ANT` | Four-variable system with reservoir, Southern Ocean, sea-ice, and Antarctic temperatures |
+| Ganopolski (2024) | `Model3` | [g24.py](climatecritters/signal_models/g24.py) | `v`, `k` | Ice volume with orbital forcing and glacial–interglacial bifurcation |
+| Energy Balance | `EBM` | [ebm.py](climatecritters/signal_models/ebm.py) | `T` | 0D radiative balance (albedo, OLR, solar constant) |
+| Latitudinal EBM | `LatitudinalEBM` | [latitudinal_ebm.py](climatecritters/signal_models/latitudinal_ebm.py) | `T_0…T_n` | 1D diffusive EBM on a latitude grid with ice-line feedback |
+| Two-Box Carbon | `TwoBoxCarbon` | [two_box_carbon.py](climatecritters/signal_models/two_box_carbon.py) | `A`, `S` | Atmosphere–surface-ocean carbon exchange with volume-aware fluxes |
+| Generic Box Model | `GenericBoxModel` via `BoxModelSpec` | [box_model.py](climatecritters/signal_models/box_model.py) | configurable | Declarative multi-box ODE builder; supports reciprocal exchange and directed transport |
+| ENSO Recharge | `ENSORechargeOscillator` | [enso_recharge.py](climatecritters/signal_models/enso_recharge.py) | `T`, `h` | Jin-style ENSO recharge oscillator with seasonal forcing |
+| Stommel THC | `Stommel` | [stommel.py](climatecritters/signal_models/stommel.py) | `T`, `S` | 2-box thermohaline circulation; diagnostic: overturning strength `q` |
+| Daisyworld | `Daisyworld` | [daisyworld.py](climatecritters/signal_models/daisyworld.py) | `Aw`, `Ab`, `T` | Biosphere–climate feedback through daisy-coverage-mediated albedo |
+| Bipolar Seesaw (minimal) | `Stocker2003BipolarSeesaw` | [stocker2003_bipolar_seesaw.py](climatecritters/signal_models/stocker2003_bipolar_seesaw.py) | `Ts` | Single-variable thermal relaxation to prescribed northern forcing |
+| Bipolar Seesaw (extended) | `Stocker2003ExtendedSeaIceSeesaw` | [stocker2003_bipolar_seesaw.py](climatecritters/signal_models/stocker2003_bipolar_seesaw.py) | `T_R`, `T_S`, `A`, `T_ANT` | Four-variable system with reservoir, Southern Ocean, sea-ice, and Antarctic temperatures |
 
 ### Dynamical Systems & Oscillators
 
 | Model | Class(es) | File | State Variables | Key Physics |
 |---|---|---|---|---|
-| Lorenz (1963) | `Lorenz63` | [lorenz.py](paleobeasts/signal_models/lorenz.py) | `x`, `y`, `z` | Classic 3-variable chaos; butterfly attractor |
-| Lorenz (1996) | `Lorenz96` | [lorenz.py](paleobeasts/signal_models/lorenz.py) | `x_k` (+ `y_jk` for two-scale) | Atmospheric chaos on a ring; supports fast–slow timescale separation |
-| Roessler | `Roessler` | [roessler.py](paleobeasts/signal_models/roessler.py) | `x`, `y`, `z` | Spiral chaotic oscillator (simpler than Lorenz) |
-| Damped Spring | `DampedSpring` | [damped_spring.py](paleobeasts/signal_models/damped_spring.py) | `x`, `v` | Damped/driven spring-mass system; diagnostics: energy, ω₀ |
-| Simple Pendulum | `SimplePendulum` | [pendulum.py](paleobeasts/signal_models/pendulum.py) | `θ`, `ω` | Nonlinear pendulum with optional linear damping |
-| Driven Pendulum | `DrivenPendulum` | [pendulum.py](paleobeasts/signal_models/pendulum.py) | `θ`, `ω` | Forced damped pendulum; canonical 1D chaos testbed |
-| Double Pendulum | `DoublePendulum` | [pendulum.py](paleobeasts/signal_models/pendulum.py) | `θ₁`, `ω₁`, `θ₂`, `ω₂` | Conservative chaotic system; diagnostics: energy, Cartesian positions |
+| Lorenz (1963) | `Lorenz63` | [lorenz.py](climatecritters/signal_models/lorenz.py) | `x`, `y`, `z` | Classic 3-variable chaos; butterfly attractor |
+| Lorenz (1996) | `Lorenz96` | [lorenz.py](climatecritters/signal_models/lorenz.py) | `x_k` (+ `y_jk` for two-scale) | Atmospheric chaos on a ring; supports fast–slow timescale separation |
+| Roessler | `Roessler` | [roessler.py](climatecritters/signal_models/roessler.py) | `x`, `y`, `z` | Spiral chaotic oscillator (simpler than Lorenz) |
+| Damped Spring | `DampedSpring` | [damped_spring.py](climatecritters/signal_models/damped_spring.py) | `x`, `v` | Damped/driven spring-mass system; diagnostics: energy, ω₀ |
+| Simple Pendulum | `SimplePendulum` | [pendulum.py](climatecritters/signal_models/pendulum.py) | `θ`, `ω` | Nonlinear pendulum with optional linear damping |
+| Driven Pendulum | `DrivenPendulum` | [pendulum.py](climatecritters/signal_models/pendulum.py) | `θ`, `ω` | Forced damped pendulum; canonical 1D chaos testbed |
+| Double Pendulum | `DoublePendulum` | [pendulum.py](climatecritters/signal_models/pendulum.py) | `θ₁`, `ω₁`, `θ₂`, `ω₂` | Conservative chaotic system; diagnostics: energy, Cartesian positions |
 
 ---
 
@@ -76,13 +76,13 @@ A unified forcing wrapper that accepts callables, time-series arrays, or composa
 
 | Module | Key Functions | Purpose |
 |---|---|---|
-| [solver.py](paleobeasts/utils/solver.py) | `euler_method`, `euler_maruyama_method`, `flux_divergence`, `define_t_eval` | Integration backends and finite-volume helpers |
-| [forcing_utils.py](paleobeasts/utils/forcing_utils.py) | `create_sinusoid_forcing`, `create_periodic_forcing`, `create_constant_forcing`, `create_piecewise_forcing` | Convenience constructors for common `Forcing` shapes |
-| [noise.py](paleobeasts/utils/noise.py) | `from_series`, `from_param` | AR(1), colored, and fractional Gaussian noise via pyleoclim |
-| [resample.py](paleobeasts/utils/resample.py) | `downsample` | Non-uniform time axis subsampling (exponential, Poisson, Pareto, random) |
-| [plotting_utils.py](paleobeasts/utils/plotting_utils.py) | `plot_solvers` | Side-by-side solver trajectory comparison |
-| [func.py](paleobeasts/utils/func.py) | `smooth_and_interpolate`, `make_derivative_func` | Moving-average smoothing, CubicSpline derivative estimation |
-| [constants.py](paleobeasts/utils/constants.py) | `sigma` | Physical constants (Stefan-Boltzmann) |
+| [solver.py](climatecritters/utils/solver.py) | `euler_method`, `euler_maruyama_method`, `flux_divergence`, `define_t_eval` | Integration backends and finite-volume helpers |
+| [forcing_utils.py](climatecritters/utils/forcing_utils.py) | `create_sinusoid_forcing`, `create_periodic_forcing`, `create_constant_forcing`, `create_piecewise_forcing` | Convenience constructors for common `Forcing` shapes |
+| [noise.py](climatecritters/utils/noise.py) | `from_series`, `from_param` | AR(1), colored, and fractional Gaussian noise via pyleoclim |
+| [resample.py](climatecritters/utils/resample.py) | `downsample` | Non-uniform time axis subsampling (exponential, Poisson, Pareto, random) |
+| [plotting_utils.py](climatecritters/utils/plotting_utils.py) | `plot_solvers` | Side-by-side solver trajectory comparison |
+| [func.py](climatecritters/utils/func.py) | `smooth_and_interpolate`, `make_derivative_func` | Moving-average smoothing, CubicSpline derivative estimation |
+| [constants.py](climatecritters/utils/constants.py) | `sigma` | Physical constants (Stefan-Boltzmann) |
 
 ---
 
@@ -132,27 +132,3 @@ Reference guide for noise generation via `utils.noise`. Covers both pathways: `f
 **[solver_choice.ipynb](notebooks/functionality_demos/solver_choice.ipynb)**
 Pedagogical comparison of `RK45`, `euler`, and `euler_maruyama` for two representative model types: smooth chaos (Lorenz-96) and regime-switching (Model 3). Shows why adaptive solvers corrupt the regime-transition history in `Model3` and provides practical guidance on timestep sizing and convergence checking.
 
----
-
-## Notes: Missing Docstrings
-
-- **`solver.py`** — `Solution` class has no docstring; `euler_method` and `euler_maruyama_method` lack parameter descriptions.
-- **`plotting_utils.py`** — `plot_solvers` has no docstring.
-- **`func.py`** — `make_derivative_func` is flagged `UNTESTED` in a code comment but carries no warning in the docstring and is publicly exported. `smooth_and_interpolate` has no parameter table.
-- **`taxonomy_entry.py`** — Most interactive functions (`label_data`, `gen_fit`, `save_data`) lack parameter/return docstrings entirely.
-- **`box_model.py`** — `BoxModelContext` has no class-level docstring.
-- **`Stocker2003ExtendedSeaIceSeesaw`** — The docstring parameter list does not cover all 12+ parameters.
-
----
-
-## Notes: Redundancy & Design Issues
-
-1. **State-appending in `dydt`** — `Lorenz63`, `Roessler`, `Daisyworld`, `EBM`, and `Model3` all append to `self.state_variables` and `self.time` inside `dydt`, which runs at every integration sub-step. The intended pattern (used by Stommel, TwoBoxCarbon, ENSORechargeOscillator, and others) is `uses_post_history() → True` with state populated in `post_integrate()`. These five models are inconsistent with the rest of the codebase.
-
-2. **Duplicated `_forcing_vector()`** — `Lorenz63` and `Stommel` each implement identical private methods that broadcast a scalar forcing value to a vector. This logic could live in `PBModel`.
-
-3. **Duplicated oscillator helpers** — `SimplePendulum` and `DampedSpring` both define `natural_frequency()`, `natural_period()`, and `damping_ratio()` with identical implementations. A shared mixin for oscillatory models would eliminate the duplication.
-
-4. **`EBM.calc_merid_diff` stub** — The method is registered as a parameter and called in `dydt` but always returns zero. There is an internal TODO comment. The stub should either be removed or replaced with a clear `NotImplementedError` / documented as a deliberate no-op.
-
-5. **`func.make_derivative_func` — untested and undocumented** — Flagged `UNTESTED` in the source but publicly exported with no docstring-level warning. Should either be tested, moved to a private namespace, or emit a `warnings.warn` at call time.

@@ -3,27 +3,23 @@ title: Quick Start
 sidebar: get-started
 ---
 
-This page walks through a complete end-to-end example in about 15 lines of code.
-We'll build a Lorenz 63 system, integrate it, and export the result to Pyleoclim
-for a quick spectral analysis.
+This page walks through a complete end-to-end example in about 15 lines of code. We'll build a Lorenz 63 system, integrate it, and export the result to Pyleoclim for a quick spectral analysis.
 
 ## 1. Create a model
 
-Every PaleoBeasts model takes a `forcing` argument. For the Lorenz 63 system the
-forcing adds an optional perturbation to the x-equation; here we set it to zero.
+Every ClimateCritters model takes a `forcing` argument. For the Lorenz 63 system the forcing adds an optional perturbation to the x-equation; here we set it to zero.
 
 ```python
-import paleobeasts as pb
-from paleobeasts.signal_models import Lorenz63
+import climatecritters as cc
+from climatecritters.signal_models import Lorenz63
 
-forcing = pb.core.Forcing(lambda t: 0.0)
+forcing = cc.core.Forcing(lambda t: 0.0)
 model = Lorenz63(forcing=forcing, sigma=10.0, rho=28.0, beta=8/3)
 ```
 
 ## 2. Integrate
 
-Call `integrate()` with an integration window, initial conditions, and a solver method.
-It returns a `PBOutput` object containing the full trajectory.
+Call `integrate()` with an integration window, initial conditions, and a solver method. It returns a `CCOutput` object containing the full trajectory.
 
 ```python
 output = model.integrate(
@@ -42,9 +38,7 @@ print(output.time[:5])                       # first five time points
 
 ## 4. Export to Pyleoclim
 
-`to_pyleo()` converts any state variable into a Pyleoclim `Series`
-(or `MultipleSeries` for a list of names), enabling the full suite of
-Pyleoclim analysis and plotting tools.
+`to_pyleo()` converts any state variable into a Pyleoclim `Series` (or `MultipleSeries` for a list of names), enabling the full suite of Pyleoclim analysis and plotting tools.
 
 ```python
 ts_x = output.to_pyleo(var_names='x')
@@ -59,8 +53,7 @@ ts_x.dashboard()
 
 ## 5. Try a time-varying parameter
 
-Any parameter can be replaced with a callable at construction time.
-The callable must have signature `(t)`, `(t, state)`, or `(t, state, model)`.
+Any parameter can be replaced with a callable at construction time. The callable must have signature `(t)`, `(t, state)`, or `(t, state, model)`.
 
 ```python
 # rho increases linearly from 20 to 40 over the integration window
@@ -75,6 +68,6 @@ output_tv = model_tv.integrate(t_span=(0, 50), y0=[1, 1, 1], method='RK45')
 
 ## Next steps
 
-- [Core concepts](concepts.qmd) — understand `PBModel`, `Forcing`, and `PBOutput` in depth
+- [Core concepts](concepts.qmd) — understand `CCModel`, `Forcing`, and `CCOutput` in depth
 - [Tutorials](../tutorials/index.qmd) — worked examples for climate and dynamical systems models
 - [Reference](../api/index.qmd) — full API documentation

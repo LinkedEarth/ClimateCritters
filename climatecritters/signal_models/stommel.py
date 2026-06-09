@@ -1,0 +1,144 @@
+from __future__ import annotations
+
+import numpy as np
+
+from ..core.ccmodel import CCModel
+
+
+class Stommel(CCModel):
+    """Minimal two-box Stommel thermohaline circulation model.
+
+    State variables are the pole-to-equator temperature contrast ``T`` and
+    salinity contrast ``S``.  The overturning strength is parameterized as:
+
+        q = k * (alpha*T - beta*S)
+
+    and the prognostic equations are:
+
+        dT/dt = -lambda_T * (T - T_star) - |q|*T
+        dS/dt =  E - lambda_S * (S - S_star) - |q|*S
+
+    Parameters
+    ----------
+    var_name : str
+        Label for the model output.  Default ``'stommel'``.
+    alpha : float or callable or cc.core.Forcing
+        Thermal expansion coefficient.  Default 1.0.
+    beta : float or callable or cc.core.Forcing
+        Haline contraction coefficient.  Default 1.0.
+    k : float or callable or cc.core.Forcing
+        Hydraulic constant controlling overturning sensitivity.  Default 1.0.
+    E : float or callable or cc.core.Forcing
+        Net evaporation-minus-precipitation freshwater flux.  Default 0.0.
+    lambda_T : float or callable or cc.core.Forcing
+        Thermal restoring rate.  Default 1.0.
+    lambda_S : float or callable or cc.core.Forcing
+        Saline restoring rate.  Default 1.0.
+    T_star : float or callable or cc.core.Forcing
+        Equilibrium temperature contrast.  Default 1.0.
+    S_star : float or callable or cc.core.Forcing
+        Equilibrium salinity contrast.  Default 0.0.
+
+    Notes
+    -----
+    The model uses ``uses_post_history`` to compute the overturning
+    diagnostic ``q`` after integration.  State variables are ``T`` and ``S``;
+    diagnostic variable is ``q``.
+
+    References
+    ----------
+    Stommel, H. (1961). Thermohaline convection with two stable regimes of
+    flow. Tellus, 13(2), 224–230.
+
+    Notes
+    -----
+    State variables are ``T`` and ``S`` (in that order).  Diagnostic
+    variable is ``q`` (overturning strength), computed after integration.
+
+    To drive the salinity equation with an external freshwater forcing::
+
+        model = Stommel(E=0.0)
+        model.register_forcing('S', cc.core.Forcing(lambda t: 0.1),
+                               attachment_style='additive', timing='pre')
+
+    Examples
+    --------
+    ```python
+    import climatecritters as cc
+    from climatecritters.signal_models.stommel import Stommel
+    import matplotlib.pyplot as plt
+
+    model = Stommel(E=0.3, T_star=1.0, S_star=0.0)
+    output = model.integrate(
+        t_span=(0, 50), y0=[1.0, 0.0], method='RK45'
+    )
+    ts_q = output.to_pyleo(var_names=['q'])
+    ts_q.plot()
+    plt.savefig('docs/reference/figures/Stommel_example.png',
+                dpi=150, bbox_inches='tight')
+    ```
+    """
+
+    def __init__(self, var_name='stommel', alpha=1.0, beta=1.0, k=1.0, E=0.0,
+                 lambda_T=1.0, lambda_S=1.0, T_star=1.0, S_star=0.0, state_variables=None,
+                 diagnostic_variables=None, *args, **kwargs):
+        if state_variables is None:
+            state_variables = ['T', 'S']
+        if diagnostic_variables is None:
+            diagnostic_variables = ['q']
+
+        super().__init__(var_name, state_variables=state_variables,
+                         diagnostic_variables=diagnostic_variables, *args, **kwargs)
+
+        self.alpha = alpha
+        self.beta = beta
+        self.k = k
+        self.E = E
+        self.lambda_T = lambda_T
+        self.lambda_S = lambda_S
+        self.T_star = T_star
+        self.S_star = S_star
+        self.param_values = {
+            'alpha': alpha,
+            'beta': beta,
+            'k': k,
+            'E': E,
+            'lambda_T': lambda_T,
+            'lambda_S': lambda_S,
+            'T_star': T_star,
+            'S_star': S_star,
+        }
+        self.params = ()
+
+    def overturning(self, t, x):
+        T, S = x[0], x[1]
+        alpha = self.get_param_value('alpha', t, x)
+        beta = self.get_param_value('beta', t, x)
+        k = self.get_param_value('k', t, x)
+        return k * (alpha * T - beta * S)
+
+    def uses_post_history(self):
+        return True
+
+    def dydt(self, t, x):
+        T, S = x[0], x[1]
+        q = self.overturning(t, x)
+        adv = np.abs(q)
+
+        E = self.get_param_value('E', t, x)
+        lambda_T = self.get_param_value('lambda_T', t, x)
+        lambda_S = self.get_param_value('lambda_S', t, x)
+        T_star = self.get_param_value('T_star', t, x)
+        S_star = self.get_param_value('S_star', t, x)
+        dTdt = -lambda_T * (T - T_star) - adv * T
+        dSdt = E - lambda_S * (S - S_star) - adv * S
+
+        return [dTdt, dSdt]
+
+    def populate_diagnostics_from_history(self, time, history):
+        time = np.asarray(time, dtype=float)
+        history = np.asarray(history, dtype=float)
+        q_vals = np.empty(len(time))
+        for i, (t, row) in enumerate(zip(time, history)):
+            q_vals[i] = self.overturning(t, row)
+        self.diagnostic_variables = {'q': q_vals}

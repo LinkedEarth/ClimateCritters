@@ -1,6 +1,6 @@
 # Signal Model Contract
 
-This document defines the conventions for constructing signal models in PaleoBeasts.
+This document defines the conventions for constructing signal models in ClimateCritters.
 Each section is a binding rule, not a suggestion. New models and tests must follow these
 conventions; deviations should be discussed and reflected here before being introduced.
 
@@ -31,7 +31,7 @@ supported.
 |---|---|---|
 | `t` | `float` | Current integration time |
 | `state` | `ndarray` | Current state vector (same shape as `y0`) |
-| `model` | `PBModel` subclass | The model instance; use for accessing other parameters or attributes |
+| `model` | `CCModel` subclass | The model instance; use for accessing other parameters or attributes |
 
 ### 1.3 Examples
 
@@ -62,7 +62,7 @@ def dydt(self, t, y):
 
 ### 1.5 Rationale
 
-Earlier versions of PaleoBeasts supported heuristic dispatch that inferred argument
+Earlier versions of ClimateCritters supported heuristic dispatch that inferred argument
 order from parameter names (e.g. `ebm_model`, `self`, reversed `(state, t)`). This
 made the base class dependent on naming conventions in individual models and produced
 subtle, silent bugs when names didn't match expectations. The strict convention above
@@ -137,7 +137,7 @@ Set `uses_post_history = True` as a **class attribute** on any model whose `dydt
 free of side effects. This is the preferred pattern for all new models.
 
 ```python
-class MyModel(PBModel):
+class MyModel(CCModel):
     uses_post_history = True
 
     def dydt(self, t, y):
@@ -164,15 +164,15 @@ instead.
 
 ---
 
-## 4. Integration Output (`PBOutput`)
+## 4. Integration Output (`CCOutput`)
 
-### 4.1 `integrate()` returns a `PBOutput`
+### 4.1 `integrate()` returns a `CCOutput`
 
 ```python
 output = model.integrate(t_span=(0, 4000), y0=[0.0], method='euler', kwargs={'dt': 10.0})
 ```
 
-`PBOutput` carries the full trajectory and provides output-focused operations. The model
+`CCOutput` carries the full trajectory and provides output-focused operations. The model
 also stores the latest output as `model.output` for backward-compatible attribute access,
 but capturing the return value is preferred when running multiple experiments.
 
@@ -209,7 +209,7 @@ solver trajectory is retained in `output.solution`.
 
 Add noise to output variables after integration using `output.add_noise`. The clean
 values are saved automatically so `output.remove_noise` can restore them. Each
-`PBOutput` instance tracks its own noise state independently, making it straightforward
+`CCOutput` instance tracks its own noise state independently, making it straightforward
 to generate multiple noisy realizations from a single deterministic run:
 
 ```python
