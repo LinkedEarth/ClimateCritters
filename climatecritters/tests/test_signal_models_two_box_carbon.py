@@ -1,7 +1,7 @@
 import numpy as np
 import climatecritters as cc
 
-from climatecritters.signal_models import BoxModelSpec, TwoBoxCarbon
+from climatecritters.model_critters import BoxModelSpec, TwoBoxCarbon
 
 
 class TestSignalModelsTwoBoxCarbon:

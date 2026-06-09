@@ -69,7 +69,7 @@ class SimplePendulum(CCModel):
     --------
     ```python
     import matplotlib.pyplot as plt
-    from climatecritters.signal_models.pendulum import SimplePendulum
+    from climatecritters.model_critters.pendulum import SimplePendulum
 
     model = SimplePendulum(L=1.0, g=9.81, damping=0.1)
     output = model.integrate(t_span=(0, 20), y0=[1.5, 0.0], method='RK45')
@@ -200,7 +200,7 @@ class DrivenPendulum(CCModel):
     --------
     ```python
     import matplotlib.pyplot as plt
-    from climatecritters.signal_models.pendulum import DrivenPendulum
+    from climatecritters.model_critters.pendulum import DrivenPendulum
 
     model = DrivenPendulum(q=0.5, A=1.2, Omega=2.0/3.0)
     output = model.integrate(
@@ -332,7 +332,7 @@ class DoublePendulum(CCModel):
     ```python
     import matplotlib.pyplot as plt
     import numpy as np
-    from climatecritters.signal_models.pendulum import DoublePendulum
+    from climatecritters.model_critters.pendulum import DoublePendulum
 
     model = DoublePendulum(m1=1.0, m2=1.0, L1=1.0, L2=1.0)
     output = model.integrate(

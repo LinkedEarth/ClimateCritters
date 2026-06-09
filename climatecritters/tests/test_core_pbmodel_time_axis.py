@@ -10,7 +10,7 @@ import pytest
 import climatecritters as cc
 
 from climatecritters.core.ccmodel import CCModel
-from climatecritters.signal_models import lorenz
+from climatecritters.model_critters import lorenz
 
 
 class TestCoreCCModelReframeTimeAxis:

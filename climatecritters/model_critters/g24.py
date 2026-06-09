@@ -26,7 +26,7 @@ class Model3(CCModel):
         Insolation threshold for glacial inception (W m\ :sup:`-2`;
         typically -20 to -15).  Default -16.
     f2 : float or callable or cc.core.Forcing
-        Insolation threshold for deglaciation inception (W m\ :sup:`-2`;
+        Insolation threshold for deglaciation inception (W m^2; typically
         positive).  Default 16.
     t1 : float or callable or cc.core.Forcing
         Relaxation timescale for glacial inception (kyr).  Default 30.
@@ -64,7 +64,7 @@ class Model3(CCModel):
     --------
     ```python
     import climatecritters as cc
-    from climatecritters.signal_models.g24 import Model3, calc_f
+    from climatecritters.model_critters.g24 import Model3, calc_f
     import matplotlib.pyplot as plt
 
     model = Model3()

@@ -1,4 +1,4 @@
-''' Tests for climatecritters.signal_models.g24
+''' Tests for climatecritters.model_critters.g24
 
 Naming rules:
 1. class: Test{filename}{Class}{method} with appropriate camel case
@@ -17,7 +17,7 @@ import pytest
 import numpy as np
 import climatecritters as cc
 
-from climatecritters.signal_models import g24
+from climatecritters.model_critters import g24
 
 class TestSignalModelsG24Integrate:
     @pytest.mark.parametrize('y0', [[0,1],[1,1]])

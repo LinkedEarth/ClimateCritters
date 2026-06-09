@@ -77,7 +77,7 @@ class CCModel:
     """The overarching model structure for PaleoBeasts.
 
     CCModel serves as the archetype/parent class for models within the
-    ``signal_models`` directory.  It is not meant to be instantiated directly.
+    ``model_critters`` directory.  It is not meant to be instantiated directly.
 
     Parameter handling
     ------------------

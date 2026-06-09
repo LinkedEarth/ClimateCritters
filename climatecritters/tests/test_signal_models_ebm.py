@@ -1,4 +1,4 @@
-''' Tests for climatecritters.signal_models.ebm
+''' Tests for climatecritters.model_critters.ebm
 
 Naming rules:
 1. class: Test{filename}{Class}{method} with appropriate camel case
@@ -17,7 +17,7 @@ import pytest
 import numpy as np
 import climatecritters as cc
 
-from climatecritters.signal_models import ebm
+from climatecritters.model_critters import ebm
 
 
 class TestSignalModelsEBM0DIntegrate:

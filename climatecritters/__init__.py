@@ -1,5 +1,5 @@
 import climatecritters.utils as utils
-from .signal_models import *
+from .model_critters import *
 from .core import *
 
 # from .utils import *

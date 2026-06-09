@@ -1,4 +1,4 @@
-''' Tests for climatecritters.signal_models.lorenz (Lorenz63)
+''' Tests for climatecritters.model_critters.lorenz (Lorenz63)
 
 Naming rules:
 1. class: Test{filename}{Class}{method} with appropriate camel case
@@ -17,7 +17,7 @@ import numpy as np
 import pytest
 import climatecritters as cc
 
-from climatecritters.signal_models import lorenz
+from climatecritters.model_critters import lorenz
 
 
 class TestSignalModelsLorenz63Integrate:

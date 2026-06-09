@@ -156,7 +156,7 @@ class BoxModelSpec:
 
     ```python
     import climatecritters as cc
-    from climatecritters.signal_models.box_model import BoxModelSpec
+    from climatecritters.model_critters.box_model import BoxModelSpec
 
     spec = BoxModelSpec("relaxation")
     spec.register_state_variables(["x"])

@@ -1,4 +1,4 @@
-''' Tests for climatecritters.signal_models.ebm.EBM1DLat
+''' Tests for climatecritters.model_critters.ebm.EBM1DLat
 
 Naming rules:
 1. class: Test{filename}{Class}{method} with appropriate camel case
@@ -15,7 +15,7 @@ Notes on how to test:
 
 import numpy as np
 
-from climatecritters.signal_models import EBM1DLat
+from climatecritters.model_critters import EBM1DLat
 
 
 class TestSignalModelsEBM1DLat:

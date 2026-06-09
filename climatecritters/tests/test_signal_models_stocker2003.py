@@ -1,9 +1,9 @@
-"""Tests for climatecritters.signal_models.stocker2003_bipolar_seesaw."""
+"""Tests for climatecritters.model_critters.stocker2003_bipolar_seesaw."""
 
 import numpy as np
 import climatecritters as cc
 
-from climatecritters.signal_models import Stocker2003BipolarSeesaw
+from climatecritters.model_critters import Stocker2003BipolarSeesaw
 
 
 class TestSignalModelsStocker2003Integrate:

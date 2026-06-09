@@ -1,10 +1,10 @@
-"""Tests for climatecritters.signal_models.damped_spring."""
+"""Tests for climatecritters.model_critters.damped_spring."""
 
 import numpy as np
 import pytest
 import climatecritters as cc
 
-from climatecritters.signal_models.damped_spring import DampedSpring
+from climatecritters.model_critters.damped_spring import DampedSpring
 
 
 class TestSignalModelsDampedSpringIntegrate:

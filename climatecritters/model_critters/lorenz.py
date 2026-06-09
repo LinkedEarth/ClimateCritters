@@ -64,7 +64,7 @@ class Lorenz96(CCModel):
     import matplotlib.pyplot as plt
     import numpy as np
     import climatecritters as cc
-    from climatecritters.signal_models.lorenz import Lorenz96
+    from climatecritters.model_critters.lorenz import Lorenz96
 
     # Single-scale system
     model = Lorenz96(n=40, F=8.0)
@@ -215,7 +215,7 @@ class Lorenz63(CCModel):
     ```python
     import matplotlib.pyplot as plt
     import climatecritters as cc
-    from climatecritters.signal_models.lorenz import Lorenz63
+    from climatecritters.model_critters.lorenz import Lorenz63
 
     model = Lorenz63()
     output = model.integrate(

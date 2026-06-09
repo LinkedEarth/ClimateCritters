@@ -39,7 +39,7 @@ class Roessler(CCModel):
     --------
     ```python
     import matplotlib.pyplot as plt
-    from climatecritters.signal_models.roessler import Roessler
+    from climatecritters.model_critters.roessler import Roessler
 
     model = Roessler()
     output = model.integrate(

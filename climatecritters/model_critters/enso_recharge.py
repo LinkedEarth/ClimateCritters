@@ -12,7 +12,7 @@ def seasonal_forcing(t, Af=0.5, Pf=6.0):
     be wrapped in a ``Forcing`` object and registered on the model::
 
         import climatecritters as cc
-        from climatecritters.signal_models.enso_recharge import (
+        from climatecritters.model_critters.enso_recharge import (
             ENSORechargeOscillator, seasonal_forcing)
         from functools import partial
 
@@ -103,7 +103,7 @@ class ENSORechargeOscillator(CCModel):
     --------
     ```python
     import matplotlib.pyplot as plt
-    from climatecritters.signal_models.enso_recharge import ENSORechargeOscillator
+    from climatecritters.model_critters.enso_recharge import ENSORechargeOscillator
 
     model = ENSORechargeOscillator(mu=0.75, Af=0.5, Pf=6.0)
     output = model.integrate(

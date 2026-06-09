@@ -68,7 +68,7 @@ class MyModel(CCModel):
     .. code-block:: python
 
         import climatecritters as cc
-        from climatecritters.signal_models.ebm import MyModel
+        from climatecritters.model_critters.ebm import MyModel
 
         forcing = cc.core.Forcing(lambda t: 1360.0)
         model = MyModel(forcing=forcing, param_a=4.0)

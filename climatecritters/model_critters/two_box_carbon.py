@@ -46,7 +46,7 @@ class TwoBoxCarbon(CCModel):
     --------
     ```python
     import climatecritters as cc
-    from climatecritters.signal_models.two_box_carbon import TwoBoxCarbon
+    from climatecritters.model_critters.two_box_carbon import TwoBoxCarbon
     import matplotlib.pyplot as plt
 
     model = TwoBoxCarbon(k=0.1, V_atm=1.0, V_surf=50.0)

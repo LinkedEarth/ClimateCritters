@@ -28,7 +28,7 @@ pip install git+https://github.com/LinkedEarth/ClimateCritters.git
 
 ```python
 import climatecritters as cc
-from climatecritters.signal_models import Lorenz63
+from climatecritters.model_critters import Lorenz63
 
 model = Lorenz63()
 output = model.integrate(t_span=(0, 50), y0=[1, 1, 1], method='RK45')

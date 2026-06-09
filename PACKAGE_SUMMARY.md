@@ -47,28 +47,28 @@ A unified forcing wrapper that accepts callables, time-series arrays, or composa
 
 | Model | Class | File | State Variables | Key Physics |
 |---|---|---|---|---|
-| Ganopolski (2024) | `Model3` | [g24.py](climatecritters/signal_models/g24.py) | `v`, `k` | Ice volume with orbital forcing and glacial–interglacial bifurcation |
-| Energy Balance | `EBM` | [ebm.py](climatecritters/signal_models/ebm.py) | `T` | 0D radiative balance (albedo, OLR, solar constant) |
-| Latitudinal EBM | `LatitudinalEBM` | [latitudinal_ebm.py](climatecritters/signal_models/latitudinal_ebm.py) | `T_0…T_n` | 1D diffusive EBM on a latitude grid with ice-line feedback |
-| Two-Box Carbon | `TwoBoxCarbon` | [two_box_carbon.py](climatecritters/signal_models/two_box_carbon.py) | `A`, `S` | Atmosphere–surface-ocean carbon exchange with volume-aware fluxes |
-| Generic Box Model | `GenericBoxModel` via `BoxModelSpec` | [box_model.py](climatecritters/signal_models/box_model.py) | configurable | Declarative multi-box ODE builder; supports reciprocal exchange and directed transport |
-| ENSO Recharge | `ENSORechargeOscillator` | [enso_recharge.py](climatecritters/signal_models/enso_recharge.py) | `T`, `h` | Jin-style ENSO recharge oscillator with seasonal forcing |
-| Stommel THC | `Stommel` | [stommel.py](climatecritters/signal_models/stommel.py) | `T`, `S` | 2-box thermohaline circulation; diagnostic: overturning strength `q` |
-| Daisyworld | `Daisyworld` | [daisyworld.py](climatecritters/signal_models/daisyworld.py) | `Aw`, `Ab`, `T` | Biosphere–climate feedback through daisy-coverage-mediated albedo |
-| Bipolar Seesaw (minimal) | `Stocker2003BipolarSeesaw` | [stocker2003_bipolar_seesaw.py](climatecritters/signal_models/stocker2003_bipolar_seesaw.py) | `Ts` | Single-variable thermal relaxation to prescribed northern forcing |
-| Bipolar Seesaw (extended) | `Stocker2003ExtendedSeaIceSeesaw` | [stocker2003_bipolar_seesaw.py](climatecritters/signal_models/stocker2003_bipolar_seesaw.py) | `T_R`, `T_S`, `A`, `T_ANT` | Four-variable system with reservoir, Southern Ocean, sea-ice, and Antarctic temperatures |
+| Ganopolski (2024) | `Model3` | [g24.py](climatecritters/model_critters/g24.py) | `v`, `k` | Ice volume with orbital forcing and glacial–interglacial bifurcation |
+| Energy Balance | `EBM` | [ebm.py](climatecritters/model_critters/ebm.py) | `T` | 0D radiative balance (albedo, OLR, solar constant) |
+| Latitudinal EBM | `LatitudinalEBM` | [latitudinal_ebm.py](climatecritters/model_critters/latitudinal_ebm.py) | `T_0…T_n` | 1D diffusive EBM on a latitude grid with ice-line feedback |
+| Two-Box Carbon | `TwoBoxCarbon` | [two_box_carbon.py](climatecritters/model_critters/two_box_carbon.py) | `A`, `S` | Atmosphere–surface-ocean carbon exchange with volume-aware fluxes |
+| Generic Box Model | `GenericBoxModel` via `BoxModelSpec` | [box_model.py](climatecritters/model_critters/box_model.py) | configurable | Declarative multi-box ODE builder; supports reciprocal exchange and directed transport |
+| ENSO Recharge | `ENSORechargeOscillator` | [enso_recharge.py](climatecritters/model_critters/enso_recharge.py) | `T`, `h` | Jin-style ENSO recharge oscillator with seasonal forcing |
+| Stommel THC | `Stommel` | [stommel.py](climatecritters/model_critters/stommel.py) | `T`, `S` | 2-box thermohaline circulation; diagnostic: overturning strength `q` |
+| Daisyworld | `Daisyworld` | [daisyworld.py](climatecritters/model_critters/daisyworld.py) | `Aw`, `Ab`, `T` | Biosphere–climate feedback through daisy-coverage-mediated albedo |
+| Bipolar Seesaw (minimal) | `Stocker2003BipolarSeesaw` | [stocker2003_bipolar_seesaw.py](climatecritters/model_critters/stocker2003_bipolar_seesaw.py) | `Ts` | Single-variable thermal relaxation to prescribed northern forcing |
+| Bipolar Seesaw (extended) | `Stocker2003ExtendedSeaIceSeesaw` | [stocker2003_bipolar_seesaw.py](climatecritters/model_critters/stocker2003_bipolar_seesaw.py) | `T_R`, `T_S`, `A`, `T_ANT` | Four-variable system with reservoir, Southern Ocean, sea-ice, and Antarctic temperatures |
 
 ### Dynamical Systems & Oscillators
 
 | Model | Class(es) | File | State Variables | Key Physics |
 |---|---|---|---|---|
-| Lorenz (1963) | `Lorenz63` | [lorenz.py](climatecritters/signal_models/lorenz.py) | `x`, `y`, `z` | Classic 3-variable chaos; butterfly attractor |
-| Lorenz (1996) | `Lorenz96` | [lorenz.py](climatecritters/signal_models/lorenz.py) | `x_k` (+ `y_jk` for two-scale) | Atmospheric chaos on a ring; supports fast–slow timescale separation |
-| Roessler | `Roessler` | [roessler.py](climatecritters/signal_models/roessler.py) | `x`, `y`, `z` | Spiral chaotic oscillator (simpler than Lorenz) |
-| Damped Spring | `DampedSpring` | [damped_spring.py](climatecritters/signal_models/damped_spring.py) | `x`, `v` | Damped/driven spring-mass system; diagnostics: energy, ω₀ |
-| Simple Pendulum | `SimplePendulum` | [pendulum.py](climatecritters/signal_models/pendulum.py) | `θ`, `ω` | Nonlinear pendulum with optional linear damping |
-| Driven Pendulum | `DrivenPendulum` | [pendulum.py](climatecritters/signal_models/pendulum.py) | `θ`, `ω` | Forced damped pendulum; canonical 1D chaos testbed |
-| Double Pendulum | `DoublePendulum` | [pendulum.py](climatecritters/signal_models/pendulum.py) | `θ₁`, `ω₁`, `θ₂`, `ω₂` | Conservative chaotic system; diagnostics: energy, Cartesian positions |
+| Lorenz (1963) | `Lorenz63` | [lorenz.py](climatecritters/model_critters/lorenz.py) | `x`, `y`, `z` | Classic 3-variable chaos; butterfly attractor |
+| Lorenz (1996) | `Lorenz96` | [lorenz.py](climatecritters/model_critters/lorenz.py) | `x_k` (+ `y_jk` for two-scale) | Atmospheric chaos on a ring; supports fast–slow timescale separation |
+| Roessler | `Roessler` | [roessler.py](climatecritters/model_critters/roessler.py) | `x`, `y`, `z` | Spiral chaotic oscillator (simpler than Lorenz) |
+| Damped Spring | `DampedSpring` | [damped_spring.py](climatecritters/model_critters/damped_spring.py) | `x`, `v` | Damped/driven spring-mass system; diagnostics: energy, ω₀ |
+| Simple Pendulum | `SimplePendulum` | [pendulum.py](climatecritters/model_critters/pendulum.py) | `θ`, `ω` | Nonlinear pendulum with optional linear damping |
+| Driven Pendulum | `DrivenPendulum` | [pendulum.py](climatecritters/model_critters/pendulum.py) | `θ`, `ω` | Forced damped pendulum; canonical 1D chaos testbed |
+| Double Pendulum | `DoublePendulum` | [pendulum.py](climatecritters/model_critters/pendulum.py) | `θ₁`, `ω₁`, `θ₂`, `ω₂` | Conservative chaotic system; diagnostics: energy, Cartesian positions |
 
 ---
 

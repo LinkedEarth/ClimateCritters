@@ -65,7 +65,7 @@ class Stommel(CCModel):
     --------
     ```python
     import climatecritters as cc
-    from climatecritters.signal_models.stommel import Stommel
+    from climatecritters.model_critters.stommel import Stommel
     import matplotlib.pyplot as plt
 
     model = Stommel(E=0.3, T_star=1.0, S_star=0.0)

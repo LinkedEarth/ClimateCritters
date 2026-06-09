@@ -228,7 +228,7 @@ class EBM0D(EBMBase):
     ```python
     import matplotlib.pyplot as plt
     import climatecritters as cc
-    from climatecritters.signal_models.ebm import EBM0D
+    from climatecritters.model_critters.ebm import EBM0D
 
     model = EBM0D(S0=1360.0)
     output = model.integrate(t_span=(0, 500), y0=[288.0], method='RK45')
@@ -241,7 +241,7 @@ class EBM0D(EBMBase):
     With a time-varying albedo and custom OLR:
 
     ```python
-    from climatecritters.signal_models.ebm import EBM0D, albedo_func, OLR_func
+    from climatecritters.model_critters.ebm import EBM0D, albedo_func, OLR_func
 
     model = EBM0D(albedo=albedo_func, OLR=OLR_func(pRad=600))
     ```
@@ -379,7 +379,7 @@ class EBM1DLat(EBMBase):
     ```python
     import matplotlib.pyplot as plt
     import numpy as np
-    from climatecritters.signal_models.ebm import EBM1DLat
+    from climatecritters.model_critters.ebm import EBM1DLat
 
     grid_n = 50
     model = EBM1DLat(S0=1365.0, grid_n=grid_n)
@@ -401,7 +401,7 @@ class EBM1DLat(EBMBase):
     ```python
     import matplotlib.pyplot as plt
     import climatecritters as cc
-    from climatecritters.signal_models.ebm import EBM1DLat
+    from climatecritters.model_critters.ebm import EBM1DLat
 
     co2_ramp = cc.core.Forcing.from_sequence([
         cc.core.Hold(duration=100, value=0.0),

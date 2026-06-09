@@ -68,7 +68,7 @@ class Daisyworld(CCModel):
 
     ```python
     import climatecritters as cc
-    from climatecritters.signal_models.daisyworld import Daisyworld
+    from climatecritters.model_critters.daisyworld import Daisyworld
     import matplotlib.pyplot as plt
 
     model = Daisyworld(L=0.9)

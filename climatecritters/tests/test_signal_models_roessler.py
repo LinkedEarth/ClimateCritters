@@ -1,7 +1,7 @@
 import numpy as np
 import climatecritters as cc
 
-from climatecritters.signal_models import Roessler
+from climatecritters.model_critters import Roessler
 
 
 class TestSignalModelsRoessler:

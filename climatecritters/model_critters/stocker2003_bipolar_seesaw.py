@@ -51,7 +51,7 @@ class Stocker2003BipolarSeesaw(CCModel):
     ```python
     import numpy as np
     import climatecritters as cc
-    from climatecritters.signal_models.stocker2003_bipolar_seesaw import (
+    from climatecritters.model_critters.stocker2003_bipolar_seesaw import (
         Stocker2003BipolarSeesaw,
     )
 
@@ -189,7 +189,7 @@ class Stocker2003ExtendedSeaIceSeesaw(CCModel):
     --------
     ```python
     import climatecritters as cc
-    from climatecritters.signal_models.stocker2003_bipolar_seesaw import (
+    from climatecritters.model_critters.stocker2003_bipolar_seesaw import (
         Stocker2003ExtendedSeaIceSeesaw,
     )
     import matplotlib.pyplot as plt

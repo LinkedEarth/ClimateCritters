@@ -2,7 +2,7 @@ import numpy as np
 from scipy import integrate
 
 from climatecritters.core.forcing import Forcing
-from climatecritters.signal_models import ENSORechargeOscillator
+from climatecritters.model_critters import ENSORechargeOscillator
 
 
 def _lab09_recharge_deriv(x, t, *pars):

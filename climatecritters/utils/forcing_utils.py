@@ -140,7 +140,7 @@ def create_periodic_forcing(periods_powers, desired_amplitude=1, y0=0):
     ```python
     import matplotlib.pyplot as plt
     from climatecritters.utils.forcing_utils import create_periodic_forcing
-    from climatecritters.signal_models.stommel import Stommel
+    from climatecritters.model_critters.stommel import Stommel
 
     orbital = create_periodic_forcing([(100, 0.6), (41, 0.4)], desired_amplitude=0.3)
     model = Stommel(E=0.0, T_star=1.0, S_star=0.0)

@@ -12,7 +12,7 @@ import pytest
 
 import climatecritters as cc
 from climatecritters.core.forcing import ForcingSpec
-from climatecritters.signal_models import lorenz, stommel
+from climatecritters.model_critters import lorenz, stommel
 
 
 # ---------------------------------------------------------------------------

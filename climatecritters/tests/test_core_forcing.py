@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 import climatecritters as cc
-from climatecritters.signal_models import stommel
+from climatecritters.model_critters import stommel
 
 
 class TestForcingFromCSV:

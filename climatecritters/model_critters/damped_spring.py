@@ -40,7 +40,7 @@ class DampedSpring(CCModel):
     import numpy as np
     import matplotlib.pyplot as plt
     import climatecritters as cc
-    from climatecritters.signal_models.damped_spring import DampedSpring
+    from climatecritters.model_critters.damped_spring import DampedSpring
 
     model = DampedSpring(m=1.0, k=4.0, c=0.4)
     output = model.integrate(t_span=(0, 30), y0=[1.0, 0.0], method='RK45')
@@ -56,7 +56,7 @@ class DampedSpring(CCModel):
     import numpy as np
     import matplotlib.pyplot as plt
     import climatecritters as cc
-    from climatecritters.signal_models.damped_spring import DampedSpring
+    from climatecritters.model_critters.damped_spring import DampedSpring
 
     m, k = 1.0, 4.0
     omega_0 = np.sqrt(k / m)

@@ -58,7 +58,7 @@ def make_derivative_func(method='numpy', derivative=None, data=None, time=None):
     import numpy as np
     import climatecritters as cc
     from climatecritters.utils.func import make_derivative_func
-    from climatecritters.signal_models.g24 import Model3, calc_f
+    from climatecritters.model_critters.g24 import Model3, calc_f
 
     # Build a Forcing from a data array (gives access to .data and .time)
     t_axis = np.linspace(-2000, 0, 4000)

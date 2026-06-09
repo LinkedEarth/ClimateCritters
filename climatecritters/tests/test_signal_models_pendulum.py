@@ -1,10 +1,10 @@
-"""Tests for climatecritters.signal_models.pendulum."""
+"""Tests for climatecritters.model_critters.pendulum."""
 
 import numpy as np
 import pytest
 import climatecritters as cc
 
-from climatecritters.signal_models.pendulum import SimplePendulum, DrivenPendulum, DoublePendulum
+from climatecritters.model_critters.pendulum import SimplePendulum, DrivenPendulum, DoublePendulum
 
 
 # ---------------------------------------------------------------------------
