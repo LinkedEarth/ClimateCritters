@@ -328,8 +328,9 @@ class PBModel:
         attachment_style : {"replacement", "additive"}, optional
             How the forcing value is applied.
 
-            * Parameters default to ``"replacement"`` (the only meaningful
-              operation: a parameter has no dynamics of its own).
+            * Parameters default to ``"replacement"``.  ``"additive"`` is
+              also supported and adds the forcing value to the nominal
+              parameter at each step (e.g. ``k = k_0 + ε(t)``).
             * State variables have **no default** — ``attachment_style`` is
               required.  This is intentional: injecting into a live state
               variable is a significant physical choice that should be explicit.
@@ -337,7 +338,7 @@ class PBModel:
             When the forcing is applied relative to the integration step.
             Derived automatically in most cases:
 
-            * parameter + replacement → ``"pre"`` (always; no override)
+            * parameter + any style   → ``"pre"`` (always; no override)
             * state + replacement     → ``"post"`` (always; warns if ``"pre"`` passed)
             * state + additive        → **required**; raise if not provided
 
@@ -366,9 +367,9 @@ class PBModel:
         if in_params:
             if attachment_style is None:
                 attachment_style = "replacement"
-            if attachment_style != "replacement":
+            if attachment_style not in ("replacement", "additive"):
                 raise ValueError(
-                    f"Parameters only support attachment_style='replacement'; "
+                    f"Parameters support attachment_style='replacement' or 'additive'; "
                     f"got {attachment_style!r} for '{var_name}'."
                 )
             resolved_timing = "pre"
@@ -472,29 +473,40 @@ class PBModel:
         Returns the original ``dydt`` unchanged if no pre-step forcings are
         registered, so the caller can always substitute the result.
         """
-        pre_param = []   # [(var_name, spec), ...]
-        pre_state = []   # [(idx, spec), ...]
+        pre_param_replace = []   # [(var_name, spec), ...]
+        pre_param_additive = []  # [(var_name, spec), ...]
+        pre_state = []           # [(idx, spec), ...]
 
         for var_name, specs in self._forcings.items():
             for spec in specs:
                 if spec.timing != "pre":
                     continue
                 if var_name in self.param_values:
-                    pre_param.append((var_name, spec))
+                    if spec.attachment_style == "additive":
+                        pre_param_additive.append((var_name, spec))
+                    else:
+                        pre_param_replace.append((var_name, spec))
                 elif var_name in self.integrated_state_vars:
                     idx = self.integrated_state_vars.index(var_name)
                     pre_state.append((idx, spec))
 
-        if not pre_param and not pre_state:
+        if not pre_param_replace and not pre_param_additive and not pre_state:
             return self.dydt
 
         original_dydt = self.dydt
 
         def forced_dydt(t, x, *args):
             saved = {}
-            for var_name, spec in pre_param:
+            t_eval = self.time_util(t)
+
+            for var_name, spec in pre_param_replace:
                 saved[var_name] = self.param_values[var_name]
-                self.param_values[var_name] = spec.evaluate(self.time_util(t))
+                self.param_values[var_name] = spec.evaluate(t_eval)
+
+            for var_name, spec in pre_param_additive:
+                if var_name not in saved:
+                    saved[var_name] = self.param_values[var_name]
+                self.param_values[var_name] = self.param_values[var_name] + spec.evaluate(t_eval)
 
             dxdt = np.asarray(original_dydt(t, x, *args), dtype=float).copy()
 
@@ -502,7 +514,7 @@ class PBModel:
                 self.param_values[var_name] = original_val
 
             for idx, spec in pre_state:
-                dxdt[idx] += spec.evaluate(self.time_util(t))
+                dxdt[idx] += spec.evaluate(t_eval)
 
             return dxdt
 

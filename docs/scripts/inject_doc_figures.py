@@ -99,7 +99,7 @@ def inject_into_content(content: str) -> tuple[str, list[str]]:
                     if not next_nonempty.startswith('!['):
                         alt = _make_alt(figname)
                         result.append('')
-                        result.append(f'![{alt}](figures/{figname})')
+                        result.append(f'![{alt}](../figures/{figname})')
                         result.append('')
                         injected.append(figname)
 

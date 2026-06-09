@@ -43,10 +43,14 @@ class TestRegisterForcingParameter:
         specs = model.get_forcings('rho')
         assert specs[0].attachment_style == 'replacement'
 
-    def test_parameter_additive_raises_t2(self):
+    def test_parameter_additive_allowed_t2(self):
+        """additive is now valid for parameters (e.g. noise centred on a constant)."""
         model = lorenz.Lorenz63()
-        with pytest.raises(ValueError, match="attachment_style='replacement'"):
-            model.register_forcing('sigma', _forcing(), attachment_style='additive')
+        model.register_forcing('sigma', _forcing(), attachment_style='additive')
+        specs = model.get_forcings('sigma')
+        assert len(specs) == 1
+        assert specs[0].attachment_style == 'additive'
+        assert specs[0].timing == 'pre'
 
     def test_parameter_timing_pre_explicit_ok_t3(self):
         model = lorenz.Lorenz63()
@@ -241,6 +245,36 @@ class TestIntegrationPreStepParameter:
         model.register_forcing('sigma', pb.Forcing(lambda t: original_sigma * 2))
         model.integrate(t_span=(0, 0.1), y0=[1, 1, 1], method='euler', dt=0.01)
         assert model.param_values['sigma'] == original_sigma
+
+    def test_parameter_additive_shifts_trajectory_t2(self):
+        """Additive parameter forcing should give same result as replacement with
+        nominal + perturbation as the forced value."""
+        sigma_0 = 10.0
+        delta = 2.0
+
+        m_additive = lorenz.Lorenz63(sigma=sigma_0)
+        m_additive.register_forcing('sigma', pb.Forcing(lambda t: delta),
+                                    attachment_style='additive')
+
+        m_replace = lorenz.Lorenz63(sigma=sigma_0)
+        m_replace.register_forcing('sigma', pb.Forcing(lambda t: sigma_0 + delta))
+
+        y0 = [1.0, 1.0, 1.0]
+        out_add = m_additive.integrate(t_span=(0, 1), y0=y0, method='euler', dt=0.01)
+        out_rep = m_replace.integrate(t_span=(0, 1), y0=y0, method='euler', dt=0.01)
+
+        np.testing.assert_allclose(
+            out_add.state_variables['x'],
+            out_rep.state_variables['x'],
+            rtol=1e-10,
+        )
+
+    def test_parameter_additive_restores_after_step_t3(self):
+        """param_values must be restored to the original nominal value after each step."""
+        model = lorenz.Lorenz63(sigma=10.0)
+        model.register_forcing('sigma', pb.Forcing(lambda t: 3.0), attachment_style='additive')
+        model.integrate(t_span=(0, 0.1), y0=[1, 1, 1], method='euler', dt=0.01)
+        assert model.param_values['sigma'] == 10.0
 
 
 # ---------------------------------------------------------------------------

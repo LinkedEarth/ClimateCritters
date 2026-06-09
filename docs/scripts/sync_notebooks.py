@@ -21,10 +21,11 @@ DST = DOCS_DIR / "notebooks"
 SUBDIRS = [
     "model_demos",
     "functionality_demos",
+    "base_classes"
 ]
 
 def sync():
-    SUBDIRS = [x.name for x in SRC.iterdir() if x.is_dir()]
+    # SUBDIRS = [x.name for x in SRC.iterdir() if x.is_dir()]
 
     for subdir in SUBDIRS:
         src_dir = SRC / subdir
