@@ -42,7 +42,7 @@ where $\mathrm{d}W$ is a Wiener increment and $g(t, y)$ (the `noise_func` argume
 ```python
 import numpy as np
 from climatecritters.model_critters.stommel import Stommel
-from climatecritters.utils.forcing_utils import create_constant_forcing
+from climatecritters.utils.forcing import create_constant_forcing
 
 model = Stommel(forcing=create_constant_forcing(0.0))
 

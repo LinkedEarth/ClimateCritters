@@ -77,7 +77,7 @@ def create_periodic_forcing_function(periods_powers, desired_amplitude=1, y0=0):
     ```python
     import numpy as np
     import matplotlib.pyplot as plt
-    from climatecritters.utils.forcing_utils import create_periodic_forcing_function
+    from climatecritters.utils.forcing import create_periodic_forcing_function
 
     # Milankovitch-like forcing: 100 kyr + 41 kyr components
     f = create_periodic_forcing_function(
@@ -139,7 +139,7 @@ def create_periodic_forcing(periods_powers, desired_amplitude=1, y0=0):
     --------
     ```python
     import matplotlib.pyplot as plt
-    from climatecritters.utils.forcing_utils import create_periodic_forcing
+    from climatecritters.utils.forcing import create_periodic_forcing
     from climatecritters.model_critters.stommel import Stommel
 
     orbital = create_periodic_forcing([(100, 0.6), (41, 0.4)], desired_amplitude=0.3)
@@ -177,7 +177,7 @@ def create_constant_forcing(value):
     Examples
     --------
     ```python
-    from climatecritters.utils.forcing_utils import create_constant_forcing
+    from climatecritters.utils.forcing import create_constant_forcing
 
     f = create_constant_forcing(8.0)
     print(f.get_forcing(0.0))    # 8.0
@@ -225,7 +225,7 @@ def create_sinusoid_forcing(A, period, y0=0.0):
     ```python
     import numpy as np
     import matplotlib.pyplot as plt
-    from climatecritters.utils.forcing_utils import create_sinusoid_forcing
+    from climatecritters.utils.forcing import create_sinusoid_forcing
 
     seasonal = create_sinusoid_forcing(A=0.5, period=1.0)
     t = np.linspace(0, 3, 300)
@@ -285,7 +285,7 @@ def create_piecewise_forcing(elements, y0=0.0, label="forcing"):
     import numpy as np
     import matplotlib.pyplot as plt
     import climatecritters as cc
-    from climatecritters.utils.forcing_utils import create_piecewise_forcing
+    from climatecritters.utils.forcing import create_piecewise_forcing
 
     forcing = create_piecewise_forcing(
         [cc.core.Hold(duration=50,  value=0.0),

@@ -239,10 +239,10 @@ quartodoc:
       desc: |
         Factory functions for common Forcing patterns.
       contents:
-        - utils.forcing_utils.create_periodic_forcing
-        - utils.forcing_utils.create_constant_forcing
-        - utils.forcing_utils.create_sinusoid_forcing
-        - utils.forcing_utils.create_piecewise_forcing
+        - utils.forcing.create_periodic_forcing
+        - utils.forcing.create_constant_forcing
+        - utils.forcing.create_sinusoid_forcing
+        - utils.forcing.create_piecewise_forcing
 
     - subtitle: Solvers
       desc: |
