@@ -5,6 +5,7 @@ project:
     - notebooks
     - scripts
     - figures
+    - objects.txt
   pre-render:
     - python scripts/sync_notebooks.py
     - python scripts/inject_doc_figures.py
@@ -25,6 +26,12 @@ interlinks:
       url: https://docs.python.org/3/
     pyleoclim:
       url: https://pyleoclim-util.readthedocs.io/en/latest/
+    climatecritters:
+      url: /
+      inv: objects.txt
+  aliases:
+    climatecritters.core.forcing: null
+    pandas: pd
 
 execute:
   freeze: true
@@ -68,6 +75,7 @@ website:
 
           - section: "Utilities"
             contents:
+              - get-started/forcing.qmd
               - get-started/downsampling.qmd
               - get-started/noise.qmd
               - get-started/solvers.qmd
