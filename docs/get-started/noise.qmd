@@ -33,30 +33,70 @@ To add observation noise to model output, generate a surrogate of the appropriat
 
 Process noise enters during integration — it is part of the dynamics, not added afterwards. This is the appropriate representation for stochastic atmospheric forcing, internal ocean variability, or any mechanism where randomness drives the system rather than merely obscuring it.
 
-ClimateCritters supports this through the `euler_maruyama` solver, which implements the Euler–Maruyama scheme for stochastic differential equations:
+ClimateCritters supports this through stochastic solvers that implement SDE schemes of the form:
 
 $$\mathrm{d}y = f(t, y)\,\mathrm{d}t + g(t, y)\,\mathrm{d}W$$
 
-where $\mathrm{d}W$ is a Wiener increment and $g(t, y)$ (the `noise_func` argument) sets the diffusion scale per state variable.
+where $\mathrm{d}W$ is a Wiener increment and $g(t, y)$ (the diffusion term) sets the noise scale per state variable.
+
+### Implementing `sde_noise`
+
+To use any stochastic solver, attach an `sde_noise` method to your model. It receives the current time and state and returns a diffusion vector with the same shape as the integrated state:
 
 ```python
 import numpy as np
-from climatecritters.model_critters.stommel import Stommel
-from climatecritters.utils.forcing import create_constant_forcing
+from climatecritters.core.ccmodel import CCModel
 
-model = Stommel(forcing=create_constant_forcing(0.0))
+class MyModel(CCModel):
+    def sde_noise(self, t, y):
+        return np.array([0.05, 0.01])   # per-variable diffusion scale
+```
+
+For an existing model instance you can also monkey-patch it:
+
+```python
+model.sde_noise = lambda t, y: np.array([0.05, 0.01])
+```
+
+If `sde_noise` is absent or not callable, the diffusion term is zero and the stochastic integrators reduce to their deterministic equivalents.
+
+### Deterministic vs stochastic
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from climatecritters.model_critters.stommel import Stommel
 
 def noise_func(t, y):
     return np.array([0.05, 0.01])   # diffusion scale on T and S
 
-output = model.integrate(
+# Deterministic baseline
+det = Stommel()
+out_det = det.integrate(t_span=(0, 500), y0=[1.0, 0.5], method='RK45')
+
+# Stochastic run — attach the diffusion term, then integrate
+sto = Stommel()
+sto.sde_noise = noise_func
+out_sto = sto.integrate(
     t_span=(0, 500),
     y0=[1.0, 0.5],
     method='euler_maruyama',
     dt=0.1,
-    noise_func=noise_func,
-    seed=42,
+    kwargs={'random_seed': 42},
 )
+
+fig, axes = plt.subplots(2, 1, figsize=(10, 5), sharex=True)
+for ax, var in zip(axes, ['T', 'S']):
+    ax.plot(out_det.time, out_det.state_variables[var],
+            color='steelblue', lw=1.5, label='deterministic')
+    ax.plot(out_sto.time, out_sto.state_variables[var],
+            color='firebrick', lw=0.8, alpha=0.8, label='stochastic')
+    ax.set_ylabel(var)
+axes[0].legend(fontsize=9)
+axes[-1].set_xlabel('time')
+fig.suptitle('Stommel model: deterministic vs stochastic (Euler–Maruyama)')
+plt.tight_layout()
+plt.show()
 ```
 
 Because noise enters at every timestep, the trajectory itself is altered. Near a bifurcation or tipping point, stochastic kicks can trigger transitions that the deterministic system would not reach on its own — something post-hoc noise cannot reproduce.
