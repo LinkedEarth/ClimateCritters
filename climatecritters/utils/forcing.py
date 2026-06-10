@@ -188,24 +188,12 @@ def create_sinusoid_forcing(A, period, y0=0.0, duration=None):
     Examples
     --------
     ```python
-    import numpy as np
     import matplotlib.pyplot as plt
-    import climatecritters as cc
     from climatecritters.utils.forcing import create_sinusoid_forcing
 
-    # Indefinite — plot over two periods
-    seasonal = create_sinusoid_forcing(A=0.5, period=1.0)
-    fig, ax = seasonal.plot(t_span=(0, 2))
-    ax.set_xlabel('time'); ax.set_ylabel('forcing')
+    f = create_sinusoid_forcing(A=0.5, period=1.0)
+    fig, ax = f.plot(t_span=(0, 2))
     plt.savefig('docs/reference/figures/create_sinusoid_forcing_example.png',
-                dpi=150, bbox_inches='tight')
-
-    # Bounded — embed in a scenario and plot
-    elem = create_sinusoid_forcing(A=0.5, period=1.0, duration=10.0)
-    seq  = cc.Hold(2, value=0.0) + elem + cc.Hold(2, value=0.0)
-    fig, ax = seq.plot()
-    ax.set_xlabel('time'); ax.set_ylabel('forcing')
-    plt.savefig('docs/reference/figures/create_sinusoid_forcing_scenario_example.png',
                 dpi=150, bbox_inches='tight')
     ```
     """
