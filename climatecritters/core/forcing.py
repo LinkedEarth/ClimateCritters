@@ -899,6 +899,7 @@ class Forcing:
         obj.data = None
         obj.time = None
         obj.params = {}
+        obj.plot_kwargs = {}
         obj.forcing_type = "sequence"
 
         segs = compiled["segments"]
