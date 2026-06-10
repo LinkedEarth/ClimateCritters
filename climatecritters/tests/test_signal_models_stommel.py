@@ -55,7 +55,7 @@ class TestSignalModelsStommelTimeVaryingParams:
 class TestSignalModelsStommelForcing:
     def test_scalar_forcing_affects_salinity_tendency_t0(self):
         forced = stommel.Stommel(E=0.0)
-        forced.register_forcing('S', cc.core.Forcing(lambda t: 0.1), attachment_style='additive', timing='pre')
+        forced.register_forcing('S', cc.Forcing(lambda t: 0.1), attachment_style='additive', timing='pre')
         unforced = stommel.Stommel(E=0.0)
         t_span = (0, 0.05)
         y0 = [1.0, 0.1]
@@ -68,10 +68,10 @@ class TestSignalModelsStommelForcing:
 
 class TestSignalModelsStommelSequenceForcing:
     def test_sequence_forcing_integrates_t0(self):
-        forcing = cc.core.Forcing.from_sequence(
+        forcing = cc.Forcing.from_sequence(
             [
-                cc.core.Hold(duration=0.02, value=0.0),
-                cc.core.Ramp(duration=0.03, y0=0.0, yf=0.1, shape='linear'),
+                cc.forcing.Hold(duration=0.02, value=0.0),
+                cc.forcing.Ramp(duration=0.03, y0=0.0, yf=0.1, shape='linear'),
             ],
             label='stommel_sequence',
         )

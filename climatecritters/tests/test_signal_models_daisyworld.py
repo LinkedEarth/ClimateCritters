@@ -54,7 +54,7 @@ class TestSignalModelsDaisyworldTimeVaryingParams:
 class TestSignalModelsDaisyworldForcing:
     def test_luminosity_forcing_changes_temperature_t0(self):
         forced = daisyworld.Daisyworld()
-        forced.register_forcing('L', cc.core.Forcing(lambda t: 0.1))
+        forced.register_forcing('L', cc.Forcing(lambda t: 0.1))
         unforced = daisyworld.Daisyworld()
         t_span = (0, 0.05)
         y0 = [0.2, 0.2, 288.0]

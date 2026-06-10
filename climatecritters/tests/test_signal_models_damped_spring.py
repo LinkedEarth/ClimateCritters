@@ -51,7 +51,7 @@ class TestSignalModelsDampedSpringPhysics:
         """Undamped oscillator driven at ω₀ should grow in amplitude."""
         m, k = 1.0, 4.0
         omega_0 = np.sqrt(k / m)
-        forcing = cc.core.Forcing(lambda t: np.cos(omega_0 * t))
+        forcing = cc.Forcing(lambda t: np.cos(omega_0 * t))
         model = DampedSpring(m=m, k=k, c=0.0)
         model.register_forcing('F', forcing)
         model.integrate(t_span=(0, 30), y0=[0.0, 0.0], method='RK45')

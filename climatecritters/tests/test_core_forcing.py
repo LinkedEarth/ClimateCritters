@@ -55,9 +55,9 @@ class TestForcingSequence:
     def test_from_sequence_summary_t0(self):
         seq_forcing = cc.Forcing.from_sequence(
             [
-                cc.Hold(duration=2.0, value=0.25),
-                cc.Ramp(duration=3.0, y0=0.25, yf=1.0, shape="linear"),
-                cc.Harmonic(duration=2.0, period=4.0, A=0.2, y0=1.0),
+                cc.forcing.Hold(duration=2.0, value=0.25),
+                cc.forcing.Ramp(duration=3.0, y0=0.25, yf=1.0, shape="linear"),
+                cc.forcing.Harmonic(duration=2.0, period=4.0, A=0.2, y0=1.0),
             ],
             label="demo",
         )
@@ -73,7 +73,7 @@ class TestForcingSequence:
 
     def test_ramp_invalid_shape_raises_t1(self):
         with pytest.raises(ValueError, match="shape"):
-            cc.Ramp(duration=1.0, y0=0.0, yf=1.0, shape="sigmoid")
+            cc.forcing.Ramp(duration=1.0, y0=0.0, yf=1.0, shape="sigmoid")
 
 
 class TestForcingAddOperator:
@@ -102,39 +102,39 @@ class TestForcingAddOperator:
     # --- Bounded + Forcing: additive overlay, auto-compiles ---
 
     def test_element_plus_forcing_returns_forcing_t3(self):
-        elem = cc.Hold(duration=5.0, value=2.0)
+        elem = cc.forcing.Hold(duration=5.0, value=2.0)
         noise = cc.Forcing(lambda t: 1.0)
         result = elem + noise
         assert isinstance(result, cc.Forcing)
 
     def test_element_plus_forcing_sums_within_duration_t4(self):
-        elem = cc.Hold(duration=5.0, value=2.0)
+        elem = cc.forcing.Hold(duration=5.0, value=2.0)
         noise = cc.Forcing(lambda t: 1.0)
         result = elem + noise
         # Within duration: Hold(2) + noise(1) = 3
         assert np.isclose(result.get_forcing(2.5), 3.0)
 
     def test_forcing_plus_element_commutative_t5(self):
-        elem = cc.Hold(duration=5.0, value=2.0)
+        elem = cc.forcing.Hold(duration=5.0, value=2.0)
         noise = cc.Forcing(lambda t: 1.0)
         assert np.isclose((elem + noise).get_forcing(2.5),
                           (noise + elem).get_forcing(2.5))
 
     def test_sequence_plus_forcing_returns_forcing_t6(self):
-        seq = cc.Hold(duration=2.0, value=0.0) + cc.Hold(duration=3.0, value=1.0)
+        seq = cc.forcing.Hold(duration=2.0, value=0.0) + cc.forcing.Hold(duration=3.0, value=1.0)
         noise = cc.Forcing(lambda t: 0.5)
         result = seq + noise
         assert isinstance(result, cc.Forcing)
 
     def test_sequence_plus_forcing_sums_values_t7(self):
-        seq = cc.Hold(duration=5.0, value=2.0) + cc.Hold(duration=5.0, value=4.0)
+        seq = cc.forcing.Hold(duration=5.0, value=2.0) + cc.forcing.Hold(duration=5.0, value=4.0)
         offset = cc.Forcing(lambda t: 10.0)
         result = seq + offset
         assert np.isclose(result.get_forcing(2.5), 12.0)   # Hold(2) + 10
         assert np.isclose(result.get_forcing(7.5), 14.0)   # Hold(4) + 10
 
     def test_forcing_plus_sequence_radd_t8(self):
-        seq = cc.Hold(duration=5.0, value=3.0) + cc.Hold(duration=5.0, value=6.0)
+        seq = cc.forcing.Hold(duration=5.0, value=3.0) + cc.forcing.Hold(duration=5.0, value=6.0)
         offset = cc.Forcing(lambda t: 1.0)
         result = offset + seq
         assert np.isclose(result.get_forcing(2.5), 4.0)
@@ -143,14 +143,14 @@ class TestForcingAddOperator:
     # --- Element + Element: temporal concatenation (unchanged) ---
 
     def test_element_plus_element_is_sequence_t9(self):
-        result = cc.Hold(duration=2.0, value=0.0) + cc.Hold(duration=3.0, value=1.0)
-        assert isinstance(result, cc.ForcingSequence)
+        result = cc.forcing.Hold(duration=2.0, value=0.0) + cc.forcing.Hold(duration=3.0, value=1.0)
+        assert isinstance(result, cc.forcing.ForcingSequence)
         assert len(result.parts) == 2
 
     def test_sequence_plus_element_is_sequence_t10(self):
-        seq = cc.Hold(duration=2.0, value=0.0) + cc.Hold(duration=3.0, value=1.0)
-        result = seq + cc.Hold(duration=2.0, value=2.0)
-        assert isinstance(result, cc.ForcingSequence)
+        seq = cc.forcing.Hold(duration=2.0, value=0.0) + cc.forcing.Hold(duration=3.0, value=1.0)
+        result = seq + cc.forcing.Hold(duration=2.0, value=2.0)
+        assert isinstance(result, cc.forcing.ForcingSequence)
         assert len(result.parts) == 3
 
 
@@ -166,7 +166,7 @@ class TestForcingUtils:
     def test_create_forcing_with_duration_returns_element_t1(self):
         from climatecritters.utils.forcing import create_forcing
         elem = create_forcing(lambda t: t * 2.0, duration=10.0)
-        assert isinstance(elem, cc.ForcingElement)
+        assert isinstance(elem, cc.forcing.ForcingElement)
 
     def test_create_constant_no_duration_t2(self):
         from climatecritters.utils.forcing import create_constant_forcing
@@ -177,7 +177,7 @@ class TestForcingUtils:
     def test_create_constant_with_duration_t3(self):
         from climatecritters.utils.forcing import create_constant_forcing
         elem = create_constant_forcing(5.0, duration=10.0)
-        assert isinstance(elem, cc.ForcingElement)
+        assert isinstance(elem, cc.forcing.ForcingElement)
 
     def test_create_sinusoid_no_duration_t4(self):
         from climatecritters.utils.forcing import create_sinusoid_forcing
@@ -188,7 +188,7 @@ class TestForcingUtils:
     def test_create_sinusoid_with_duration_t5(self):
         from climatecritters.utils.forcing import create_sinusoid_forcing
         elem = create_sinusoid_forcing(A=1.0, period=1.0, duration=5.0)
-        assert isinstance(elem, cc.ForcingElement)
+        assert isinstance(elem, cc.forcing.ForcingElement)
 
     def test_create_periodic_single_component_matches_sinusoid_t6(self):
         from climatecritters.utils.forcing import create_sinusoid_forcing, create_periodic_forcing
@@ -205,7 +205,7 @@ class TestForcingUtils:
         from climatecritters.utils.forcing import make_forcing_element
         f = cc.Forcing(lambda t: np.sin(t))
         elem = make_forcing_element(f, duration=10.0)
-        assert isinstance(elem, cc.ForcingElement)
+        assert isinstance(elem, cc.forcing.ForcingElement)
         assert np.isclose(elem._duration, 10.0)
 
     def test_make_forcing_element_infers_duration_from_time_axis_t8(self):
@@ -226,7 +226,7 @@ class TestForcingUtils:
         from climatecritters.utils.forcing import make_forcing_element
         f = cc.Forcing(lambda t: np.sin(t))
         elem = make_forcing_element(f, duration=np.pi)
-        seq = cc.Hold(duration=1.0, value=0.0) + elem
+        seq = cc.forcing.Hold(duration=1.0, value=0.0) + elem
         compiled = seq.compile()
         assert isinstance(compiled, cc.Forcing)
         assert np.isclose(compiled.summary["t_end"], 1.0 + np.pi)
@@ -236,25 +236,25 @@ class TestForcingElementBase:
     """Tests for ForcingElement used directly as a callable-backed segment."""
 
     def test_basic_construction_t0(self):
-        elem = cc.ForcingElement(lambda t: t * 2.0, duration=5.0)
+        elem = cc.forcing.ForcingElement(lambda t: t * 2.0, duration=5.0)
         assert hasattr(elem, "_func")
         assert hasattr(elem, "_duration")
         assert np.isclose(elem._duration, 5.0)
 
     def test_non_callable_raises_t1(self):
         with pytest.raises(TypeError, match="callable"):
-            cc.ForcingElement(func=42.0, duration=5.0)
+            cc.forcing.ForcingElement(func=42.0, duration=5.0)
 
     def test_zero_duration_raises_t2(self):
         with pytest.raises(ValueError, match="duration"):
-            cc.ForcingElement(lambda t: t, duration=0.0)
+            cc.forcing.ForcingElement(lambda t: t, duration=0.0)
 
     def test_negative_duration_raises_t3(self):
         with pytest.raises(ValueError, match="duration"):
-            cc.ForcingElement(lambda t: t, duration=-1.0)
+            cc.forcing.ForcingElement(lambda t: t, duration=-1.0)
 
     def test_resolve_produces_correct_segment_t4(self):
-        elem = cc.ForcingElement(lambda t: t * 2.0, duration=5.0)
+        elem = cc.forcing.ForcingElement(lambda t: t * 2.0, duration=5.0)
         seg = elem._resolve(t0=3.0, y_prev=0.0)
         assert seg.kind == "func"
         assert seg.eval_mode == "func"
@@ -266,9 +266,9 @@ class TestForcingElementBase:
     def test_in_sequence_evaluates_correctly_t5(self):
         """ForcingElement embedded in a ForcingSequence evaluates func(t) correctly."""
         # sin element starting at t=2, duration=4 — absolute t passed to func
-        elem = cc.ForcingElement(lambda t: np.sin(t), duration=4.0)
+        elem = cc.forcing.ForcingElement(lambda t: np.sin(t), duration=4.0)
         seq_forcing = cc.Forcing.from_sequence(
-            [cc.Hold(duration=2.0, value=0.0), elem],
+            [cc.forcing.Hold(duration=2.0, value=0.0), elem],
             label="test",
         )
         # At t=3 (tau=1 into the elem, absolute t=3): expect sin(3)
@@ -278,15 +278,15 @@ class TestForcingElementBase:
 
     def test_concatenation_with_named_elements_t6(self):
         """ForcingElement composes with Hold/Ramp via + operator."""
-        elem = cc.ForcingElement(lambda t: 1.0, duration=3.0)
-        seq = cc.Hold(duration=2.0, value=0.0) + elem
-        assert isinstance(seq, cc.ForcingSequence)
+        elem = cc.forcing.ForcingElement(lambda t: 1.0, duration=3.0)
+        seq = cc.forcing.Hold(duration=2.0, value=0.0) + elem
+        assert isinstance(seq, cc.forcing.ForcingSequence)
         assert len(seq.parts) == 2
 
     def test_sequence_duration_includes_func_element_t7(self):
-        elem = cc.ForcingElement(lambda t: 0.5, duration=3.0)
+        elem = cc.forcing.ForcingElement(lambda t: 0.5, duration=3.0)
         seq_forcing = cc.Forcing.from_sequence(
-            [cc.Hold(duration=2.0, value=0.0), elem],
+            [cc.forcing.Hold(duration=2.0, value=0.0), elem],
         )
         assert np.isclose(seq_forcing.summary["t_end"], 5.0)
 
@@ -351,33 +351,33 @@ class TestPlotKwargs:
     # --- plot_kwargs stored on all element types ---
 
     def test_hold_stores_plot_kwargs_t0(self):
-        elem = cc.Hold(duration=5.0, value=1.0, plot_kwargs={'color': 'red'})
+        elem = cc.forcing.Hold(duration=5.0, value=1.0, plot_kwargs={'color': 'red'})
         assert elem.plot_kwargs == {'color': 'red'}
 
     def test_ramp_stores_plot_kwargs_t1(self):
-        elem = cc.Ramp(duration=5.0, y0=0.0, yf=1.0, plot_kwargs={'color': 'blue'})
+        elem = cc.forcing.Ramp(duration=5.0, y0=0.0, yf=1.0, plot_kwargs={'color': 'blue'})
         assert elem.plot_kwargs == {'color': 'blue'}
 
     def test_harmonic_stores_plot_kwargs_t2(self):
-        elem = cc.Harmonic(duration=5.0, period=1.0, A=0.5, y0=0.0,
+        elem = cc.forcing.Harmonic(duration=5.0, period=1.0, A=0.5, y0=0.0,
                            plot_kwargs={'linestyle': '--'})
         assert elem.plot_kwargs == {'linestyle': '--'}
 
     def test_forcing_element_stores_plot_kwargs_t3(self):
-        elem = cc.ForcingElement(lambda t: t, duration=5.0, plot_kwargs={'alpha': 0.5})
+        elem = cc.forcing.ForcingElement(lambda t: t, duration=5.0, plot_kwargs={'alpha': 0.5})
         assert elem.plot_kwargs == {'alpha': 0.5}
 
     def test_default_plot_kwargs_is_none_t4(self):
-        assert cc.Hold(duration=5.0, value=1.0).plot_kwargs is None
-        assert cc.Ramp(duration=5.0, y0=0.0, yf=1.0).plot_kwargs is None
-        assert cc.Harmonic(duration=5.0, period=1.0, A=0.5, y0=0.0).plot_kwargs is None
+        assert cc.forcing.Hold(duration=5.0, value=1.0).plot_kwargs is None
+        assert cc.forcing.Ramp(duration=5.0, y0=0.0, yf=1.0).plot_kwargs is None
+        assert cc.forcing.Harmonic(duration=5.0, period=1.0, A=0.5, y0=0.0).plot_kwargs is None
 
     # --- .plot() return types ---
 
     def test_forcing_element_plot_returns_fig_ax_t5(self):
         import matplotlib
         matplotlib.use('Agg')
-        elem = cc.Hold(duration=10.0, value=2.0)
+        elem = cc.forcing.Hold(duration=10.0, value=2.0)
         fig, ax = elem.plot()
         import matplotlib.pyplot as plt
         assert isinstance(fig, plt.Figure)
@@ -386,7 +386,7 @@ class TestPlotKwargs:
     def test_forcing_sequence_plot_returns_fig_ax_t6(self):
         import matplotlib
         matplotlib.use('Agg')
-        seq = cc.Hold(10.0, value=0.0) + cc.Ramp(10.0, y0=0.0, yf=1.0) + cc.Hold(10.0, value=1.0)
+        seq = cc.forcing.Hold(10.0, value=0.0) + cc.forcing.Ramp(10.0, y0=0.0, yf=1.0) + cc.forcing.Hold(10.0, value=1.0)
         fig, ax = seq.plot()
         import matplotlib.pyplot as plt
         assert isinstance(fig, plt.Figure)
@@ -395,7 +395,7 @@ class TestPlotKwargs:
     def test_forcing_plot_sequence_backed_infers_t_span_t7(self):
         import matplotlib
         matplotlib.use('Agg')
-        f = cc.Forcing.from_sequence([cc.Hold(10.0, value=1.0), cc.Hold(10.0, value=2.0)])
+        f = cc.Forcing.from_sequence([cc.forcing.Hold(10.0, value=1.0), cc.forcing.Hold(10.0, value=2.0)])
         fig, ax = f.plot()
         import matplotlib.pyplot as plt
         assert isinstance(fig, plt.Figure)
@@ -431,7 +431,7 @@ class TestPlotKwargs:
         import matplotlib
         matplotlib.use('Agg')
         import matplotlib.pyplot as plt
-        seq = cc.Hold(10.0, value=1.0, plot_kwargs={'color': 'red'})
+        seq = cc.forcing.Hold(10.0, value=1.0, plot_kwargs={'color': 'red'})
         fig, ax = seq.plot()
         line_color = ax.lines[0].get_color()
         assert line_color == 'red'
@@ -442,7 +442,7 @@ class TestPlotKwargs:
         matplotlib.use('Agg')
         import matplotlib.pyplot as plt
         fig, ax = plt.subplots()
-        seq = cc.Hold(5.0, value=1.0) + cc.Hold(5.0, value=2.0)
+        seq = cc.forcing.Hold(5.0, value=1.0) + cc.forcing.Hold(5.0, value=2.0)
         returned_fig, returned_ax = seq.plot(ax=ax)
         assert returned_ax is ax
         assert returned_fig is fig
@@ -453,8 +453,8 @@ class TestForcingModelIntegration:
     def test_stommel_sequence_forcing_t0(self):
         forcing = cc.Forcing.from_sequence(
             [
-                cc.Hold(duration=0.02, value=0.0),
-                cc.Ramp(duration=0.03, y0=0.0, yf=0.2, shape="linear"),
+                cc.forcing.Hold(duration=0.02, value=0.0),
+                cc.forcing.Ramp(duration=0.03, y0=0.0, yf=0.2, shape="linear"),
             ],
             label="stommel_sequence",
         )
