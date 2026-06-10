@@ -32,7 +32,7 @@ Model parameters (e.g. `sigma`, `C`, `D`) can be:
 | Callable `(t)` | `sigma=lambda t: 10.0 + 0.1*t` | Called with current time |
 | Callable `(t, state)` | `sigma=lambda t, x: ...` | Called with time and state vector |
 | Callable `(t, state, model)` | `sigma=lambda t, x, m: ...` | Also receives the model instance |
-| `cc.core.Forcing` | `sigma=cc.core.Forcing(...)` | Evaluated via `get_forcing(t)` |
+| `cc.Forcing` | `sigma=cc.Forcing(...)` | Evaluated via `get_forcing(t)` |
 
 The first argument of any callable **must** be named `t` or `time`.
 See `contracts/signal_model_contract.md` for the full specification.
@@ -41,40 +41,39 @@ See `contracts/signal_model_contract.md` for the full specification.
 
 ## Forcing
 
-`Forcing` wraps any time-dependent input signal and provides a uniform `get_forcing(t)` interface to the model. It accepts:
-
-**A callable:**
+`Forcing` wraps any time-dependent input signal and provides a uniform `get_forcing(t)` interface to the model. It accepts a callable, a data array, a CSV file, or a compiled `ForcingSequence`:
 
 ```python
-forcing = cc.core.Forcing(lambda t: 1360.0 + 5.0 * np.sin(2 * np.pi * t / 11.0))
+# Callable
+f = cc.Forcing(lambda t: 1360.0 + 5.0 * np.sin(2 * np.pi * t / 11.0))
+
+# Data array
+f = cc.Forcing(data=my_array, time=my_time, interpolation='cubic')
+
+# Bundled CSV dataset
+f = cc.Forcing.from_csv(dataset='vieira_tsi')
 ```
 
-**An array with a time axis:**
+### Composable scenarios
+
+For signals that change character over time, build a `ForcingSequence` from `Hold`, `Ramp`, and `Harmonic` segments using `+`, then call `.compile()`:
 
 ```python
-forcing = cc.core.Forcing(data=my_array, time=my_time, interpolation='cubic')
+scenario = (
+    cc.Hold(duration=100, value=1360.0)
+    + cc.Ramp(duration=50, y0=1360.0, yf=1380.0, shape='linear')
+    + cc.Hold(duration=100, value=1380.0)
+)
+f = scenario.compile()   # → Forcing, ready to register
 ```
 
-**A CSV dataset** (built-in datasets include TSI reconstructions and insolation):
+Two signals can be superposed with `+`:
 
 ```python
-forcing = cc.core.Forcing.from_csv(dataset='vieira_tsi')
+combined = cc.Forcing(orbital_func) + cc.Forcing(noise_func)
 ```
 
-### Composable sequences
-
-For scenarios with distinct phases (e.g. a spin-up, a ramp, and a perturbation), use `Forcing.from_sequence()` with `Hold`, `Ramp`, and `Harmonic` elements:
-
-```python
-forcing = cc.core.Forcing.from_sequence([
-    cc.core.Hold(duration=100, value=1360.0),
-    cc.core.Ramp(duration=50, y0=1360.0, yf=1380.0, shape='linear'),
-    cc.core.Hold(duration=100, value=1380.0),
-])
-```
-
-The sequence is stitched together automatically; `get_forcing(t)` returns
-the correct segment value at any `t`.
+See the [Forcing](forcing.qmd) page for the full API.
 
 ---
 
@@ -126,9 +125,9 @@ import climatecritters as cc
 from climatecritters.model_critters import EBM
 
 # composable forcing: spin-up then a solar ramp
-forcing = cc.core.Forcing.from_sequence([
-    cc.core.Hold(duration=500, value=1360.0),
-    cc.core.Ramp(duration=200, y0=1360.0, yf=1390.0, shape='linear'),
+forcing = cc.Forcing.from_sequence([
+    cc.Hold(duration=500, value=1360.0),
+    cc.Ramp(duration=200, y0=1360.0, yf=1390.0, shape='linear'),
 ])
 
 # time-varying albedo

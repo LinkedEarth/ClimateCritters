@@ -5,37 +5,51 @@ import numpy as np
 from climatecritters.core.ccmodel import CCModel
 
 
-def seasonal_forcing(t, Af=0.5, Pf=6.0):
-    """Standard sinusoidal seasonal forcing for the ENSO recharge oscillator.
+def seasonal_forcing(A=0.5, period=6.0):
+    """Return a sinusoidal seasonal forcing callable for the ENSO recharge oscillator.
 
-    Returns the seasonal SST forcing term ``Af * sin(2π t / Pf)``, which can
-    be wrapped in a ``Forcing`` object and registered on the model::
+    The returned function computes ``A * sin(2π t / period)`` and can be
+    wrapped in a :class:`~climatecritters.core.Forcing` or passed directly to
+    :meth:`~climatecritters.core.CCModel.register_forcing`::
 
         import climatecritters as cc
         from climatecritters.model_critters.enso_recharge import (
             ENSORechargeOscillator, seasonal_forcing)
-        from functools import partial
 
         model = ENSORechargeOscillator()
-        sf = partial(seasonal_forcing, Af=0.5, Pf=6.0)
-        model.register_forcing('T', cc.core.Forcing(sf),
-                               attachment_style='additive', timing='pre')
+        model.register_forcing(
+            'T',
+            cc.Forcing(seasonal_forcing(A=0.5, period=6.0)),
+            attachment_style='additive',
+            timing='pre',
+        )
+
+    Or equivalently with the factory::
+
+        from climatecritters.utils.forcing import create_sinusoid_forcing
+
+        model.register_forcing(
+            'T',
+            create_sinusoid_forcing(A=0.5, period=6.0),
+            attachment_style='additive',
+            timing='pre',
+        )
 
     Parameters
     ----------
-    t : float
-        Time (model units, e.g. months).
-    Af : float
+    A : float
         Seasonal forcing amplitude.  Default 0.5.
-    Pf : float
-        Seasonal forcing period (same units as ``t``).  Default 6.0.
+    period : float
+        Seasonal forcing period (same units as model time).  Default 6.0.
 
     Returns
     -------
-    float
-        Seasonal forcing value at time ``t``.
+    callable
+        Function ``f(t) -> float``.
     """
-    return Af * np.sin(2.0 * np.pi * t / Pf)
+    def _func(t):
+        return float(A * np.sin(2.0 * np.pi * t / period))
+    return _func
 
 
 class ENSORechargeOscillator(CCModel):
@@ -44,22 +58,23 @@ class ENSORechargeOscillator(CCModel):
     Couples the eastern Pacific SST anomaly ``T`` to the thermocline depth
     anomaly ``h`` via a nonlinear recharge-discharge mechanism:
 
-        dT/dt = R*T + gamma*h - en*(h + b*T)^3 + Af*sin(2*pi*t/Pf)
+        dT/dt = R*T + gamma*h - en*(h + b*T)^3
         dh/dt = -r*h - alpha*b*T
 
     where ``b = b0*mu`` and ``R = gamma*b - c``.
 
-    By default ``Af=0`` so the model runs without any seasonal forcing.
-    To add the standard seasonal cycle, register it externally::
+    Seasonal or any other external forcing is added through the standard
+    :meth:`~climatecritters.core.CCModel.register_forcing` interface::
 
-        from functools import partial
-        sf = partial(seasonal_forcing, Af=0.5, Pf=6.0)
-        model.register_forcing('T', cc.core.Forcing(sf),
-                               attachment_style='additive', timing='pre')
+        from climatecritters.utils.forcing import create_sinusoid_forcing
 
-    Alternatively, set ``Af`` to a non-zero value to drive seasonal forcing
-    internally through the ``_sst_forcing`` helper without registering an
-    external forcing.
+        model = ENSORechargeOscillator()
+        model.register_forcing(
+            'T',
+            create_sinusoid_forcing(A=0.5, period=6.0),
+            attachment_style='additive',
+            timing='pre',
+        )
 
     Parameters
     ----------
@@ -69,10 +84,6 @@ class ENSORechargeOscillator(CCModel):
         Bjerknes coupling coefficient.  Default 0.7.
     en : float or callable or cc.core.Forcing
         Nonlinear damping coefficient.  Default 0.0 (linear limit).
-    Af : float or callable or cc.core.Forcing
-        Internal seasonal forcing amplitude.  Default 0.0 (no seasonal forcing).
-    Pf : float or callable or cc.core.Forcing
-        Internal seasonal forcing period (model time units).  Default 6.0.
     c : float or callable or cc.core.Forcing
         Newtonian cooling rate of SST.  Default 1.0.
     r : float or callable or cc.core.Forcing
@@ -86,13 +97,8 @@ class ENSORechargeOscillator(CCModel):
 
     Notes
     -----
-    The internal time scale is ``tscale = 1/6`` (months to years mapping);
-    this is baked in but does not affect ``t`` directly as the equations are
-    already in the dimensionless form used in the worksheet.
-
     State vector: ``[T, h]`` — eastern Pacific SST anomaly and thermocline
-    depth anomaly.  ``Pf`` must be non-zero when ``Af != 0`` (raises
-    ``ValueError`` otherwise).
+    depth anomaly.
 
     References
     ----------
@@ -103,12 +109,18 @@ class ENSORechargeOscillator(CCModel):
     --------
     ```python
     import matplotlib.pyplot as plt
+    import climatecritters as cc
     from climatecritters.model_critters.enso_recharge import ENSORechargeOscillator
+    from climatecritters.utils.forcing import create_sinusoid_forcing
 
-    model = ENSORechargeOscillator(mu=0.75, Af=0.5, Pf=6.0)
-    output = model.integrate(
-        t_span=(0, 120), y0=[0.5, 0.0], method='RK45'
+    model = ENSORechargeOscillator(mu=0.75)
+    model.register_forcing(
+        'T',
+        create_sinusoid_forcing(A=0.5, period=6.0),
+        attachment_style='additive',
+        timing='pre',
     )
+    output = model.integrate(t_span=(0, 120), y0=[0.5, 0.0], method='RK45')
     ts = output.to_pyleo(var_names=['T'])
     ts.plot()
     plt.savefig('docs/reference/figures/ENSORechargeOscillator_example.png',
@@ -121,8 +133,6 @@ class ENSORechargeOscillator(CCModel):
         var_name="enso_recharge_oscillator",
         mu=0.7,
         en=0.0,
-        Af=0.0,
-        Pf=6.0,
         c=1.0,
         r=0.25,
         alpha=0.125,
@@ -148,8 +158,6 @@ class ENSORechargeOscillator(CCModel):
 
         self.mu = mu
         self.en = en
-        self.Af = Af
-        self.Pf = Pf
         self.c = c
         self.r = r
         self.alpha = alpha
@@ -159,8 +167,6 @@ class ENSORechargeOscillator(CCModel):
         self.param_values = {
             "mu": mu,
             "en": en,
-            "Af": Af,
-            "Pf": Pf,
             "c": c,
             "r": r,
             "alpha": alpha,
@@ -172,16 +178,7 @@ class ENSORechargeOscillator(CCModel):
     def uses_post_history(self):
         return True
 
-    def _sst_forcing(self, t, state):
-        Af = float(self.get_param_value("Af", t, state))
-        if Af == 0.0:
-            return 0.0
-        Pf = float(self.get_param_value("Pf", t, state))
-        if Pf == 0.0:
-            raise ValueError("Pf must be non-zero when Af != 0.")
-        return float(Af * np.sin(2.0 * np.pi * t / Pf))
-
-    def recharge_components(self, t, state):
+    def dydt(self, t, state):
         T, h = [float(v) for v in np.asarray(state, dtype=float).reshape(-1)]
         mu = float(self.get_param_value("mu", t, state))
         en = float(self.get_param_value("en", t, state))
@@ -193,12 +190,7 @@ class ENSORechargeOscillator(CCModel):
 
         b = b0 * mu
         R = gamma * b - c
-        forcing_term = self._sst_forcing(t, state)
 
-        dT = R * T + gamma * h - en * (h + b * T) ** 3 + forcing_term
+        dT = R * T + gamma * h - en * (h + b * T) ** 3
         dh = -r * h - alpha * b * T
-        return dT, dh
-
-    def dydt(self, t, state):
-        dT, dh = self.recharge_components(t, state)
         return [dT, dh]

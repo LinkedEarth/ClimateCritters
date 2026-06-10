@@ -1,0 +1,387 @@
+---
+title: Forcing
+sidebar: get-started
+---
+
+A **forcing** is any time-varying signal you want to drive a model with — solar
+irradiance, freshwater flux, CO₂ concentration, or noise.  ClimateCritters
+represents all of these through a pair of layers: a **builder layer** for
+constructing piecewise scenarios, and a **signal layer** that models actually
+consume.
+
+## The two layers at a glance
+
+| Layer | Classes | Role |
+|---|---|---|
+| Builder | `ForcingElement`, `Hold`, `Ramp`, `Harmonic`, `ForcingSequence` | Compose a timeline of segments |
+| Signal | `Forcing` | Callable signal consumed by `register_forcing` |
+
+The typical flow: build a sequence with `+`, call `.compile()` to get a
+`Forcing`, register it with the model.
+
+```python
+import climatecritters as cc
+
+seq = cc.Hold(100, value=0.0) + cc.Ramp(50, y0=0.0, yf=4.0) + cc.Hold(100, value=4.0)
+f   = seq.compile()
+model.register_forcing('S', f, attachment_style='additive', timing='pre')
+```
+
+---
+
+## `Forcing` — the signal object
+
+`Forcing` wraps any time-varying signal and exposes a uniform
+`get_forcing(t)` interface.  There are four ways to create one.
+
+### From a callable
+
+The simplest case — any Python function or lambda:
+
+```python
+# Perpetual 11-year solar cycle
+solar = cc.Forcing(lambda t: 1360.0 + 5.0 * np.sin(2 * np.pi * t / 11.0))
+model.register_forcing('S0', solar)
+```
+
+### From a data array
+
+Provide values and an optional time axis; ClimateCritters interpolates:
+
+```python
+co2 = cc.Forcing(data=co2_array, time=age_array, interpolation='cubic')
+```
+
+Outside the time range the value is held at the first or last point.
+Use `interpolation='linear'` for piecewise-linear interpolation.
+
+### From a CSV file
+
+Two datasets are bundled:
+
+```python
+tsi   = cc.Forcing.from_csv(dataset='vieira_tsi')   # total solar irradiance
+insol = cc.Forcing.from_csv(dataset='insolation')   # 65°N summer insolation
+```
+
+Or load your own:
+
+```python
+co2 = cc.Forcing.from_csv(
+    file_path='data/co2_record.csv',
+    time_name='age_kyr',
+    value_name='co2_ppm',
+)
+```
+
+### From a compiled sequence
+
+Call `.compile()` on a `ForcingSequence` (see [below](#forcingsequence)):
+
+```python
+f = seq.compile()   # → Forcing
+```
+
+Or equivalently pass the sequence directly to `Forcing()`:
+
+```python
+f = cc.Forcing(seq)   # auto-compiles
+```
+
+---
+
+## Builder layer
+
+Use the builder layer when you need a signal that changes character over time —
+a spin-up period, a transition, an oscillation, then a hold.
+
+### `Hold` — constant segment
+
+```python
+cc.Hold(duration=100, value=280.0)   # 100 time units at 280
+cc.Hold(dt=50,        value=1360.0)  # dt is an alias for duration
+cc.Hold(tf=200,       value=0.0)     # ends at absolute time 200
+```
+
+### `Ramp` — monotonic transition
+
+```python
+# Linear ramp from 280 to 560 over 100 time units
+cc.Ramp(duration=100, y0=280.0, yf=560.0, shape='linear')
+
+# Cosine (S-curve) ramp; y0 inherits from the previous segment if omitted
+cc.Ramp(duration=100, yf=560.0, shape='cosine')
+
+# Specify amplitude instead of endpoint: yf = y0 + A
+cc.Ramp(duration=100, A=280.0)
+```
+
+### `Harmonic` — sinusoidal segment with phase continuity
+
+`Harmonic` computes the starting phase so the sine wave passes through `y0`
+smoothly, even mid-oscillation:
+
+```python
+cc.Harmonic(duration=20, period=1.0, A=0.5, center=0.0)
+```
+
+If `y0` is omitted it inherits the endpoint of the previous segment, keeping
+the signal continuous across the join.
+
+### General callable: `ForcingElement`
+
+Wrap any function as a bounded segment:
+
+```python
+cc.ForcingElement(lambda t: np.exp(-0.01 * t), duration=50.0)
+```
+
+### `ForcingSequence` — composing segments with `+`
+
+Concatenate segments with `+` to build a `ForcingSequence`:
+
+```python
+scenario = (
+    cc.Hold(duration=200, value=280.0)
+    + cc.Ramp(duration=100, y0=280.0, yf=560.0, shape='cosine')
+    + cc.Hold(duration=200, value=560.0)
+)
+```
+
+Call `.compile()` when the sequence is ready:
+
+```python
+f = scenario.compile()   # → Forcing, 500 time-unit duration
+```
+
+Compilation is not cached — you can extend the sequence and recompile:
+
+```python
+scenario = scenario + cc.Ramp(duration=100, yf=280.0)
+f2 = scenario.compile()   # f is unaffected
+```
+
+You can also pass a list directly to `Forcing.from_sequence`:
+
+```python
+f = cc.Forcing.from_sequence([
+    cc.Hold(duration=100, value=0.0),
+    cc.Ramp(duration=50, y0=0.0, yf=1.0),
+], label='hosing')
+```
+
+---
+
+## Value superposition with `+`
+
+The behaviour of `+` depends on the types of the operands.
+
+### Two `Forcing` objects → value superposition
+
+The result is an indefinite `Forcing` whose value is the sum of both signals
+at every `t`:
+
+```python
+orbital = cc.Forcing(lambda t: 5.0 * np.sin(2 * np.pi * t / 100.0))
+seasonal = cc.Forcing(lambda t: 1.0 * np.sin(2 * np.pi * t / 1.0))
+combined = orbital + seasonal   # → Forcing; value = orbital(t) + seasonal(t)
+model.register_forcing('S0', combined)
+```
+
+### Bounded + `Forcing` → additive overlay
+
+When one operand is a bounded element or sequence and the other is a `Forcing`,
+the result is a bounded `Forcing` for the duration of the bounded operand.
+Outside that interval the bounded part holds at its boundary value.
+
+This is the natural way to add noise to a scenario:
+
+```python
+rng   = np.random.default_rng(42)
+noise = cc.Forcing(lambda t: rng.normal(0, 5.0))
+
+# Noise on a single element
+noisy_ramp = cc.Ramp(duration=100, y0=0.0, yf=4.0) + noise
+
+# Noise on an entire scenario
+noisy_scenario = scenario + noise   # → Forcing, same 500-unit duration
+
+# Commutative — both orderings give the same result
+assert np.isclose(
+    (noise + scenario).get_forcing(150.0),
+    (scenario + noise).get_forcing(150.0),
+)
+```
+
+### Summary table
+
+| Left | Right | Result | Semantic |
+|---|---|---|---|
+| `Forcing` | `Forcing` | `Forcing` (indefinite) | value superposition |
+| `Forcing` | callable | `Forcing` (indefinite) | value superposition |
+| `ForcingElement` | `ForcingElement` | `ForcingSequence` | temporal concatenation |
+| `ForcingSequence` | `ForcingElement` / `ForcingSequence` | `ForcingSequence` | temporal concatenation |
+| `ForcingElement` / `ForcingSequence` | `Forcing` | `Forcing` (bounded) | additive overlay |
+| `Forcing` | `ForcingElement` / `ForcingSequence` | `Forcing` (bounded) | additive overlay |
+
+---
+
+## Registering forcings with a model
+
+Once you have a `Forcing`, attach it to a model parameter or state variable
+with `register_forcing`:
+
+```python
+model.register_forcing(
+    var_name,          # name of the parameter or state variable
+    forcing_object,    # Forcing, callable, or any object with get_forcing(t)
+    attachment_style,  # 'replacement' or 'additive'
+    timing,            # 'pre' or 'post' (inferred for parameters)
+)
+```
+
+### Parameters
+
+| `attachment_style` | Effect |
+|---|---|
+| `'replacement'` | Parameter is patched to `forcing(t)` at each `dydt` call |
+| `'additive'` | `forcing(t)` is added to the nominal parameter value: `k = k₀ + forcing(t)` |
+
+`timing` is always `'pre'` for parameters and is set automatically.
+
+```python
+# Replace solar constant with a time-varying signal
+model.register_forcing('S0', cc.Forcing(lambda t: 1360.0 + 5.0 * np.sin(t)))
+
+# Add centred noise to a diffusion coefficient
+rng = np.random.default_rng(0)
+model.register_forcing('D', cc.Forcing(lambda t: rng.normal(0, 0.01)),
+                       attachment_style='additive')
+```
+
+### State variables
+
+For state variables, `attachment_style` and `timing` both matter:
+
+| `attachment_style` | `timing` | Effect |
+|---|---|---|
+| `'replacement'` | `'post'` (default) | `x[i]` is set to `forcing(t)` after each step |
+| `'additive'` | `'pre'` | `forcing(t)` is added to `dx/dt[i]` — a continuous source/sink rate |
+| `'additive'` | `'post'` | `forcing(t)` is added to `x[i]` after each step |
+
+```python
+# Freshwater flux directly into salinity tendency
+model.register_forcing('S', cc.Forcing(lambda t: 0.1),
+                       attachment_style='additive', timing='pre')
+```
+
+### Factory functions
+
+The `climatecritters.utils.forcing` module provides convenience factories.
+All accept an optional `duration` argument: omit it for an indefinite
+`Forcing`, provide it for a bounded `ForcingElement`:
+
+```python
+from climatecritters.utils.forcing import (
+    create_forcing,
+    create_constant_forcing,
+    create_sinusoid_forcing,
+    create_periodic_forcing,
+    make_forcing_element,
+)
+
+# Indefinite signals
+f_const = create_constant_forcing(1360.0)
+f_sin   = create_sinusoid_forcing(A=5.0, period=11.0)
+f_orb   = create_periodic_forcing([(100, 0.6), (41, 0.4)], desired_amplitude=25.0)
+
+# Bounded elements (composable into a ForcingSequence)
+elem = create_sinusoid_forcing(A=5.0, period=1.0, duration=50.0)
+seq  = cc.Hold(10, value=0.0) + elem + cc.Hold(10, value=0.0)
+f    = seq.compile()
+
+# Convert an existing Forcing into a ForcingElement
+obs  = cc.Forcing.from_csv(dataset='insolation')
+elem = make_forcing_element(obs)          # duration inferred from time axis
+seq  = cc.Hold(50, value=0.0) + elem
+```
+
+---
+
+---
+
+## Visualising forcings
+
+Every forcing object has a `.plot()` method that returns `(fig, ax)`.
+
+### `ForcingElement.plot()` and `ForcingSequence.plot()`
+
+`ForcingSequence.plot()` draws each segment in a distinct colour (Hold →
+blue, Ramp → orange, Harmonic → green, callable → red) and marks
+transitions with dotted vertical lines.  Per-segment styling is controlled
+by `plot_kwargs`:
+
+```python
+import matplotlib.pyplot as plt
+import climatecritters as cc
+
+scenario = (
+    cc.Hold(200, value=280.0,
+            plot_kwargs={'color': 'steelblue',  'label': 'pre-industrial'})
+    + cc.Ramp(100, y0=280.0, yf=560.0, shape='cosine',
+              plot_kwargs={'color': 'firebrick', 'label': 'CO₂ ramp'})
+    + cc.Hold(200, value=560.0,
+              plot_kwargs={'color': 'darkorange', 'label': '2×CO₂'})
+)
+
+fig, ax = scenario.plot()
+ax.set_xlabel('time (kyr)')
+ax.set_ylabel('CO₂ (ppm)')
+ax.legend()
+```
+
+Pass an existing `ax` to overlay multiple sequences on the same panel:
+
+```python
+fig, ax = plt.subplots()
+scenario_a.plot(ax=ax)
+scenario_b.plot(ax=ax, linestyle='--')
+```
+
+### `Forcing.plot()`
+
+For sequence-backed `Forcing` objects the time range is inferred
+automatically.  For callable-backed objects you must supply `t_span`:
+
+```python
+# Sequence-backed — inferred
+fig, ax = scenario.compile().plot()
+
+# Callable-backed — t_span required
+solar = cc.Forcing(lambda t: 1360.0 + 5.0 * np.sin(t))
+fig, ax = solar.plot(t_span=(0, 50), color='gold', label='solar')
+
+# Array-backed — inferred from time axis
+insol = cc.Forcing.from_csv(dataset='insolation')
+fig, ax = insol.plot()
+```
+
+All `.plot()` calls accept the same signature:
+
+```python
+fig, ax = forcing.plot(
+    t_span=(t0, tf),   # optional for sequence/array types
+    n=300,             # evaluation points
+    ax=existing_ax,    # optional; creates a new figure if None
+    color='steelblue', # any matplotlib kwargs
+    label='my forcing',
+)
+```
+
+---
+
+## For a deeper walkthrough
+
+See the [Forcing notebook](../notebooks/base_classes/forcing.ipynb) for
+interactive examples covering all signal types, superposition, and model
+integration.

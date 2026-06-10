@@ -3,6 +3,7 @@ from scipy import integrate
 
 from climatecritters.core.forcing import Forcing
 from climatecritters.model_critters import ENSORechargeOscillator
+from climatecritters.utils.forcing import create_sinusoid_forcing
 
 
 def _lab09_recharge_deriv(x, t, *pars):
@@ -45,6 +46,7 @@ class TestSignalModelsENSORechargeOscillator:
         assert np.all(np.isfinite(model.state_variables["h"]))
 
     def test_matches_lab09_recharge_solver_t0(self):
+        """Model output with seasonal forcing via register_forcing matches reference solver."""
         mu = 0.8
         en = 3.0
         Af = 0.03
@@ -52,7 +54,13 @@ class TestSignalModelsENSORechargeOscillator:
         x0 = [0.1, -0.1]
         t_ref, x_ref = _lab09_recharge_solver(mu=mu, en=en, Af=Af, Pf=Pf, x0=x0, max_time=120)
 
-        model = ENSORechargeOscillator(mu=mu, en=en, Af=Af, Pf=Pf)
+        model = ENSORechargeOscillator(mu=mu, en=en)
+        model.register_forcing(
+            'T',
+            create_sinusoid_forcing(A=Af, period=Pf),
+            attachment_style='additive',
+            timing='pre',
+        )
         model.integrate(
             t_span=(0, 120),
             y0=x0,
@@ -63,15 +71,15 @@ class TestSignalModelsENSORechargeOscillator:
         got = np.column_stack([model.state_variables["T"], model.state_variables["h"]])
         assert np.allclose(got, x_ref, rtol=1e-6, atol=1e-6)
 
-    def test_sst_forcing_matches_analytic_at_quarter_period(self):
-        """_sst_forcing at t=Pf/4 should equal Af (peak of sine)."""
-        Af, Pf = 2.5, 6.0
-        model = ENSORechargeOscillator(mu=0.8, en=0.2, Af=Af, Pf=Pf)
-        t_peak = Pf / 4.0
-        assert np.isclose(model._sst_forcing(t_peak, [0.1, -0.2]), Af)
+    def test_seasonal_forcing_peak_value_t0(self):
+        """create_sinusoid_forcing at t=period/4 should equal A (peak of sine)."""
+        A, period = 2.5, 6.0
+        f = create_sinusoid_forcing(A=A, period=period)
+        t_peak = period / 4.0
+        assert np.isclose(f.get_forcing(t_peak), A)
 
     def test_enso_like_period_t0(self):
-        model = ENSORechargeOscillator(mu=0.8, en=3.0, Af=0.0, Pf=6.0)
+        model = ENSORechargeOscillator(mu=0.8, en=3.0)
         model.integrate(
             t_span=(0, 600),
             y0=[0.1, -0.1],

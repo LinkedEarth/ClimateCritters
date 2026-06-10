@@ -1,3 +1,37 @@
+"""Core forcing classes for ClimateCritters.
+
+The forcing system has two layers:
+
+**Builder layer** — assemble a piecewise timeline from typed segments:
+
+* `ForcingElement` — base class; also directly instantiable with any callable
+* `Hold` — constant segment
+* `Ramp` — linear or cosine transition
+* `Harmonic` — sinusoidal segment with phase continuity
+* `ForcingSequence` — ordered composition; call `ForcingSequence.compile`
+  to produce a ready-to-use `Forcing`
+
+**Signal layer** — a uniform, callable interface consumed by models:
+
+* `Forcing` — wraps a callable, a data array, or a compiled sequence;
+  supports value superposition via ``+``
+
+The typical workflow::
+
+    import climatecritters as cc
+
+    # Build a scenario timeline
+    seq = cc.Hold(100, value=0.0) + cc.Ramp(50, y0=0.0, yf=4.0) + cc.Hold(100, value=4.0)
+    f   = seq.compile()              # → Forcing
+
+    # Register with a model
+    model.register_forcing('S', f, attachment_style='additive', timing='pre')
+
+    # Superpose two indefinite signals
+    combined = cc.Forcing(orbital_func) + cc.Forcing(noise_func)
+    model.register_forcing('S0', combined)
+"""
+
 from __future__ import annotations
 
 import functools
@@ -13,6 +47,25 @@ from scipy.interpolate import CubicSpline, interp1d
 
 @dataclass(frozen=True)
 class ResolvedSegment:
+    """Immutable record describing one compiled segment of a `ForcingSequence`.
+
+    Users do not construct this directly.
+
+    Attributes
+    ----------
+    kind : str
+        Element kind (``'hold'``, ``'ramp'``, ``'harmonic'``, ``'func'``).
+    t0, tf : float
+        Absolute start and end times in model time units.
+    y0, yf : float
+        Forcing value at ``t0`` and ``tf``.
+    eval_mode : str
+        Evaluation rule (``'constant'``, ``'linear'``, ``'cosine'``,
+        ``'harmonic'``, ``'func'``).
+    params : dict
+        Mode-specific evaluation parameters (e.g. amplitude, omega, callable).
+    """
+
     kind: str
     t0: float
     tf: float
@@ -23,20 +76,174 @@ class ResolvedSegment:
 
 
 class ForcingElement:
-    """Base class for composable forcing elements."""
+    """A bounded forcing segment backed by an arbitrary callable.
+
+    ``ForcingElement`` serves two roles:
+
+    1. **Base class** for the named segment types ``Hold``, ``Ramp``,
+       and ``Harmonic``.  Those subclasses call ``super().__init__`` to
+       inherit ``plot_kwargs``.
+    2. **Concrete class** for the general case — wrap *any* callable as a
+       bounded segment with a fixed duration
+
+           elem = ForcingElement(lambda t: np.sin(t), duration=10.0)
+
+    Parameters
+    ----------
+    func : callable
+        Function `f(t) -> float | ndarray`.  Receives the *absolute* time
+        value (``t0 + tau``) at each evaluation point.
+    duration : float
+        Length of the segment in model time units.  Must be > 0.
+    plot_kwargs : dict, optional
+        Matplotlib keyword arguments used when this element is drawn by
+        ``.plot()`` or ``ForcingSequence.plot``.  Common keys:
+        ``color``, ``linewidth``, ``linestyle``, ``label``, ``alpha``.
+        If ``None`` (default), a colour is chosen automatically by segment
+        kind.
+
+    Notes
+    -----
+    A `ForcingElement` is not callable and cannot be used directly as a
+    model input.  Compose it into a `ForcingSequence` and call
+    `ForcingSequence.compile`
+
+        seq = Hold(5, value=0.0) + elem + Hold(5, value=0.0)
+        f   = seq.compile()   # → Forcing, ready to register
+
+    **Operator ``+``**
+
+    The behaviour of ``+`` depends on the type of the right-hand operand:
+
+    * ``ForcingElement + ForcingElement`` → `ForcingSequence`
+      (temporal concatenation)
+    * ``ForcingElement + ForcingSequence`` → `ForcingSequence`
+      (prepend to sequence)
+    * ``ForcingElement + Forcing`` → `Forcing`
+      (additive overlay for the duration of the element; auto-compiles)
+    * ``Forcing + ForcingElement`` → `Forcing`
+      (same; ``__radd__`` makes this commutative)
+
+    Examples
+    --------
+    ```python
+    import numpy as np
+    import matplotlib.pyplot as plt
+    import climatecritters as cc
+
+    elem = cc.ForcingElement(lambda t: np.exp(-0.01 * t), duration=50.0)
+    fig, ax = elem.plot()
+    plt.savefig('docs/reference/figures/ForcingElement_example.png',
+                dpi=150, bbox_inches='tight')
+    ```
+    """
+
+    def __init__(self, func=None, duration=None, plot_kwargs=None):
+        # Always store plot_kwargs so subclasses that call super().__init__ inherit it.
+        self.plot_kwargs = plot_kwargs
+        if func is not None:
+            if not callable(func):
+                raise TypeError(
+                    "ForcingElement func must be callable; "
+                    f"got {type(func)!r}."
+                )
+            duration = float(duration)
+            if duration <= 0.0:
+                raise ValueError("ForcingElement duration must be > 0.")
+            self._func = func
+            self._duration = duration
+
+    def _resolve(self, t0, y_prev):
+        # Only reached for direct ForcingElement instances (not named subclasses).
+        if not hasattr(self, "_func"):
+            raise NotImplementedError(
+                f"{type(self).__name__} must implement _resolve."
+            )
+        t0 = float(t0)
+        tf = t0 + self._duration
+        y0 = float(self._func(t0))
+        yf = float(self._func(tf))
+        return ResolvedSegment(
+            kind="func",
+            t0=t0,
+            tf=tf,
+            y0=y0,
+            yf=yf,
+            eval_mode="func",
+            params={"func": self._func, "t0_abs": t0},
+        )
+
+    def plot(self, t_span=None, n=300, ax=None, **kwargs):
+        """Plot this element over its duration.
+
+        Delegates to `ForcingSequence.plot` with this element as the
+        only part.  ``t_span`` defaults to ``(0, duration)``.
+
+        Parameters
+        ----------
+        t_span : (float, float), optional
+            Time range to plot.  Defaults to ``(0, duration)``.
+        n : int
+            Number of evaluation points.  Default 300.
+        ax : matplotlib.axes.Axes, optional
+            Axes to plot into.  A new figure is created if ``None``.
+        **kwargs
+            Additional keyword arguments passed to ``ax.plot``, overriding
+            any ``plot_kwargs`` set on this element.
+
+        Returns
+        -------
+        fig, ax : matplotlib Figure and Axes
+        """
+        return ForcingSequence([self]).plot(t_span=t_span, n=n, ax=ax, **kwargs)
 
     def __add__(self, other):
         if isinstance(other, ForcingSequence):
             return ForcingSequence([self] + list(other.parts), label=other.label)
         if isinstance(other, ForcingElement):
             return ForcingSequence([self, other])
+        if isinstance(other, Forcing):
+            # Additive overlay: compile self then superpose with the indefinite Forcing.
+            return ForcingSequence([self]).compile() + other
+        return NotImplemented
+
+    def __radd__(self, other):
+        """Support ``Forcing + ForcingElement`` — additive overlay."""
+        if isinstance(other, Forcing):
+            return other + self
         return NotImplemented
 
 
 class Hold(ForcingElement):
-    """Constant segment over a duration or until absolute tf."""
+    """Constant-valued segment.
 
-    def __init__(self, dt=None, value=None, duration=None, tf=None):
+    Parameters
+    ----------
+    value : float
+        The constant forcing value throughout the segment.
+    duration : float, optional
+        Length of the segment.  Alias: ``dt``.  Exactly one of ``duration``,
+        ``dt``, or ``tf`` must be provided.
+    dt : float, optional
+        Alias for ``duration``.
+    tf : float, optional
+        Absolute end time (used instead of ``duration`` when the end time is
+        known but the start time is not yet fixed).
+    Examples
+    --------
+    ```python
+    import matplotlib.pyplot as plt
+    import climatecritters as cc
+
+    h = cc.Hold(duration=50, value=280.0)
+    fig, ax = h.plot()
+    plt.savefig('docs/reference/figures/Hold_example.png',
+                dpi=150, bbox_inches='tight')
+    ```
+    """
+
+    def __init__(self, dt=None, value=None, duration=None, tf=None, plot_kwargs=None):
+        super().__init__(plot_kwargs=plot_kwargs)
         if value is None:
             raise ValueError("Hold requires value.")
 
@@ -77,31 +284,70 @@ class Hold(ForcingElement):
 
 
 class Ramp(ForcingElement):
-    """Monotonic transition over a duration with linear or cosine easing."""
+    """Monotonic transition between two values with linear or cosine easing.
+
+    Parameters
+    ----------
+    duration : float
+        Length of the transition.
+    y0 : float, optional
+        Starting value.  If omitted, inherits from the previous segment's
+        endpoint.
+    yf : float, optional
+        Ending value.  If omitted, computed from ``A`` or ``y_exit``.
+    A : float, optional
+        Signed amplitude of the transition (``yf = y0 + A``).  Used when
+        ``yf`` is not specified directly.
+    y_exit : float, optional
+        Absolute target value combined with ``A`` and ``duration`` to
+        compute a proportionally scaled duration.
+    shape : {'linear', 'cosine'}
+        Interpolation shape.  ``'cosine'`` gives a smooth S-curve (eased
+        start and end); ``'linear'`` is a straight line.  Default
+        ``'linear'``.
+
+    Notes
+    -----
+    The ``shape='cosine'`` option applies a half-cosine ease, producing an
+    S-curve::
+
+        y(τ) = y0 + (yf - y0) * 0.5 * (1 - cos(π * τ / duration))
+
+    This is smoother than ``'linear'`` at both endpoints and is a good
+    choice when the transition is intended to represent a gradual forcing
+    change rather than an abrupt one.
+
+    Examples
+    --------
+    ```python
+    import matplotlib.pyplot as plt
+    import climatecritters as cc
+
+    fig, ax = plt.subplots()
+    cc.Ramp(100, y0=0.0, yf=1.0, shape='linear').plot(ax=ax, label='linear')
+    cc.Ramp(100, y0=0.0, yf=1.0, shape='cosine').plot(ax=ax, label='cosine', linestyle='--')
+    ax.legend()
+    plt.savefig('docs/reference/figures/Ramp_shapes_example.png',
+                dpi=150, bbox_inches='tight')
+    ```
+    """
 
     def __init__(
         self,
-        half_period=None,
         duration=None,
-        y_start=None,
-        y_end=None,
         y0=None,
         yf=None,
         A=None,
         y_exit=None,
         shape="linear",
+        plot_kwargs=None,
     ):
-        if half_period is None and duration is None:
-            raise ValueError("Ramp requires half_period or duration.")
-        dt = half_period if half_period is not None else duration
-        self.half_period = float(dt)
-        if self.half_period <= 0.0:
-            raise ValueError("Ramp half_period/duration must be > 0.")
-
-        if y0 is None and y_start is not None:
-            y0 = y_start
-        if yf is None and y_end is not None:
-            yf = y_end
+        super().__init__(plot_kwargs=plot_kwargs)
+        if duration is None:
+            raise ValueError("Ramp requires duration.")
+        self.duration = float(duration)
+        if self.duration <= 0.0:
+            raise ValueError("Ramp duration must be > 0.")
 
         self.y0 = None if y0 is None else float(y0)
         self.yf = None if yf is None else float(yf)
@@ -123,7 +369,7 @@ class Ramp(ForcingElement):
                 y0 = float(y_prev)
 
         yf = self.yf
-        duration_effective = float(self.half_period)
+        duration_effective = float(self.duration)
         if yf is None:
             if self.y_exit is not None:
                 yf = float(self.y_exit)
@@ -133,7 +379,7 @@ class Ramp(ForcingElement):
                     frac = (yf - y0) / self.A
                     if frac < 0.0:
                         raise ValueError("Ramp y_exit implies opposite direction from A.")
-                    duration_effective = float(self.half_period * frac)
+                    duration_effective = float(self.duration * frac)
             elif self.A is not None:
                 yf = float(y0 + self.A)
             else:
@@ -156,9 +402,44 @@ class Ramp(ForcingElement):
 
 
 class Harmonic(ForcingElement):
-    """Sinusoidal segment constrained by duration, period, and amplitude."""
+    """Sinusoidal segment with automatic phase continuity.
 
-    def __init__(self, duration, period, A, center=None, y0=None):
+    The phase at the start of the segment is computed so that the sinusoid
+    passes through ``y0`` (or the previous segment's endpoint), ensuring a
+    smooth join when embedded in a `ForcingSequence`.
+
+    Parameters
+    ----------
+    duration : float
+        Length of the segment.  Must be > 0.
+    period : float
+        Period of the sinusoid in model time units.  Must be > 0.
+    A : float
+        Amplitude.  Must be non-zero.
+    center : float, optional
+        Mean value (vertical offset) of the sinusoid.  If omitted, the mean
+        is inferred from ``y0`` such that the sinusoid oscillates symmetrically
+        about the starting value.
+    y0 : float, optional
+        Starting value.  If omitted, inherits from the previous segment's
+        endpoint.  At least one of ``y0`` or ``center`` must be provided (or
+        a previous segment must exist).
+
+    Examples
+    --------
+    ```python
+    import matplotlib.pyplot as plt
+    import climatecritters as cc
+
+    h = cc.Harmonic(duration=20, period=4.0, A=0.5, center=0.0)
+    fig, ax = h.plot()
+    plt.savefig('docs/reference/figures/Harmonic_example.png',
+                dpi=150, bbox_inches='tight')
+    ```
+    """
+
+    def __init__(self, duration, period, A, center=None, y0=None, plot_kwargs=None):
+        super().__init__(plot_kwargs=plot_kwargs)
         self.duration = float(duration)
         self.period = float(period)
         self.A = float(A)
@@ -199,23 +480,222 @@ class Harmonic(ForcingElement):
 
 
 class ForcingSequence:
-    """Composable sequence of forcing elements."""
+    """Composable sequence of `ForcingElement` parts.
+
+    ``ForcingSequence`` is a **builder** — it assembles an ordered timeline
+    of segments and knows how to resolve them.  It is **not callable** and
+    cannot be used directly as a model input.  Call `compile` to produce
+    a `Forcing` that is callable and ready to register::
+
+        seq = Hold(100, value=0.0) + Ramp(50, y0=0.0, yf=4.0) + Hold(100, value=0.0)
+        f   = seq.compile()
+        model.register_forcing('S', f, attachment_style='additive', timing='pre')
+
+    Parameters
+    ----------
+    parts : list of ForcingElement, optional
+        Initial list of elements.  May also be built incrementally with ``+``.
+    label : str
+        Human-readable label carried through to the compiled `Forcing`.
+        Default ``'forcing'``.
+
+    Notes
+    -----
+    **Operator ``+``**
+
+    * ``ForcingSequence + ForcingElement`` → `ForcingSequence`
+      (append element)
+    * ``ForcingSequence + ForcingSequence`` → `ForcingSequence`
+      (concatenate)
+    * ``ForcingSequence + Forcing`` → `Forcing`
+      (additive overlay for the full duration of the sequence; auto-compiles)
+    * ``Forcing + ForcingSequence`` → `Forcing`
+      (same; ``__radd__`` makes this commutative)
+
+    **No memoization** — `compile` always produces a fresh
+    `Forcing`.  Recompile freely after modifying ``parts``.
+
+    **Visualisation** — call `plot` to inspect the scenario before
+    registering it.  Each segment is colour-coded by type and labelled from
+    its ``plot_kwargs`` if provided.
+
+    Examples
+    --------
+    ```python
+    import matplotlib.pyplot as plt
+    import climatecritters as cc
+
+    scenario = (
+        cc.Hold(200, value=280.0)
+        + cc.Ramp(100, y0=280.0, yf=560.0, shape='cosine')
+        + cc.Hold(200, value=560.0)
+    )
+    fig, ax = scenario.plot()
+    plt.savefig('docs/reference/figures/ForcingSequence_example.png',
+                dpi=150, bbox_inches='tight')
+    ```
+    """
 
     def __init__(self, parts=None, label="forcing"):
         self.parts = [] if parts is None else list(parts)
         self.label = str(label)
-        self._compiled = None
 
     def __add__(self, other):
         if isinstance(other, ForcingElement):
             return ForcingSequence(self.parts + [other], label=self.label)
         if isinstance(other, ForcingSequence):
             return ForcingSequence(self.parts + other.parts, label=self.label)
+        if isinstance(other, Forcing):
+            # Additive overlay: compile self then superpose with the indefinite Forcing.
+            return self.compile() + other
         return NotImplemented
 
+    def __radd__(self, other):
+        """Support ``Forcing + ForcingSequence`` — additive overlay."""
+        if isinstance(other, Forcing):
+            return other + self
+        return NotImplemented
+
+    def plot(self, t_span=None, n=300, ax=None, **kwargs):
+        """Plot the sequence, colour-coded by segment type.
+
+        Each segment is drawn separately using its own ``plot_kwargs`` if set,
+        otherwise a default colour is chosen by segment kind (``Hold`` →
+        blue, ``Ramp`` → orange, ``Harmonic`` → green, callable → red).
+        Vertical dotted lines mark the transitions between segments.
+
+        Parameters
+        ----------
+        t_span : (float, float), optional
+            Time range to plot.  Defaults to ``(0, t_end)`` of the compiled
+            sequence.
+        n : int
+            Total number of evaluation points distributed proportionally
+            across segments.  Default 300.
+        ax : matplotlib.axes.Axes, optional
+            Axes to plot into.  A new figure is created if ``None``.
+        **kwargs
+            Additional keyword arguments applied to **all** segments,
+            overriding per-element ``plot_kwargs``.  Useful for e.g.
+            ``linewidth`` or ``alpha``.
+
+        Returns
+        -------
+        fig : matplotlib.figure.Figure
+        ax : matplotlib.axes.Axes
+
+        Examples
+        --------
+        ```python
+        import matplotlib.pyplot as plt
+        import climatecritters as cc
+
+        scenario = (
+            cc.Hold(100, value=0.0, plot_kwargs={'color': 'steelblue', 'label': 'baseline'})
+            + cc.Ramp(50, y0=0.0, yf=4.0, plot_kwargs={'color': 'firebrick', 'label': 'ramp'})
+            + cc.Hold(100, value=4.0, plot_kwargs={'color': 'darkorange', 'label': 'perturbed'})
+        )
+        fig, ax = scenario.plot()
+        ax.set_xlabel('time'); ax.set_ylabel('forcing'); ax.legend()
+        plt.savefig('docs/reference/figures/ForcingSequence_plot_example.png',
+                    dpi=150, bbox_inches='tight')
+        ```
+        """
+        import matplotlib.pyplot as plt
+
+        _DEFAULT_COLORS = {
+            'hold':     'steelblue',
+            'ramp':     'darkorange',
+            'harmonic': 'seagreen',
+            'func':     'firebrick',
+        }
+
+        # Resolve segments to get absolute t0/tf per part.
+        resolved = []
+        t_cursor = 0.0
+        y_prev = None
+        for part in self.parts:
+            seg = part._resolve(t_cursor, y_prev)
+            resolved.append((part, seg))
+            t_cursor = float(seg.tf)
+            y_prev = float(seg.yf)
+
+        t_end = resolved[-1][1].tf
+        compiled = self.compile()
+
+        if t_span is None:
+            t_span = (0.0, t_end)
+
+        if ax is None:
+            fig, ax = plt.subplots(figsize=(6,4))
+        else:
+            fig = ax.get_figure()
+
+        total_dur = max(t_span[1] - t_span[0], 1e-12)
+        legend_labels = set()
+
+        for part, seg in resolved:
+            # Clip segment to t_span
+            t0_plot = max(float(seg.t0), t_span[0])
+            tf_plot = min(float(seg.tf), t_span[1])
+            if t0_plot >= tf_plot:
+                continue
+
+            seg_dur = float(seg.tf) - float(seg.t0)
+            n_seg = max(2, int(n * seg_dur / total_dur))
+            t_vals = np.linspace(t0_plot, tf_plot, n_seg)
+            y_vals = np.array([compiled.get_forcing(t) for t in t_vals])
+
+            # Build plot style: element's plot_kwargs → default by kind → caller kwargs
+            seg_style = {'color': _DEFAULT_COLORS.get(seg.kind, 'gray')}
+            if part.plot_kwargs is not None:
+                seg_style.update(part.plot_kwargs)
+            seg_style.update(kwargs)
+
+            # Avoid duplicate legend entries
+            label = seg_style.get('label')
+            if label is not None and label in legend_labels:
+                seg_style.pop('label')
+            elif label is not None:
+                legend_labels.add(label)
+
+            ax.plot(t_vals, y_vals, **seg_style)
+
+        # Vertical dotted lines at internal transitions
+        for _, seg in resolved[:-1]:
+            if t_span[0] < seg.tf < t_span[1]:
+                ax.axvline(float(seg.tf), color='gray', linestyle=':', linewidth=0.8, alpha=0.6)
+
+        ax.set_xlabel('time')
+        ax.set_ylabel('forcing')
+        return fig, ax
+
     def compile(self):
-        if self._compiled is not None:
-            return self._compiled
+        """Resolve all elements and return a callable `Forcing`.
+
+        Each call produces a **fresh** `Forcing` with no internal
+        caching.  The sequence itself is unchanged and can be extended and
+        recompiled freely::
+
+            seq = Hold(50, value=0.0) + Ramp(100, y0=0.0, yf=4.0)
+            f1  = seq.compile()
+            seq = seq + Hold(50, value=4.0)
+            f2  = seq.compile()   # f1 is unaffected
+
+        Returns
+        -------
+        forcing : Forcing
+            A bounded `Forcing` defined over ``[0, t_end]``.  Outside
+            this interval the value is held at the first / last segment's
+            boundary value.
+
+        Raises
+        ------
+        ValueError
+            If the sequence has no parts.
+        TypeError
+            If any part is not a `ForcingElement`.
+        """
         if len(self.parts) == 0:
             raise ValueError("ForcingSequence has no parts.")
 
@@ -233,7 +713,7 @@ class ForcingSequence:
         marks = [float(seg.tf) for seg in segs[:-1]]
         transition_times = np.array(sorted(set(np.round(marks, 12))), dtype=float)
 
-        self._compiled = {
+        compiled = {
             "label": self.label,
             "segments": segs,
             "t_end": float(segs[-1].tf),
@@ -242,62 +722,126 @@ class ForcingSequence:
             "transition_times": transition_times,
             "n_transitions": int(transition_times.size),
         }
-        return self._compiled
-
-    def summary(self):
-        c = self.compile()
-        return {
-            "label": c["label"],
-            "t_end": c["t_end"],
-            "y_start": c["y_start"],
-            "y_end": c["y_end"],
-            "n_parts": len(c["segments"]),
-            "n_transitions": c["n_transitions"],
-            "transition_times": c["transition_times"].copy(),
-        }
-
-    def _eval_scalar(self, t_scalar):
-        c = self.compile()
-        t = float(t_scalar)
-        if t <= 0.0:
-            return c["segments"][0].y0
-        if t >= c["t_end"]:
-            return c["segments"][-1].yf
-
-        for seg in c["segments"]:
-            if t <= seg.tf + 1e-12:
-                tau = t - seg.t0
-                dur = seg.tf - seg.t0
-                if seg.eval_mode == "constant":
-                    return float(seg.params["value"])
-                if seg.eval_mode == "linear":
-                    if dur <= 0.0:
-                        return float(seg.yf)
-                    frac = tau / dur
-                    return float(seg.y0 + (seg.yf - seg.y0) * frac)
-                if seg.eval_mode == "cosine":
-                    if dur <= 0.0:
-                        return float(seg.yf)
-                    frac = np.clip(tau / dur, 0.0, 1.0)
-                    return float(seg.y0 + (seg.yf - seg.y0) * 0.5 * (1.0 - np.cos(np.pi * frac)))
-                if seg.eval_mode == "harmonic":
-                    p = seg.params
-                    return float(p["center"] + p["A"] * np.sin(p["omega"] * tau + p["phi"]))
-                raise ValueError(f"Unsupported eval mode {seg.eval_mode!r}")
-        return float(c["y_end"])
-
-    def __call__(self, t):
-        t_arr = np.asarray(t, dtype=float)
-        scalar = t_arr.ndim == 0
-        t_flat = t_arr.reshape(-1)
-        y = np.array([self._eval_scalar(tt) for tt in t_flat], dtype=float)
-        if scalar:
-            return float(y[0])
-        return y.reshape(t_arr.shape)
+        return Forcing._from_compiled(compiled)
 
 
 class Forcing:
-    """Unified forcing object for callables, time series arrays, and element sequences."""
+    """Unified time-varying signal consumed by models.
+
+    ``Forcing`` wraps any time-dependent input and exposes a single
+    ``get_forcing(t)`` interface.  It accepts four kinds of input:
+
+    **1. A callable** (lambda, function, or any object with ``__call__``)::
+
+        f = Forcing(lambda t: 1360.0 + 5.0 * np.sin(2 * np.pi * t / 11.0))
+
+    **2. A data array** with an optional time axis (interpolated)::
+
+        f = Forcing(data=values, time=t_axis, interpolation='cubic')
+
+    **3. A CSV dataset** (two built-in datasets are bundled)::
+
+        f = Forcing.from_csv(dataset='vieira_tsi')
+        f = Forcing.from_csv(dataset='insolation')
+        f = Forcing.from_csv(file_path='my_data.csv', time_name='age', value_name='co2')
+
+    **4. A** `ForcingSequence` **(auto-compiled)**::
+
+        seq = Hold(100, value=0.0) + Ramp(50, y0=0.0, yf=4.0) + Hold(100, value=4.0)
+        f   = Forcing(seq)   # equivalent to seq.compile()
+
+    Parameters
+    ----------
+    data : callable, array-like, or ForcingSequence
+        The signal source.  See above for accepted types.
+    time : array-like, optional
+        Time axis for array-backed ``Forcing``.  If omitted, integer indices
+        are used.  Must be strictly increasing and the same length as ``data``.
+    params : dict, optional
+        Extra keyword arguments forwarded to a callable ``data`` via
+        ``functools.partial``.
+    interpolation : {'cubic', 'linear'}
+        Interpolation method for array-backed ``Forcing``.  Default ``'cubic'``
+        (extrapolates outside the data range).
+
+    Attributes
+    ----------
+    forcing_type : str
+        One of ``'function'``, ``'sequence'``, ``'interpolated array cubic'``,
+        or ``'interpolated array linear'``.
+    summary : dict or None
+        For sequence-backed ``Forcing``, a summary dict with keys ``label``,
+        ``t_end``, ``y_start``, ``y_end``, ``n_parts``, ``n_transitions``,
+        ``transition_times``.  ``None`` for other types.
+
+    Notes
+    -----
+    **Value superposition with ``+``**
+
+    ``Forcing`` objects can be combined with ``+`` to produce a new
+    ``Forcing`` whose value is the sum of both operands at each ``t``.
+    The unifying rule is:
+
+    * Both operands indefinite → result indefinite:
+      ``Forcing + Forcing``, ``Forcing + callable``
+    * One operand bounded (`ForcingElement` or `ForcingSequence`)
+      → result bounded for the duration of the bounded operand:
+      ``Forcing + ForcingElement``, ``ForcingSequence + Forcing``, etc.
+
+    The bounded operand is auto-compiled before superposition.  Outside its
+    interval the compiled ``Forcing`` holds at its boundary value, so the
+    sum is well-defined for all ``t``.
+
+    Full operator table:
+
+    .. list-table::
+       :header-rows: 1
+
+       * - Left
+         - Right
+         - Result
+         - Semantic
+       * - ``Forcing``
+         - ``Forcing``
+         - ``Forcing`` (indefinite)
+         - value superposition for all t
+       * - ``Forcing``
+         - callable
+         - ``Forcing`` (indefinite)
+         - value superposition for all t
+       * - ``ForcingElement``
+         - ``ForcingElement``
+         - ``ForcingSequence``
+         - temporal concatenation
+       * - ``ForcingSequence``
+         - ``ForcingElement`` / ``ForcingSequence``
+         - ``ForcingSequence``
+         - temporal concatenation
+       * - ``ForcingElement`` / ``ForcingSequence``
+         - ``Forcing``
+         - ``Forcing`` (bounded)
+         - additive overlay; auto-compiles
+       * - ``Forcing``
+         - ``ForcingElement`` / ``ForcingSequence``
+         - ``Forcing`` (bounded)
+         - additive overlay; auto-compiles
+
+    Examples
+    --------
+    ```python
+    import matplotlib.pyplot as plt
+    import climatecritters as cc
+
+    scenario = (
+        cc.Hold(200, value=280.0)
+        + cc.Ramp(100, y0=280.0, yf=560.0, shape='cosine')
+        + cc.Hold(200, value=560.0)
+    )
+    fig, ax = scenario.compile().plot()
+    plt.savefig('docs/reference/figures/Forcing_sequence_example.png',
+                dpi=150, bbox_inches='tight')
+    ```
+    """
 
     _INTERPOLATION_KINDS = {"cubic", "linear"}
 
@@ -309,18 +853,19 @@ class Forcing:
         self.summary = None
 
         if isinstance(data, ForcingSequence):
-            data.compile()
-            self.forcing_type = "sequence"
-            self.forcing_func = data
-            self.summary = data.summary()
+            # Delegate to compile() which returns a fully initialised Forcing.
+            # Copy internals rather than wrapping again to avoid recursion.
+            compiled_forcing = data.compile()
+            self.forcing_type = compiled_forcing.forcing_type
+            self.forcing_func = compiled_forcing.forcing_func
+            self.summary = compiled_forcing.summary
             return
 
         if isinstance(data, ForcingElement):
-            sequence = ForcingSequence([data])
-            sequence.compile()
-            self.forcing_type = "sequence"
-            self.forcing_func = sequence
-            self.summary = sequence.summary()
+            compiled_forcing = ForcingSequence([data]).compile()
+            self.forcing_type = compiled_forcing.forcing_type
+            self.forcing_func = compiled_forcing.forcing_func
+            self.summary = compiled_forcing.summary
             return
 
         if callable(data):
@@ -381,93 +926,103 @@ class Forcing:
             self.forcing_func = interp1d(t_axis, values, **interp_kwargs)
 
     @classmethod
-    def from_sequence(cls, parts: Iterable[ForcingElement], label="forcing"):
-        sequence = ForcingSequence(parts=list(parts), label=label)
-        return cls(data=sequence)
+    def _from_compiled(cls, compiled: dict):
+        """Internal factory: build a Forcing directly from a compiled segment dict.
+
+        Called by `ForcingSequence.compile`; avoids going back through
+        ``__init__`` which would recurse into the ForcingSequence path.
+        """
+        obj = cls.__new__(cls)
+        obj.data = None
+        obj.time = None
+        obj.params = {}
+        obj.forcing_type = "sequence"
+
+        segs = compiled["segments"]
+        t_end = compiled["t_end"]
+        y_end = compiled["y_end"]
+
+        def _eval_scalar(t_scalar):
+            t = float(t_scalar)
+            if t <= 0.0:
+                return float(segs[0].y0)
+            if t >= t_end:
+                return float(y_end)
+            for seg in segs:
+                if t <= seg.tf + 1e-12:
+                    tau = t - seg.t0
+                    dur = seg.tf - seg.t0
+                    if seg.eval_mode == "constant":
+                        return float(seg.params["value"])
+                    if seg.eval_mode == "linear":
+                        if dur <= 0.0:
+                            return float(seg.yf)
+                        return float(seg.y0 + (seg.yf - seg.y0) * tau / dur)
+                    if seg.eval_mode == "cosine":
+                        if dur <= 0.0:
+                            return float(seg.yf)
+                        frac = np.clip(tau / dur, 0.0, 1.0)
+                        return float(seg.y0 + (seg.yf - seg.y0) * 0.5 * (1.0 - np.cos(np.pi * frac)))
+                    if seg.eval_mode == "harmonic":
+                        p = seg.params
+                        return float(p["center"] + p["A"] * np.sin(p["omega"] * tau + p["phi"]))
+                    if seg.eval_mode == "func":
+                        return float(seg.params["func"](seg.params["t0_abs"] + tau))
+                    raise ValueError(f"Unsupported eval mode {seg.eval_mode!r}")
+            return float(y_end)
+
+        def _forcing_func(t):
+            t_arr = np.asarray(t, dtype=float)
+            scalar = t_arr.ndim == 0
+            t_flat = t_arr.reshape(-1)
+            y = np.array([_eval_scalar(tt) for tt in t_flat], dtype=float)
+            if scalar:
+                return float(y[0])
+            return y.reshape(t_arr.shape)
+
+        obj.forcing_func = _forcing_func
+        obj.summary = {
+            "label": compiled["label"],
+            "t_end": t_end,
+            "y_start": compiled["y_start"],
+            "y_end": y_end,
+            "n_parts": len(segs),
+            "n_transitions": compiled["n_transitions"],
+            "transition_times": compiled["transition_times"].copy(),
+        }
+        return obj
 
     @classmethod
-    def from_elements(cls, elements, y0, label="forcing"):
-        if elements is None:
-            raise ValueError("elements must not be None.")
+    def from_sequence(cls, parts: Iterable[ForcingElement], label="forcing"):
+        """Build a `Forcing` from an iterable of `ForcingElement` parts.
 
-        parts = []
-        current = float(y0)
+        Convenience alias for ``ForcingSequence(parts, label).compile()``.
 
-        for element in list(elements):
-            if isinstance(element, ForcingElement):
-                parts.append(element)
-                current = float(element._resolve(0.0, current).yf)
-                continue
+        Parameters
+        ----------
+        parts : iterable of ForcingElement
+            Ordered `Hold`, `Ramp`, `Harmonic`, or general
+            `ForcingElement` instances defining the piecewise timeline.
+        label : str
+            Human-readable label for the resulting forcing object.
 
-            if not isinstance(element, dict):
-                raise TypeError("Forcing elements must be ForcingElement instances or dictionaries.")
+        Returns
+        -------
+        forcing : Forcing
 
-            kind = str(element.get("kind", "")).lower()
-            if kind in {"constant", "hold"}:
-                value = float(element.get("value", current))
-                if "tf" in element:
-                    part = Hold(tf=float(element["tf"]), value=value)
-                else:
-                    duration = element.get("duration", element.get("dt"))
-                    if duration is None:
-                        raise ValueError("constant/hold elements require 'duration' (or 'dt') or 'tf'.")
-                    part = Hold(duration=float(duration), value=value)
-                parts.append(part)
-                current = value
-                continue
+        Examples
+        --------
+        ```python
+        import climatecritters as cc
 
-            if kind == "ramp":
-                params = dict(element)
-                params.pop("kind", None)
-                if not any(k in params for k in ("y0", "y_start")):
-                    params["y0"] = current
-                part = Ramp(**params)
-                parts.append(part)
-                current = float(part._resolve(0.0, current).yf)
-                continue
-
-            if kind == "harmonic":
-                params = dict(element)
-                params.pop("kind", None)
-                if "y0" not in params and "center" not in params:
-                    params["y0"] = current
-                part = Harmonic(**params)
-                parts.append(part)
-                current = float(part._resolve(0.0, current).yf)
-                continue
-
-            if kind == "spike":
-                # Legacy lab element: spike is two ramp halves with optional cosine shape.
-                amp = float(element.get("amplitude", 0.0))
-                hp1 = float(element.get("half_period1", 0.0))
-                hp2 = float(element.get("half_period2", 0.0))
-                if hp1 <= 0.0 or hp2 <= 0.0:
-                    raise ValueError("spike elements require half_period1>0 and half_period2>0")
-                shape = str(element.get("shape", "cosine")).lower()
-                if shape not in {"linear", "cosine"}:
-                    raise ValueError("spike shape must be 'linear' or 'cosine'.")
-
-                start_val = current
-                peak_val = start_val + amp
-                end_val = float(element.get("end_value", start_val))
-                if bool(element.get("half_period2_to_start", False)):
-                    denom = start_val - peak_val
-                    if np.isclose(denom, 0.0):
-                        frac = 0.0
-                    else:
-                        frac = (end_val - peak_val) / denom
-                    hp2 = max(np.finfo(float).eps, hp2 * float(np.clip(frac, 0.0, 1.0)))
-
-                up = Ramp(duration=hp1, y0=start_val, yf=peak_val, shape=shape)
-                down = Ramp(duration=hp2, y0=peak_val, yf=end_val, shape=shape)
-                parts.extend([up, down])
-                current = end_val
-                continue
-
-            raise ValueError(f"Unknown forcing element kind '{kind}'.")
-
-        sequence = ForcingSequence(parts=parts, label=label)
-        return cls(data=sequence)
+        f = cc.Forcing.from_sequence([
+            cc.Hold(duration=100, value=0.0),
+            cc.Ramp(duration=50, y0=0.0, yf=1.0, shape='cosine'),
+            cc.Hold(duration=100, value=1.0),
+        ], label='freshwater_hosing')
+        ```
+        """
+        return ForcingSequence(parts=list(parts), label=label).compile()
 
     @classmethod
     def from_csv(
@@ -479,8 +1034,51 @@ class Forcing:
         params=None,
         interpolation="cubic",
     ):
-        """Create a forcing object from packaged datasets or an arbitrary CSV file."""
+        """Build a `Forcing` from a CSV file or a bundled dataset.
 
+        Two datasets are included with ClimateCritters:
+
+        * ``'vieira_tsi'`` — Vieira et al. total solar irradiance reconstruction
+        * ``'insolation'`` — 65°N summer solstice insolation (Laskar et al.)
+
+        Parameters
+        ----------
+        dataset : {'vieira_tsi', 'insolation'}, optional
+            Name of a bundled dataset.  Mutually exclusive with ``file_path``.
+        file_path : str or Path, optional
+            Path to an arbitrary CSV file.  Mutually exclusive with ``dataset``.
+        value_name : str, optional
+            Column name for the forcing values.  If omitted, the first column
+            (or the dataset default) is used.
+        time_name : str, optional
+            Column name for the time axis.  If omitted, integer indices are used
+            (or the dataset default is applied).
+        params : dict, optional
+            Extra keyword arguments forwarded to the interpolator.
+        interpolation : {'cubic', 'linear'}
+            Interpolation method.  Default ``'cubic'``.
+
+        Returns
+        -------
+        forcing : Forcing
+
+        Examples
+        --------
+        ```python
+        import climatecritters as cc
+
+        # Bundled dataset
+        tsi = cc.Forcing.from_csv(dataset='vieira_tsi')
+
+        # Custom CSV
+        co2 = cc.Forcing.from_csv(
+            file_path='data/co2_record.csv',
+            time_name='age_kyr',
+            value_name='co2_ppm',
+            interpolation='linear',
+        )
+        ```
+        """
         if dataset is not None:
             if dataset == "vieira_tsi":
                 my_resources = importlib.resources.files("climatecritters") / "data"
@@ -521,8 +1119,148 @@ class Forcing:
         return cls(data=data, time=time, params=params, interpolation=interpolation)
 
     def get_forcing(self, t):
-        """Get forcing value(s) at time ``t``."""
+        """Return the forcing value at time ``t``.
+
+        Parameters
+        ----------
+        t : float or array-like
+            Time value(s).  Accepts scalars or NumPy arrays; returns the same
+            shape.
+
+        Returns
+        -------
+        float or ndarray
+        """
         return self.forcing_func(t)
+
+    def plot(self, t_span=None, n=300, ax=None, **kwargs):
+        """Plot the forcing signal over a time range.
+
+        Parameters
+        ----------
+        t_span : (float, float), optional
+            Time range ``(t0, tf)`` to evaluate and plot.  For
+            sequence-backed ``Forcing`` objects this defaults to
+            ``(0, summary["t_end"])``.  For array-backed objects it
+            defaults to ``(time[0], time[-1])``.  For callable-backed
+            objects ``t_span`` is **required**.
+        n : int
+            Number of evaluation points.  Default 300.
+        ax : matplotlib.axes.Axes, optional
+            Axes to plot into.  A new figure is created if ``None``.
+        **kwargs
+            Additional keyword arguments forwarded to ``ax.plot``
+            (e.g. ``color``, ``linewidth``, ``label``).
+
+        Returns
+        -------
+        fig : matplotlib.figure.Figure
+        ax : matplotlib.axes.Axes
+
+        Raises
+        ------
+        ValueError
+            If ``t_span`` is not provided for a callable-backed
+            ``Forcing`` that has no time axis.
+
+        Examples
+        --------
+        ```python
+        import numpy as np
+        import matplotlib.pyplot as plt
+        import climatecritters as cc
+
+        # Sequence-backed — t_span inferred automatically
+        f = cc.Forcing.from_sequence([
+            cc.Hold(100, value=0.0),
+            cc.Ramp(50, y0=0.0, yf=4.0),
+        ])
+        fig, ax = f.plot()
+        plt.savefig('docs/reference/figures/Forcing_plot_example.png',
+                    dpi=150, bbox_inches='tight')
+
+        # Callable-backed — t_span required
+        solar = cc.Forcing(lambda t: 1360.0 + 5.0 * np.sin(t))
+        fig, ax = solar.plot(t_span=(0, 50))
+        plt.savefig('docs/reference/figures/Forcing_plot_callable_example.png',
+                    dpi=150, bbox_inches='tight')
+        ```
+        """
+        import matplotlib.pyplot as plt
+
+        if t_span is None:
+            if self.summary is not None:
+                t_span = (0.0, float(self.summary['t_end']))
+            elif self.time is not None:
+                t_arr = np.asarray(self.time, dtype=float)
+                t_span = (float(t_arr[0]), float(t_arr[-1]))
+            else:
+                raise ValueError(
+                    "t_span is required for callable-backed Forcing objects "
+                    "(no time axis or sequence summary to infer from)."
+                )
+
+        t_vals = np.linspace(float(t_span[0]), float(t_span[1]), int(n))
+        y_vals = self.forcing_func(t_vals)
+
+        if ax is None:
+            fig, ax = plt.subplots(figsize=(6,4))
+        else:
+            fig = ax.get_figure()
+
+        ax.plot(t_vals, y_vals, **kwargs)
+        ax.set_xlabel('time')
+        ax.set_ylabel('forcing')
+        return fig, ax
+
+    def __add__(self, other):
+        """Value superposition — return a new `Forcing` equal to ``self(t) + other(t)``.
+
+        Parameters
+        ----------
+        other : Forcing, ForcingElement, ForcingSequence, or callable
+
+        Returns
+        -------
+        Forcing
+            Bounded if ``other`` is a `ForcingElement` or
+            `ForcingSequence` (duration inherited from the bounded
+            operand, holding at boundary values outside the interval).
+            Indefinite otherwise.
+
+        Notes
+        -----
+        ``ForcingElement`` and ``ForcingSequence`` operands are auto-compiled
+        before superposition.
+        """
+        if isinstance(other, (ForcingElement, ForcingSequence)):
+            if isinstance(other, ForcingElement):
+                other = ForcingSequence([other]).compile()
+            else:
+                other = other.compile()
+        if isinstance(other, Forcing):
+            f_a = self.forcing_func
+            f_b = other.forcing_func
+            def _sum(t):
+                return f_a(t) + f_b(t)
+            return Forcing(_sum)
+        if callable(other):
+            f_a = self.forcing_func
+            def _sum_callable(t):
+                return f_a(t) + other(t)
+            return Forcing(_sum_callable)
+        return NotImplemented
+
+    def __radd__(self, other):
+        """Support ``callable + Forcing`` and ``ForcingElement/Sequence + Forcing``."""
+        if isinstance(other, (ForcingElement, ForcingSequence, Forcing)):
+            return self.__add__(other)
+        if callable(other):
+            f_b = self.forcing_func
+            def _sum_callable(t):
+                return other(t) + f_b(t)
+            return Forcing(_sum_callable)
+        return NotImplemented
 
 
 _VALID_ATTACHMENT_STYLES = {"replacement", "additive"}
@@ -533,31 +1271,38 @@ _VALID_TIMINGS = {"pre", "post"}
 class ForcingSpec:
     """Registration record for a single forcing attachment on a model variable.
 
-    Created internally by ``CCModel.set_forcing``; users do not construct this
-    directly.  All fields are validated at construction time.
+    Created internally by `register_forcing`;
+    users do not construct this directly.
 
     Parameters
     ----------
-    forcing_object :
-        A ``Forcing`` instance, a callable ``f(t)`` → scalar/array, or any
-        object with a ``get_forcing(t)`` method.
-    attachment_style : {"replacement", "additive"}
+    forcing_object : Forcing, callable, or object with get_forcing
+        The signal source.  Accepts a `Forcing` instance, any callable
+        ``f(t)``, or any object with a ``get_forcing(t)`` method.
+    attachment_style : {'replacement', 'additive'}
         How the forcing value is applied to the target variable.
-        ``"replacement"`` substitutes the current parameter or state value.
-        ``"additive"`` adds the forcing value to the existing value or to
-        ``dx/dt`` for state variables.
-    timing : {"pre", "post"}
-        When the forcing is applied relative to the integration step.
-        ``"pre"`` — applied inside the RHS before the integrator advances.
-        ``"post"`` — applied as a correction after the integrator step.
+
+        * ``'replacement'`` — substitutes the current parameter or state value
+          entirely at each step.
+        * ``'additive'`` — adds the forcing value on top of the existing value
+          (for parameters) or to ``dx/dt`` / ``x`` (for state variables).
+    timing : {'pre', 'post'}
+        When the forcing is applied relative to each integration step.
+
+        * ``'pre'`` — applied inside the RHS function before the integrator
+          advances.  The only valid timing for parameters.
+        * ``'post'`` — applied as a correction after the integrator step.
+          Required for state-variable replacement; also valid for additive state.
 
     Notes
     -----
-    Derivation rules (enforced by ``set_forcing``, not here):
+    Validation rules (enforced by `register_forcing`,
+    not here):
 
-    * parameter + replacement  →  timing always ``"pre"``
-    * state + replacement      →  timing always ``"post"``
-    * state + additive         →  timing required from caller
+    * parameter + replacement → timing forced to ``'pre'``
+    * parameter + additive    → timing forced to ``'pre'``
+    * state + replacement     → timing forced to ``'post'``
+    * state + additive        → timing required from caller
     """
 
     forcing_object: object
@@ -585,7 +1330,11 @@ class ForcingSpec:
             )
 
     def evaluate(self, t):
-        """Return the forcing value at time ``t``."""
+        """Return the forcing value at time ``t``.
+
+        Delegates to ``get_forcing(t)`` if available, otherwise calls the
+        object directly.
+        """
         if hasattr(self.forcing_object, "get_forcing"):
             return self.forcing_object.get_forcing(t)
         return self.forcing_object(t)

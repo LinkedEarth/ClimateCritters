@@ -77,7 +77,7 @@ A unified forcing wrapper that accepts callables, time-series arrays, or composa
 | Module | Key Functions | Purpose |
 |---|---|---|
 | [solver.py](climatecritters/utils/solver.py) | `euler_method`, `euler_maruyama_method`, `flux_divergence`, `define_t_eval` | Integration backends and finite-volume helpers |
-| [forcing_utils.py](climatecritters/utils/forcing_utils.py) | `create_sinusoid_forcing`, `create_periodic_forcing`, `create_constant_forcing`, `create_piecewise_forcing` | Convenience constructors for common `Forcing` shapes |
+| [forcing_utils.py](climatecritters/utils/forcing.py) | `create_sinusoid_forcing`, `create_periodic_forcing`, `create_constant_forcing`, `create_piecewise_forcing` | Convenience constructors for common `Forcing` shapes |
 | [noise.py](climatecritters/utils/noise.py) | `from_series`, `from_param` | AR(1), colored, and fractional Gaussian noise via pyleoclim |
 | [resample.py](climatecritters/utils/resample.py) | `downsample` | Non-uniform time axis subsampling (exponential, Poisson, Pareto, random) |
 | [plotting_utils.py](climatecritters/utils/plotting_utils.py) | `plot_solvers` | Side-by-side solver trajectory comparison |
