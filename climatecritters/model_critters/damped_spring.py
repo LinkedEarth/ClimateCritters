@@ -19,7 +19,7 @@ class DampedSpring(CCModel):
     c:
         Linear damping coefficient in N·s/m.  ``c=0`` gives undamped SHM;
         ``c < 2*sqrt(k*m)`` gives underdamped (oscillatory) decay.
-    F : float or callable or cc.core.Forcing
+    F : float or callable or cc.Forcing
         External driving force (N).  Default 0.0 (undriven).  For a
         time-varying drive use ``model.register_forcing('F', forcing_obj)``.
     state_variables:
@@ -61,7 +61,7 @@ class DampedSpring(CCModel):
     m, k = 1.0, 4.0
     omega_0 = np.sqrt(k / m)
     model = DampedSpring(m=m, k=k, c=0.0)
-    model.register_forcing('F', cc.core.Forcing(lambda t: np.cos(omega_0 * t)))
+    model.register_forcing('F', cc.Forcing(lambda t: np.cos(omega_0 * t)))
     output = model.integrate(t_span=(0, 30), y0=[0.0, 0.0], method='RK45')
     fig, ax = plt.subplots()
     ax.plot(output.time, output.state_variables['x'])

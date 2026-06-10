@@ -26,12 +26,12 @@ class Stocker2003BipolarSeesaw(CCModel):
     ----------
     var_name : str
         Label for the model output.  Default ``'stocker2003_bipolar_seesaw'``.
-    tau : float or callable or cc.core.Forcing
+    tau : float or callable or cc.Forcing
         Thermal equilibration timescale (years).  Must be > 0.  Default 1000.
-    beta : float or callable or cc.core.Forcing
+    beta : float or callable or cc.Forcing
         Amplitude ratio relating southern to northern anomaly.  Default -1.0
         (antiphase seesaw).
-    Tn : float or callable or cc.core.Forcing
+    Tn : float or callable or cc.Forcing
         Northern temperature anomaly.  Default 0.0.  Register a
         time-varying signal via ``model.register_forcing('Tn', forcing_obj)``.
 
@@ -58,7 +58,7 @@ class Stocker2003BipolarSeesaw(CCModel):
     import matplotlib.pyplot as plt
 
     model = Stocker2003BipolarSeesaw(tau=500.0, beta=-1.0)
-    model.register_forcing('Tn', cc.core.Forcing(lambda t: 1.0 if (t % 2000) < 1000 else -1.0))
+    model.register_forcing('Tn', cc.Forcing(lambda t: 1.0 if (t % 2000) < 1000 else -1.0))
     output = model.integrate(
         t_span=(0, 8000), y0=[0.0], method='RK45'
     )
@@ -196,7 +196,7 @@ class Stocker2003ExtendedSeaIceSeesaw(CCModel):
 
 
     model = Stocker2003ExtendedSeaIceSeesaw()
-    model.register_forcing('T_N', cc.core.Forcing(lambda t: 1.0 if (t % 2000) < 1000 else 0.0))
+    model.register_forcing('T_N', cc.Forcing(lambda t: 1.0 if (t % 2000) < 1000 else 0.0))
     output = model.integrate(
         t_span=(0, 10000), y0=[0.0, 0.0, 0.3, 0.0], method='RK45'
     )

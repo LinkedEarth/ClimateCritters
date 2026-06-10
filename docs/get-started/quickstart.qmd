@@ -13,7 +13,7 @@ Every ClimateCritters model takes a `forcing` argument. For the Lorenz 63 system
 import climatecritters as cc
 from climatecritters.model_critters import Lorenz63
 
-forcing = cc.core.Forcing(lambda t: 0.0)
+forcing = cc.Forcing(lambda t: 0.0)
 model = Lorenz63(forcing=forcing, sigma=10.0, rho=28.0, beta=8/3)
 ```
 

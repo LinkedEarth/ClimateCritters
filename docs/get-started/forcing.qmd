@@ -22,7 +22,7 @@ The typical flow: build a sequence with `+`, call `.compile()` to get a
 ```python
 import climatecritters as cc
 
-seq = cc.Hold(100, value=0.0) + cc.Ramp(50, y0=0.0, yf=4.0) + cc.Hold(100, value=4.0)
+seq = cc.forcing.Hold(100, value=0.0) + cc.forcing.Ramp(50, y0=0.0, yf=4.0) + cc.forcing.Hold(100, value=4.0)
 f   = seq.compile()
 model.register_forcing('S', f, attachment_style='additive', timing='pre')
 ```
@@ -98,22 +98,22 @@ a spin-up period, a transition, an oscillation, then a hold.
 ### `Hold` — constant segment
 
 ```python
-cc.Hold(duration=100, value=280.0)   # 100 time units at 280
-cc.Hold(dt=50,        value=1360.0)  # dt is an alias for duration
-cc.Hold(tf=200,       value=0.0)     # ends at absolute time 200
+cc.forcing.Hold(duration=100, value=280.0)   # 100 time units at 280
+cc.forcing.Hold(dt=50,        value=1360.0)  # dt is an alias for duration
+cc.forcing.Hold(tf=200,       value=0.0)     # ends at absolute time 200
 ```
 
 ### `Ramp` — monotonic transition
 
 ```python
 # Linear ramp from 280 to 560 over 100 time units
-cc.Ramp(duration=100, y0=280.0, yf=560.0, shape='linear')
+cc.forcing.Ramp(duration=100, y0=280.0, yf=560.0, shape='linear')
 
 # Cosine (S-curve) ramp; y0 inherits from the previous segment if omitted
-cc.Ramp(duration=100, yf=560.0, shape='cosine')
+cc.forcing.Ramp(duration=100, yf=560.0, shape='cosine')
 
 # Specify amplitude instead of endpoint: yf = y0 + A
-cc.Ramp(duration=100, A=280.0)
+cc.forcing.Ramp(duration=100, A=280.0)
 ```
 
 ### `Harmonic` — sinusoidal segment with phase continuity
@@ -122,7 +122,7 @@ cc.Ramp(duration=100, A=280.0)
 smoothly, even mid-oscillation:
 
 ```python
-cc.Harmonic(duration=20, period=1.0, A=0.5, center=0.0)
+cc.forcing.Harmonic(duration=20, period=1.0, A=0.5, center=0.0)
 ```
 
 If `y0` is omitted it inherits the endpoint of the previous segment, keeping
@@ -133,7 +133,7 @@ the signal continuous across the join.
 Wrap any function as a bounded segment:
 
 ```python
-cc.ForcingElement(lambda t: np.exp(-0.01 * t), duration=50.0)
+cc.forcing.ForcingElement(lambda t: np.exp(-0.01 * t), duration=50.0)
 ```
 
 ### `ForcingSequence` — composing segments with `+`
@@ -142,9 +142,9 @@ Concatenate segments with `+` to build a `ForcingSequence`:
 
 ```python
 scenario = (
-    cc.Hold(duration=200, value=280.0)
-    + cc.Ramp(duration=100, y0=280.0, yf=560.0, shape='cosine')
-    + cc.Hold(duration=200, value=560.0)
+    cc.forcing.Hold(duration=200, value=280.0)
+    + cc.forcing.Ramp(duration=100, y0=280.0, yf=560.0, shape='cosine')
+    + cc.forcing.Hold(duration=200, value=560.0)
 )
 ```
 
@@ -157,7 +157,7 @@ f = scenario.compile()   # → Forcing, 500 time-unit duration
 Compilation is not cached — you can extend the sequence and recompile:
 
 ```python
-scenario = scenario + cc.Ramp(duration=100, yf=280.0)
+scenario = scenario + cc.forcing.Ramp(duration=100, yf=280.0)
 f2 = scenario.compile()   # f is unaffected
 ```
 
@@ -165,8 +165,8 @@ You can also pass a list directly to `Forcing.from_sequence`:
 
 ```python
 f = cc.Forcing.from_sequence([
-    cc.Hold(duration=100, value=0.0),
-    cc.Ramp(duration=50, y0=0.0, yf=1.0),
+    cc.forcing.Hold(duration=100, value=0.0),
+    cc.forcing.Ramp(duration=50, y0=0.0, yf=1.0),
 ], label='hosing')
 ```
 
@@ -201,7 +201,7 @@ rng   = np.random.default_rng(42)
 noise = cc.Forcing(lambda t: rng.normal(0, 5.0))
 
 # Noise on a single element
-noisy_ramp = cc.Ramp(duration=100, y0=0.0, yf=4.0) + noise
+noisy_ramp = cc.forcing.Ramp(duration=100, y0=0.0, yf=4.0) + noise
 
 # Noise on an entire scenario
 noisy_scenario = scenario + noise   # → Forcing, same 500-unit duration
@@ -297,13 +297,13 @@ f_orb   = create_periodic_forcing([(100, 0.6), (41, 0.4)], desired_amplitude=25.
 
 # Bounded elements (composable into a ForcingSequence)
 elem = create_sinusoid_forcing(A=5.0, period=1.0, duration=50.0)
-seq  = cc.Hold(10, value=0.0) + elem + cc.Hold(10, value=0.0)
+seq  = cc.forcing.Hold(10, value=0.0) + elem + cc.forcing.Hold(10, value=0.0)
 f    = seq.compile()
 
 # Convert an existing Forcing into a ForcingElement
 obs  = cc.Forcing.from_csv(dataset='insolation')
 elem = make_forcing_element(obs)          # duration inferred from time axis
-seq  = cc.Hold(50, value=0.0) + elem
+seq  = cc.forcing.Hold(50, value=0.0) + elem
 ```
 
 ---
@@ -326,11 +326,11 @@ import matplotlib.pyplot as plt
 import climatecritters as cc
 
 scenario = (
-    cc.Hold(200, value=280.0,
+    cc.forcing.Hold(200, value=280.0,
             plot_kwargs={'color': 'steelblue',  'label': 'pre-industrial'})
-    + cc.Ramp(100, y0=280.0, yf=560.0, shape='cosine',
+    + cc.forcing.Ramp(100, y0=280.0, yf=560.0, shape='cosine',
               plot_kwargs={'color': 'firebrick', 'label': 'CO₂ ramp'})
-    + cc.Hold(200, value=560.0,
+    + cc.forcing.Hold(200, value=560.0,
               plot_kwargs={'color': 'darkorange', 'label': '2×CO₂'})
 )
 

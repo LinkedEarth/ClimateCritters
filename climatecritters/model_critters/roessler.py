@@ -16,11 +16,11 @@ class Roessler(CCModel):
     ----------
     var_name : str
         Label for the model output.  Default ``'roessler'``.
-    a : float or callable or cc.core.Forcing
+    a : float or callable or cc.Forcing
         Controls the strength of the y-feedback.  Default 0.2.
-    b : float or callable or cc.core.Forcing
+    b : float or callable or cc.Forcing
         Offset in the z equation.  Default 0.2.
-    c : float or callable or cc.core.Forcing
+    c : float or callable or cc.Forcing
         Nonlinear threshold in the z equation.  Default 5.7.
 
     Notes

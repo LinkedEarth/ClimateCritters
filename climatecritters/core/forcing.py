@@ -21,7 +21,7 @@ The typical workflow::
     import climatecritters as cc
 
     # Build a scenario timeline
-    seq = cc.Hold(100, value=0.0) + cc.Ramp(50, y0=0.0, yf=4.0) + cc.Hold(100, value=4.0)
+    seq = cc.forcing.Hold(100, value=0.0) + cc.forcing.Ramp(50, y0=0.0, yf=4.0) + cc.forcing.Hold(100, value=4.0)
     f   = seq.compile()              # → Forcing
 
     # Register with a model
@@ -131,7 +131,7 @@ class ForcingElement:
     import matplotlib.pyplot as plt
     import climatecritters as cc
 
-    elem = cc.ForcingElement(lambda t: np.exp(-0.01 * t), duration=50.0)
+    elem = cc.forcing.ForcingElement(lambda t: np.exp(-0.01 * t), duration=50.0)
     fig, ax = elem.plot()
     plt.savefig('docs/reference/figures/ForcingElement_example.png',
                 dpi=150, bbox_inches='tight')
@@ -235,7 +235,7 @@ class Hold(ForcingElement):
     import matplotlib.pyplot as plt
     import climatecritters as cc
 
-    h = cc.Hold(duration=50, value=280.0)
+    h = cc.forcing.Hold(duration=50, value=280.0)
     fig, ax = h.plot()
     plt.savefig('docs/reference/figures/Hold_example.png',
                 dpi=150, bbox_inches='tight')
@@ -324,8 +324,8 @@ class Ramp(ForcingElement):
     import climatecritters as cc
 
     fig, ax = plt.subplots()
-    cc.Ramp(100, y0=0.0, yf=1.0, shape='linear').plot(ax=ax, label='linear')
-    cc.Ramp(100, y0=0.0, yf=1.0, shape='cosine').plot(ax=ax, label='cosine', linestyle='--')
+    cc.forcing.Ramp(100, y0=0.0, yf=1.0, shape='linear').plot(ax=ax, label='linear')
+    cc.forcing.Ramp(100, y0=0.0, yf=1.0, shape='cosine').plot(ax=ax, label='cosine', linestyle='--')
     ax.legend()
     plt.savefig('docs/reference/figures/Ramp_shapes_example.png',
                 dpi=150, bbox_inches='tight')
@@ -431,7 +431,7 @@ class Harmonic(ForcingElement):
     import matplotlib.pyplot as plt
     import climatecritters as cc
 
-    h = cc.Harmonic(duration=20, period=4.0, A=0.5, center=0.0)
+    h = cc.forcing.Harmonic(duration=20, period=4.0, A=0.5, center=0.0)
     fig, ax = h.plot()
     plt.savefig('docs/reference/figures/Harmonic_example.png',
                 dpi=150, bbox_inches='tight')
@@ -526,9 +526,9 @@ class ForcingSequence:
     import climatecritters as cc
 
     scenario = (
-        cc.Hold(200, value=280.0)
-        + cc.Ramp(100, y0=280.0, yf=560.0, shape='cosine')
-        + cc.Hold(200, value=560.0)
+        cc.forcing.Hold(200, value=280.0)
+        + cc.forcing.Ramp(100, y0=280.0, yf=560.0, shape='cosine')
+        + cc.forcing.Hold(200, value=560.0)
     )
     fig, ax = scenario.plot()
     plt.savefig('docs/reference/figures/ForcingSequence_example.png',
@@ -591,9 +591,9 @@ class ForcingSequence:
         import climatecritters as cc
 
         scenario = (
-            cc.Hold(100, value=0.0, plot_kwargs={'color': 'steelblue', 'label': 'baseline'})
-            + cc.Ramp(50, y0=0.0, yf=4.0, plot_kwargs={'color': 'firebrick', 'label': 'ramp'})
-            + cc.Hold(100, value=4.0, plot_kwargs={'color': 'darkorange', 'label': 'perturbed'})
+            cc.forcing.Hold(100, value=0.0, plot_kwargs={'color': 'steelblue', 'label': 'baseline'})
+            + cc.forcing.Ramp(50, y0=0.0, yf=4.0, plot_kwargs={'color': 'firebrick', 'label': 'ramp'})
+            + cc.forcing.Hold(100, value=4.0, plot_kwargs={'color': 'darkorange', 'label': 'perturbed'})
         )
         fig, ax = scenario.plot()
         ax.set_xlabel('time'); ax.set_ylabel('forcing'); ax.legend()
@@ -728,103 +728,65 @@ class ForcingSequence:
 class Forcing:
     """Unified time-varying signal consumed by models.
 
-    ``Forcing`` wraps any time-dependent input and exposes a single
-    ``get_forcing(t)`` interface.  It accepts four kinds of input:
+    `Forcing` wraps any time-dependent input and exposes a single
+    ``get_forcing(t)`` interface to the model.
 
-    **1. A callable** (lambda, function, or any object with ``__call__``)::
+    Input types
+    -----------
+    Pass a callable, a data array, a bundled CSV dataset, or a compiled
+    `ForcingSequence`::
 
-        f = Forcing(lambda t: 1360.0 + 5.0 * np.sin(2 * np.pi * t / 11.0))
+        # callable
+        f = cc.Forcing(lambda t: 1360.0 + 5.0 * np.sin(2 * np.pi * t / 11.0))
 
-    **2. A data array** with an optional time axis (interpolated)::
+        # data array
+        f = cc.Forcing(data=values, time=t_axis, interpolation='cubic')
 
-        f = Forcing(data=values, time=t_axis, interpolation='cubic')
+        # bundled CSV dataset
+        f = cc.Forcing.from_csv(dataset='vieira_tsi')
+        f = cc.Forcing.from_csv(file_path='my_data.csv', time_name='age', value_name='co2')
 
-    **3. A CSV dataset** (two built-in datasets are bundled)::
+        # ForcingSequence (auto-compiled)
+        seq = cc.forcing.Hold(100, value=0.0) + cc.forcing.Ramp(50, y0=0.0, yf=4.0)
+        f   = cc.Forcing(seq)
 
-        f = Forcing.from_csv(dataset='vieira_tsi')
-        f = Forcing.from_csv(dataset='insolation')
-        f = Forcing.from_csv(file_path='my_data.csv', time_name='age', value_name='co2')
+    Value superposition
+    -------------------
+    Two `Forcing` objects (or a `Forcing` and a callable) can be combined
+    with ``+`` to produce a new `Forcing` whose value is the pointwise sum::
 
-    **4. A** `ForcingSequence` **(auto-compiled)**::
+        combined = cc.Forcing(orbital_func) + cc.Forcing(noise_func)
 
-        seq = Hold(100, value=0.0) + Ramp(50, y0=0.0, yf=4.0) + Hold(100, value=4.0)
-        f   = Forcing(seq)   # equivalent to seq.compile()
+    A bounded `ForcingElement` or `ForcingSequence` can also be superposed;
+    it is auto-compiled and the result is bounded to that element's duration.
+
+    Full operator table:
+
+    | Left | Right | Result | Semantic |
+    |---|---|---|---|
+    | `Forcing` | `Forcing` | `Forcing` (indefinite) | value superposition for all t |
+    | `Forcing` | callable | `Forcing` (indefinite) | value superposition for all t |
+    | `ForcingElement` | `ForcingElement` | `ForcingSequence` | temporal concatenation |
+    | `ForcingSequence` | `ForcingElement` / `ForcingSequence` | `ForcingSequence` | temporal concatenation |
+    | `ForcingElement` / `ForcingSequence` | `Forcing` | `Forcing` (bounded) | additive overlay; auto-compiles |
+    | `Forcing` | `ForcingElement` / `ForcingSequence` | `Forcing` (bounded) | additive overlay; auto-compiles |
 
     Parameters
     ----------
     data : callable, array-like, or ForcingSequence
-        The signal source.  See above for accepted types.
+        The signal source.  See *Input types* above.
     time : array-like, optional
-        Time axis for array-backed ``Forcing``.  If omitted, integer indices
-        are used.  Must be strictly increasing and the same length as ``data``.
+        Time axis for array-backed `Forcing`.  Must be strictly increasing
+        and the same length as ``data``.  If omitted, integer indices are used.
     params : dict, optional
         Extra keyword arguments forwarded to a callable ``data`` via
         ``functools.partial``.
     interpolation : {'cubic', 'linear'}
-        Interpolation method for array-backed ``Forcing``.  Default ``'cubic'``
-        (extrapolates outside the data range).
-
-    Attributes
-    ----------
-    forcing_type : str
-        One of ``'function'``, ``'sequence'``, ``'interpolated array cubic'``,
-        or ``'interpolated array linear'``.
-    summary : dict or None
-        For sequence-backed ``Forcing``, a summary dict with keys ``label``,
-        ``t_end``, ``y_start``, ``y_end``, ``n_parts``, ``n_transitions``,
-        ``transition_times``.  ``None`` for other types.
-
-    Notes
-    -----
-    **Value superposition with ``+``**
-
-    ``Forcing`` objects can be combined with ``+`` to produce a new
-    ``Forcing`` whose value is the sum of both operands at each ``t``.
-    The unifying rule is:
-
-    * Both operands indefinite → result indefinite:
-      ``Forcing + Forcing``, ``Forcing + callable``
-    * One operand bounded (`ForcingElement` or `ForcingSequence`)
-      → result bounded for the duration of the bounded operand:
-      ``Forcing + ForcingElement``, ``ForcingSequence + Forcing``, etc.
-
-    The bounded operand is auto-compiled before superposition.  Outside its
-    interval the compiled ``Forcing`` holds at its boundary value, so the
-    sum is well-defined for all ``t``.
-
-    Full operator table:
-
-    .. list-table::
-       :header-rows: 1
-
-       * - Left
-         - Right
-         - Result
-         - Semantic
-       * - ``Forcing``
-         - ``Forcing``
-         - ``Forcing`` (indefinite)
-         - value superposition for all t
-       * - ``Forcing``
-         - callable
-         - ``Forcing`` (indefinite)
-         - value superposition for all t
-       * - ``ForcingElement``
-         - ``ForcingElement``
-         - ``ForcingSequence``
-         - temporal concatenation
-       * - ``ForcingSequence``
-         - ``ForcingElement`` / ``ForcingSequence``
-         - ``ForcingSequence``
-         - temporal concatenation
-       * - ``ForcingElement`` / ``ForcingSequence``
-         - ``Forcing``
-         - ``Forcing`` (bounded)
-         - additive overlay; auto-compiles
-       * - ``Forcing``
-         - ``ForcingElement`` / ``ForcingSequence``
-         - ``Forcing`` (bounded)
-         - additive overlay; auto-compiles
+        Interpolation method for array-backed `Forcing`.  Default ``'cubic'``.
+    plot_kwargs : dict, optional
+        Matplotlib keyword arguments used by `.plot()` — e.g. ``color``,
+        ``linewidth``, ``label``, ``linestyle``.  Explicit kwargs passed
+        to `.plot()` override these defaults.
 
     Examples
     --------
@@ -833,9 +795,9 @@ class Forcing:
     import climatecritters as cc
 
     scenario = (
-        cc.Hold(200, value=280.0)
-        + cc.Ramp(100, y0=280.0, yf=560.0, shape='cosine')
-        + cc.Hold(200, value=560.0)
+        cc.forcing.Hold(200, value=280.0)
+        + cc.forcing.Ramp(100, y0=280.0, yf=560.0, shape='cosine')
+        + cc.forcing.Hold(200, value=560.0)
     )
     fig, ax = scenario.compile().plot()
     plt.savefig('docs/reference/figures/Forcing_sequence_example.png',
@@ -845,10 +807,11 @@ class Forcing:
 
     _INTERPOLATION_KINDS = {"cubic", "linear"}
 
-    def __init__(self, data, time=None, params=None, interpolation="cubic"):
+    def __init__(self, data, time=None, params=None, interpolation="cubic", plot_kwargs=None):
         self.data = data
         self.time = time
         self.params = {} if params is None else dict(params)
+        self.plot_kwargs = plot_kwargs or {}
         self.forcing_type = None
         self.summary = None
 
@@ -936,6 +899,7 @@ class Forcing:
         obj.data = None
         obj.time = None
         obj.params = {}
+        obj.plot_kwargs = {}
         obj.forcing_type = "sequence"
 
         segs = compiled["segments"]
@@ -1016,9 +980,9 @@ class Forcing:
         import climatecritters as cc
 
         f = cc.Forcing.from_sequence([
-            cc.Hold(duration=100, value=0.0),
-            cc.Ramp(duration=50, y0=0.0, yf=1.0, shape='cosine'),
-            cc.Hold(duration=100, value=1.0),
+            cc.forcing.Hold(duration=100, value=0.0),
+            cc.forcing.Ramp(duration=50, y0=0.0, yf=1.0, shape='cosine'),
+            cc.forcing.Hold(duration=100, value=1.0),
         ], label='freshwater_hosing')
         ```
         """
@@ -1172,8 +1136,8 @@ class Forcing:
 
         # Sequence-backed — t_span inferred automatically
         f = cc.Forcing.from_sequence([
-            cc.Hold(100, value=0.0),
-            cc.Ramp(50, y0=0.0, yf=4.0),
+            cc.forcing.Hold(100, value=0.0),
+            cc.forcing.Ramp(50, y0=0.0, yf=4.0),
         ])
         fig, ax = f.plot()
         plt.savefig('docs/reference/figures/Forcing_plot_example.png',
@@ -1201,14 +1165,18 @@ class Forcing:
                 )
 
         t_vals = np.linspace(float(t_span[0]), float(t_span[1]), int(n))
-        y_vals = self.forcing_func(t_vals)
+        y_vals = np.asarray(self.forcing_func(t_vals), dtype=float)
+        if y_vals.shape != t_vals.shape:
+            # callable returned a scalar (e.g. lambda t: 1.0) — evaluate per-point
+            y_vals = np.array([float(self.forcing_func(t)) for t in t_vals])
 
         if ax is None:
             fig, ax = plt.subplots(figsize=(6,4))
         else:
             fig = ax.get_figure()
 
-        ax.plot(t_vals, y_vals, **kwargs)
+        plot_kw = {**self.plot_kwargs, **kwargs}
+        ax.plot(t_vals, y_vals, **plot_kw)
         ax.set_xlabel('time')
         ax.set_ylabel('forcing')
         return fig, ax
@@ -1341,12 +1309,5 @@ class ForcingSpec:
 
 
 __all__ = [
-    "ResolvedSegment",
-    "ForcingElement",
-    "Hold",
-    "Ramp",
-    "Harmonic",
-    "ForcingSequence",
     "Forcing",
-    "ForcingSpec",
 ]

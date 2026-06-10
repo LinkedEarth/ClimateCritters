@@ -197,13 +197,13 @@ class EBM0D(EBMBase):
         argument named ``t`` or ``time`` (see
         ``contracts/signal_model_contract.md``).  Default is
         Stefan-Boltzmann via ``OLR_func(pRad=650, ps=1000)``.
-    C : float or callable or cc.core.Forcing, optional
+    C : float or callable or cc.Forcing, optional
         Heat capacity (W yr m⁻² K⁻¹).  If callable, must follow the
         parameter callable contract.  Default is 4.
-    albedo : float or callable or cc.core.Forcing, optional
+    albedo : float or callable or cc.Forcing, optional
         Planetary albedo.  If callable, must follow the parameter callable
         contract.  Default is 0.3.
-    S0 : float or callable or cc.core.Forcing, optional
+    S0 : float or callable or cc.Forcing, optional
         Solar constant (W m⁻²).  Default 1365.0.  Pass a time-varying
         orbital signal via ``model.register_forcing('S0', forcing_obj)``.
 
@@ -333,17 +333,17 @@ class EBM1DLat(EBMBase):
     grid_n : int, optional
         Number of evenly-spaced latitude grid points from -90° to 90°.
         Must be ≥ 3.  Default is 50.
-    C : float or callable or cc.core.Forcing, optional
+    C : float or callable or cc.Forcing, optional
         Heat capacity (W yr m⁻² K⁻¹).  Default is 10.0.
-    D : float or callable or cc.core.Forcing, optional
+    D : float or callable or cc.Forcing, optional
         Meridional diffusion coefficient.  Default is 0.55.
-    A : float or callable or cc.core.Forcing, optional
+    A : float or callable or cc.Forcing, optional
         Budyko OLR intercept (W m⁻²).  Default is 210.0.
-    B : float or callable or cc.core.Forcing, optional
+    B : float or callable or cc.Forcing, optional
         Budyko OLR slope (W m⁻² K⁻¹).  Default is 2.0.
-    S0 : float or callable or cc.core.Forcing, optional
+    S0 : float or callable or cc.Forcing, optional
         Solar constant (W m⁻²).  Default is 1365.0.
-    CO2_forcing : float or callable or cc.core.Forcing, optional
+    CO2_forcing : float or callable or cc.Forcing, optional
         Radiative forcing from CO2 (W m⁻²); shifts the OLR intercept down,
         warming the climate.  Default is 0.0.
     state_variables : list of str, optional
@@ -403,9 +403,9 @@ class EBM1DLat(EBMBase):
     import climatecritters as cc
     from climatecritters.model_critters.ebm import EBM1DLat
 
-    co2_ramp = cc.core.Forcing.from_sequence([
-        cc.core.Hold(duration=100, value=0.0),
-        cc.core.Ramp(duration=100, y0=0.0, yf=4.0, shape='linear'),
+    co2_ramp = cc.Forcing.from_sequence([
+        cc.forcing.Hold(duration=100, value=0.0),
+        cc.forcing.Ramp(duration=100, y0=0.0, yf=4.0, shape='linear'),
     ])
     model_co2 = EBM1DLat(CO2_forcing=co2_ramp, D=0.35)
     output_co2 = model_co2.integrate(t_span=(0, 200), y0=[15.0], method='RK45')

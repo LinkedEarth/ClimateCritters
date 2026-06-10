@@ -27,7 +27,7 @@ class TestSignalModelsEBM0DIntegrate:
     @pytest.mark.parametrize('method, dt', [('euler', 1), ('RK45', None)])
     def test_integrate_t0(self, t_span, y0, method, OLR, dt):
         '''Test integrate method'''
-        forcing = cc.core.Forcing(lambda x: 1)
+        forcing = cc.Forcing(lambda x: 1)
         model = ebm.EBM0D(OLR=OLR)
         model.register_forcing('S0', forcing)
         model.integrate(t_span=t_span, y0=y0, method=method, dt=dt)
@@ -46,7 +46,7 @@ class TestSignalModelsEBM0DtoPyleo:
     ])
     def test_topyleo_t0(self, method, dt, var_names):
         '''Test to_pyleo method'''
-        forcing = cc.core.Forcing(lambda x: 1)
+        forcing = cc.Forcing(lambda x: 1)
         model = ebm.EBM0D()
         model.register_forcing('S0', forcing)
         output = model.integrate(t_span=(0, 10), y0=[100], method=method, dt=dt)
@@ -55,7 +55,7 @@ class TestSignalModelsEBM0DtoPyleo:
 
 class TestSignalModelsEBM0DTimeVaryingParams:
     def test_time_varying_params_match_constants_t0(self):
-        forcing = cc.core.Forcing(lambda t: 1360.0)
+        forcing = cc.Forcing(lambda t: 1360.0)
 
         model_const = ebm.EBM0D(C=4.0, albedo=0.3)
         model_const.register_forcing('S0', forcing)
@@ -77,10 +77,10 @@ class TestSignalModelsEBM0DTimeVaryingParams:
 
 class TestSignalModelsEBM0DSequenceForcing:
     def test_sequence_forcing_integrates_t0(self):
-        forcing = cc.core.Forcing.from_sequence(
+        forcing = cc.Forcing.from_sequence(
             [
-                cc.core.Hold(duration=6.0, value=1360.0),
-                cc.core.Ramp(duration=4.0, y0=1360.0, yf=1365.0, shape='linear'),
+                cc.forcing.Hold(duration=6.0, value=1360.0),
+                cc.forcing.Ramp(duration=4.0, y0=1360.0, yf=1365.0, shape='linear'),
             ],
             label='ebm_sequence',
         )

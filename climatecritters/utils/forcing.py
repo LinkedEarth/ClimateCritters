@@ -111,7 +111,7 @@ def create_forcing(func, duration=None):
 
     # Bounded: embed in a scenario
     elem = create_forcing(lambda t: 0.1 * t, duration=50.0)
-    seq  = cc.Hold(10, value=0.0) + elem
+    seq  = cc.forcing.Hold(10, value=0.0) + elem
     model.register_forcing('S', seq.compile())
     ```
     """
@@ -276,9 +276,9 @@ def create_piecewise_forcing(elements, label="forcing"):
     from climatecritters.utils.forcing import create_piecewise_forcing
 
     f = create_piecewise_forcing([
-        cc.Hold(duration=50,  value=0.0),
-        cc.Ramp(duration=100, y0=0.0, yf=4.0),
-        cc.Hold(duration=50,  value=4.0),
+        cc.forcing.Hold(duration=50,  value=0.0),
+        cc.forcing.Ramp(duration=100, y0=0.0, yf=4.0),
+        cc.forcing.Hold(duration=50,  value=4.0),
     ], label="CO2 ramp")
     fig, ax = f.plot()
     ax.set_xlabel('time'); ax.set_ylabel('forcing')
@@ -330,7 +330,7 @@ def make_forcing_element(forcing, duration=None):
     # Embed empirical insolation data as a bounded segment
     obs  = cc.Forcing.from_csv(dataset='insolation')
     elem = make_forcing_element(obs)          # duration inferred from time axis
-    scenario = cc.Hold(50, value=0.0) + elem + cc.Hold(50, value=0.0)
+    scenario = cc.forcing.Hold(50, value=0.0) + elem + cc.forcing.Hold(50, value=0.0)
     fig, ax = scenario.plot()
     ax.set_xlabel('time (kyr)'); ax.set_ylabel('insolation (W m⁻²)')
     plt.savefig('docs/reference/figures/make_forcing_element_example.png',

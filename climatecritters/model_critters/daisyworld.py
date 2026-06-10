@@ -22,29 +22,29 @@ class Daisyworld(CCModel):
     ----------
     var_name : str
         Label for the model output.  Default ``'daisyworld'``.
-    alpha_w : float or callable or cc.core.Forcing
+    alpha_w : float or callable or cc.Forcing
         White daisy albedo.  Default 0.75.
-    alpha_b : float or callable or cc.core.Forcing
+    alpha_b : float or callable or cc.Forcing
         Black daisy albedo.  Default 0.25.
-    alpha_g : float or callable or cc.core.Forcing
+    alpha_g : float or callable or cc.Forcing
         Bare-ground albedo.  Default 0.5.
-    gamma : float or callable or cc.core.Forcing
+    gamma : float or callable or cc.Forcing
         Daisy death rate (fraction per unit time).  Default 0.3.
-    q : float or callable or cc.core.Forcing
+    q : float or callable or cc.Forcing
         Local temperature sensitivity to albedo contrast (K).  Default 20.0.
-    T_opt : float or callable or cc.core.Forcing
+    T_opt : float or callable or cc.Forcing
         Optimal daisy growth temperature (K).  Default 295.0.
-    beta_width : float or callable or cc.core.Forcing
+    beta_width : float or callable or cc.Forcing
         Parabolic growth-rate width parameter.  Default 0.003265.
-    S0 : float or callable or cc.core.Forcing
+    S0 : float or callable or cc.Forcing
         Solar constant (W m\ :sup:`-2`).  Default 1365.0.
-    L : float or callable or cc.core.Forcing
+    L : float or callable or cc.Forcing
         Normalized stellar luminosity (1.0 = present Sun).  Default 1.0.
         Register a time-varying luminosity via
         ``model.register_forcing('L', forcing_obj)``.
-    C : float or callable or cc.core.Forcing
+    C : float or callable or cc.Forcing
         Planetary heat capacity (effective, in model units).  Default 10.0.
-    sigma : float or callable or cc.core.Forcing
+    sigma : float or callable or cc.Forcing
         Stefan-Boltzmann constant (W m\ :sup:`-2` K\ :sup:`-4`).
         Default 5.67051196e-8.
 

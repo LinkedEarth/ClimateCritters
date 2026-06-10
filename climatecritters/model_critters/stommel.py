@@ -22,21 +22,21 @@ class Stommel(CCModel):
     ----------
     var_name : str
         Label for the model output.  Default ``'stommel'``.
-    alpha : float or callable or cc.core.Forcing
+    alpha : float or callable or cc.Forcing
         Thermal expansion coefficient.  Default 1.0.
-    beta : float or callable or cc.core.Forcing
+    beta : float or callable or cc.Forcing
         Haline contraction coefficient.  Default 1.0.
-    k : float or callable or cc.core.Forcing
+    k : float or callable or cc.Forcing
         Hydraulic constant controlling overturning sensitivity.  Default 1.0.
-    E : float or callable or cc.core.Forcing
+    E : float or callable or cc.Forcing
         Net evaporation-minus-precipitation freshwater flux.  Default 0.0.
-    lambda_T : float or callable or cc.core.Forcing
+    lambda_T : float or callable or cc.Forcing
         Thermal restoring rate.  Default 1.0.
-    lambda_S : float or callable or cc.core.Forcing
+    lambda_S : float or callable or cc.Forcing
         Saline restoring rate.  Default 1.0.
-    T_star : float or callable or cc.core.Forcing
+    T_star : float or callable or cc.Forcing
         Equilibrium temperature contrast.  Default 1.0.
-    S_star : float or callable or cc.core.Forcing
+    S_star : float or callable or cc.Forcing
         Equilibrium salinity contrast.  Default 0.0.
 
     Notes
@@ -58,7 +58,7 @@ class Stommel(CCModel):
     To drive the salinity equation with an external freshwater forcing::
 
         model = Stommel(E=0.0)
-        model.register_forcing('S', cc.core.Forcing(lambda t: 0.1),
+        model.register_forcing('S', cc.Forcing(lambda t: 0.1),
                                attachment_style='additive', timing='pre')
 
     Examples

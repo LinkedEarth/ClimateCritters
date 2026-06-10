@@ -80,19 +80,19 @@ class ENSORechargeOscillator(CCModel):
     ----------
     var_name : str
         Label for the model output.  Default ``'enso_recharge_oscillator'``.
-    mu : float or callable or cc.core.Forcing
+    mu : float or callable or cc.Forcing
         Bjerknes coupling coefficient.  Default 0.7.
-    en : float or callable or cc.core.Forcing
+    en : float or callable or cc.Forcing
         Nonlinear damping coefficient.  Default 0.0 (linear limit).
-    c : float or callable or cc.core.Forcing
+    c : float or callable or cc.Forcing
         Newtonian cooling rate of SST.  Default 1.0.
-    r : float or callable or cc.core.Forcing
+    r : float or callable or cc.Forcing
         Thermocline recharge damping rate.  Default 0.25.
-    alpha : float or callable or cc.core.Forcing
+    alpha : float or callable or cc.Forcing
         Wind-stress feedback strength.  Default 0.125.
-    b0 : float or callable or cc.core.Forcing
+    b0 : float or callable or cc.Forcing
         Background thermocline slope sensitivity.  Default 2.5.
-    gamma : float or callable or cc.core.Forcing
+    gamma : float or callable or cc.Forcing
         Thermocline feedback onto SST.  Default 0.75.
 
     Notes

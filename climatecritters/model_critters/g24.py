@@ -22,17 +22,17 @@ class Model3(CCModel):
     ----------
     var_name : str
         Label for the model output.  Default ``'ice volume'``.
-    f1 : float or callable or cc.core.Forcing
+    f1 : float or callable or cc.Forcing
         Insolation threshold for glacial inception (W m\ :sup:`-2`;
         typically -20 to -15).  Default -16.
-    f2 : float or callable or cc.core.Forcing
+    f2 : float or callable or cc.Forcing
         Insolation threshold for deglaciation inception (W m^2; typically
         positive).  Default 16.
-    t1 : float or callable or cc.core.Forcing
+    t1 : float or callable or cc.Forcing
         Relaxation timescale for glacial inception (kyr).  Default 30.
-    t2 : float or callable or cc.core.Forcing
+    t2 : float or callable or cc.Forcing
         Relaxation timescale for deglaciation (kyr).  Default 10.
-    vc : float or callable or cc.core.Forcing
+    vc : float or callable or cc.Forcing
         Critical ice volume controlling dominant periodicity and asymmetry.
         Default 1.4.
 
@@ -45,11 +45,11 @@ class Model3(CCModel):
     The ``insolation`` parameter (default 0.0) provides the orbital forcing
     value used by the model.  Register a time-varying orbital signal via::
 
-        model.register_forcing('insolation', cc.core.Forcing(calc_f))
+        model.register_forcing('insolation', cc.Forcing(calc_f))
 
     The internal derivative of forcing ``dfdt`` is computed via
     :func:`calc_df` by default; supply a custom callable or
-    ``cc.core.Forcing`` to override.
+    ``cc.Forcing`` to override.
 
     Parameter defaults are taken from Ganopolski (2024).  Time-varying
     parameters follow the standard callable contract ``(t)``,
@@ -68,7 +68,7 @@ class Model3(CCModel):
     import matplotlib.pyplot as plt
 
     model = Model3()
-    model.register_forcing('insolation', cc.core.Forcing(calc_f))
+    model.register_forcing('insolation', cc.Forcing(calc_f))
 
     output = model.integrate(
         t_span=(-2000, 0), y0=[0.0, 1], method='RK45',
