@@ -26,7 +26,7 @@ class Lorenz96(CCModel):
     J : int
         Fast variables per slow variable.  ``J=0`` (default) gives the
         single-scale system; ``J>0`` activates the two-scale system.
-    F : float or callable or cc.core.Forcing
+    F : float or callable or cc.Forcing
         Slow-scale forcing amplitude.  Default 8.0.  Pass a time-varying
         signal via ``model.register_forcing('F', forcing_obj)``.
     h : float
@@ -190,12 +190,12 @@ class Lorenz63(CCModel):
     ----------
     var_name : str
         Label for the model output.  Default ``'lorenz63'``.
-    sigma : float or callable or cc.core.Forcing
+    sigma : float or callable or cc.Forcing
         Prandtl number controlling rotation of convective rolls.  Default 10.
-    rho : float or callable or cc.core.Forcing
+    rho : float or callable or cc.Forcing
         Rayleigh number (reduced) controlling the buoyancy forcing.
         Default 28.
-    beta : float or callable or cc.core.Forcing
+    beta : float or callable or cc.Forcing
         Geometric factor controlling the spatial structure.  Default 8/3.
 
     Notes

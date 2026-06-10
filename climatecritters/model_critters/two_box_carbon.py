@@ -20,18 +20,18 @@ class TwoBoxCarbon(CCModel):
     ----------
     var_name : str
         Label for the model output.  Default ``'two_box_carbon'``.
-    k : float or callable or cc.core.Forcing
+    k : float or callable or cc.Forcing
         Air-sea gas exchange rate constant (volume units per time).
         Default 0.2.
-    R : float or callable or cc.core.Forcing
+    R : float or callable or cc.Forcing
         Constant carbon source flux into the atmosphere (mass per time).
         Default 0.0.  Register a time-varying source via
         ``model.register_forcing('R', forcing_obj)``.
-    l_s : float or callable or cc.core.Forcing
+    l_s : float or callable or cc.Forcing
         First-order atmospheric loss coefficient.  Default 0.0.
-    V_atm : float or callable or cc.core.Forcing
+    V_atm : float or callable or cc.Forcing
         Volume of the atmospheric box (must be > 0).  Default 1.0.
-    V_surf : float or callable or cc.core.Forcing
+    V_surf : float or callable or cc.Forcing
         Volume of the surface-ocean box (must be > 0).  Default 1.0.
 
     Notes

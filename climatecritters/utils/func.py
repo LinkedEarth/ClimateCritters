@@ -63,7 +63,7 @@ def make_derivative_func(method='numpy', derivative=None, data=None, time=None):
     # Build a Forcing from a data array (gives access to .data and .time)
     t_axis = np.linspace(-2000, 0, 4000)
     f_vals = np.array([calc_f(t) for t in t_axis])
-    orb_forcing = cc.core.Forcing(data=f_vals, time=t_axis)
+    orb_forcing = cc.Forcing(data=f_vals, time=t_axis)
 
     # Compute a smooth derivative and attach it to Model3
     dfdt = make_derivative_func(method='scipy', data=orb_forcing.data,

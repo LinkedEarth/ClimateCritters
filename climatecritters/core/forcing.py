@@ -21,7 +21,7 @@ The typical workflow::
     import climatecritters as cc
 
     # Build a scenario timeline
-    seq = cc.Hold(100, value=0.0) + cc.Ramp(50, y0=0.0, yf=4.0) + cc.Hold(100, value=4.0)
+    seq = cc.forcing.Hold(100, value=0.0) + cc.forcing.Ramp(50, y0=0.0, yf=4.0) + cc.forcing.Hold(100, value=4.0)
     f   = seq.compile()              # → Forcing
 
     # Register with a model
@@ -131,7 +131,7 @@ class ForcingElement:
     import matplotlib.pyplot as plt
     import climatecritters as cc
 
-    elem = cc.ForcingElement(lambda t: np.exp(-0.01 * t), duration=50.0)
+    elem = cc.forcing.ForcingElement(lambda t: np.exp(-0.01 * t), duration=50.0)
     fig, ax = elem.plot()
     plt.savefig('docs/reference/figures/ForcingElement_example.png',
                 dpi=150, bbox_inches='tight')
@@ -235,7 +235,7 @@ class Hold(ForcingElement):
     import matplotlib.pyplot as plt
     import climatecritters as cc
 
-    h = cc.Hold(duration=50, value=280.0)
+    h = cc.forcing.Hold(duration=50, value=280.0)
     fig, ax = h.plot()
     plt.savefig('docs/reference/figures/Hold_example.png',
                 dpi=150, bbox_inches='tight')
@@ -324,8 +324,8 @@ class Ramp(ForcingElement):
     import climatecritters as cc
 
     fig, ax = plt.subplots()
-    cc.Ramp(100, y0=0.0, yf=1.0, shape='linear').plot(ax=ax, label='linear')
-    cc.Ramp(100, y0=0.0, yf=1.0, shape='cosine').plot(ax=ax, label='cosine', linestyle='--')
+    cc.forcing.Ramp(100, y0=0.0, yf=1.0, shape='linear').plot(ax=ax, label='linear')
+    cc.forcing.Ramp(100, y0=0.0, yf=1.0, shape='cosine').plot(ax=ax, label='cosine', linestyle='--')
     ax.legend()
     plt.savefig('docs/reference/figures/Ramp_shapes_example.png',
                 dpi=150, bbox_inches='tight')
@@ -431,7 +431,7 @@ class Harmonic(ForcingElement):
     import matplotlib.pyplot as plt
     import climatecritters as cc
 
-    h = cc.Harmonic(duration=20, period=4.0, A=0.5, center=0.0)
+    h = cc.forcing.Harmonic(duration=20, period=4.0, A=0.5, center=0.0)
     fig, ax = h.plot()
     plt.savefig('docs/reference/figures/Harmonic_example.png',
                 dpi=150, bbox_inches='tight')
@@ -526,9 +526,9 @@ class ForcingSequence:
     import climatecritters as cc
 
     scenario = (
-        cc.Hold(200, value=280.0)
-        + cc.Ramp(100, y0=280.0, yf=560.0, shape='cosine')
-        + cc.Hold(200, value=560.0)
+        cc.forcing.Hold(200, value=280.0)
+        + cc.forcing.Ramp(100, y0=280.0, yf=560.0, shape='cosine')
+        + cc.forcing.Hold(200, value=560.0)
     )
     fig, ax = scenario.plot()
     plt.savefig('docs/reference/figures/ForcingSequence_example.png',
@@ -591,9 +591,9 @@ class ForcingSequence:
         import climatecritters as cc
 
         scenario = (
-            cc.Hold(100, value=0.0, plot_kwargs={'color': 'steelblue', 'label': 'baseline'})
-            + cc.Ramp(50, y0=0.0, yf=4.0, plot_kwargs={'color': 'firebrick', 'label': 'ramp'})
-            + cc.Hold(100, value=4.0, plot_kwargs={'color': 'darkorange', 'label': 'perturbed'})
+            cc.forcing.Hold(100, value=0.0, plot_kwargs={'color': 'steelblue', 'label': 'baseline'})
+            + cc.forcing.Ramp(50, y0=0.0, yf=4.0, plot_kwargs={'color': 'firebrick', 'label': 'ramp'})
+            + cc.forcing.Hold(100, value=4.0, plot_kwargs={'color': 'darkorange', 'label': 'perturbed'})
         )
         fig, ax = scenario.plot()
         ax.set_xlabel('time'); ax.set_ylabel('forcing'); ax.legend()
@@ -833,9 +833,9 @@ class Forcing:
     import climatecritters as cc
 
     scenario = (
-        cc.Hold(200, value=280.0)
-        + cc.Ramp(100, y0=280.0, yf=560.0, shape='cosine')
-        + cc.Hold(200, value=560.0)
+        cc.forcing.Hold(200, value=280.0)
+        + cc.forcing.Ramp(100, y0=280.0, yf=560.0, shape='cosine')
+        + cc.forcing.Hold(200, value=560.0)
     )
     fig, ax = scenario.compile().plot()
     plt.savefig('docs/reference/figures/Forcing_sequence_example.png',
@@ -1016,9 +1016,9 @@ class Forcing:
         import climatecritters as cc
 
         f = cc.Forcing.from_sequence([
-            cc.Hold(duration=100, value=0.0),
-            cc.Ramp(duration=50, y0=0.0, yf=1.0, shape='cosine'),
-            cc.Hold(duration=100, value=1.0),
+            cc.forcing.Hold(duration=100, value=0.0),
+            cc.forcing.Ramp(duration=50, y0=0.0, yf=1.0, shape='cosine'),
+            cc.forcing.Hold(duration=100, value=1.0),
         ], label='freshwater_hosing')
         ```
         """
@@ -1172,8 +1172,8 @@ class Forcing:
 
         # Sequence-backed — t_span inferred automatically
         f = cc.Forcing.from_sequence([
-            cc.Hold(100, value=0.0),
-            cc.Ramp(50, y0=0.0, yf=4.0),
+            cc.forcing.Hold(100, value=0.0),
+            cc.forcing.Ramp(50, y0=0.0, yf=4.0),
         ])
         fig, ax = f.plot()
         plt.savefig('docs/reference/figures/Forcing_plot_example.png',
