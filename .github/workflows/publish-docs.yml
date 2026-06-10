@@ -30,7 +30,7 @@ jobs:
         working-directory: docs
 
       - name: add extension
-        run: quarto add machow/quartodoc
+        run: quarto add machow/quartodoc --no-prompt
         working-directory: docs
 
       - name: Build Quartodoc
