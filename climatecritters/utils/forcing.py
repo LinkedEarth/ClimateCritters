@@ -1,33 +1,51 @@
 """Convenience factories for common :class:`~climatecritters.core.Forcing` patterns.
 
-All public functions return either a plain callable or a
-:class:`~climatecritters.core.Forcing` object.  Attach the result to a model
-parameter or state variable after construction using
-``model.register_forcing(var_name, forcing_obj)``.
+All public functions return either a :class:`~climatecritters.core.Forcing`
+(when no ``duration`` is given) or a :class:`~climatecritters.core.ForcingElement`
+(when ``duration`` is given).  The unified entry point is :func:`create_forcing`;
+the named factories are ergonomic aliases that build their callable internally.
+
+.. rubric:: Duration gate
+
+Every factory accepts an optional ``duration`` keyword:
+
+* **No duration** → returns an indefinite :class:`~climatecritters.core.Forcing`
+  backed by a lambda.  Suitable for perpetual signals (orbital forcing, seasonal
+  cycle, noise) registered directly with a model.
+* **With duration** → returns a bounded :class:`~climatecritters.core.ForcingElement`
+  that can be composed into a :class:`~climatecritters.core.ForcingSequence` and
+  then compiled::
+
+      elem = create_sinusoid_forcing(A=5.0, period=1.0, duration=10.0)
+      seq  = Hold(5, value=0.0) + elem + Hold(5, value=0.0)
+      f    = seq.compile()   # → Forcing, ready to register
 """
 
 import numpy as np
 
-from ..core.forcing import Forcing
+from ..core.forcing import Forcing, ForcingElement, ForcingSequence
 
 __all__ = [
-    "create_periodic_forcing_function",
+    "create_forcing",
+    "create_sinusoid_forcing",
     "create_periodic_forcing",
     "create_constant_forcing",
-    "create_sinusoid_forcing",
     "create_piecewise_forcing",
+    "make_forcing_element",
 ]
 
+
+# ---------------------------------------------------------------------------
+# Internal helpers
+# ---------------------------------------------------------------------------
 
 def _validate_periods_powers(periods_powers):
     """Validate and normalise a sequence of (period, power) pairs."""
     if periods_powers is None:
         raise ValueError("periods_powers must not be None.")
-
     pairs = list(periods_powers)
     if len(pairs) == 0:
         raise ValueError("periods_powers must contain at least one (period, power) pair.")
-
     normalized = []
     for item in pairs:
         if len(item) != 2:
@@ -36,143 +54,92 @@ def _validate_periods_powers(periods_powers):
         if period <= 0.0:
             raise ValueError("Periods must be > 0.")
         normalized.append((period, power))
-
-    total_max_amplitude = float(sum(power for _, power in normalized))
-    if np.isclose(total_max_amplitude, 0.0):
+    total = float(sum(p for _, p in normalized))
+    if np.isclose(total, 0.0):
         raise ValueError("Sum of powers must be non-zero.")
+    return normalized, total
 
-    return normalized, total_max_amplitude
 
-
-def create_periodic_forcing_function(periods_powers, desired_amplitude=1, y0=0):
-    """Build a composite periodic forcing callable from sine components.
-
-    Component amplitudes are rescaled so their summed peak amplitude equals
-    ``desired_amplitude``.
-
-    Parameters
-    ----------
-    periods_powers : sequence of (float, float)
-        Sequence of ``(period, power)`` pairs.  Each ``period`` must be > 0.
-        ``power`` sets the relative amplitude of that component; components
-        are normalised so the total peak amplitude equals ``desired_amplitude``.
-    desired_amplitude : float
-        Peak amplitude of the composite signal.  Default 1.
-    y0 : float
-        Constant offset added to the output.  Default 0.
-
-    Returns
-    -------
-    forcing_function : callable
-        Function with signature ``f(t) -> float | ndarray``.  Accepts
-        scalar or array ``t`` and returns the same shape.
-
-    See also
-    --------
-    create_periodic_forcing : Wraps the returned callable in a
-        :class:`~climatecritters.core.Forcing` object.
-
-    Examples
-    --------
-    ```python
-    import numpy as np
-    import matplotlib.pyplot as plt
-    from climatecritters.utils.forcing import create_periodic_forcing_function
-
-    # Milankovitch-like forcing: 100 kyr + 41 kyr components
-    f = create_periodic_forcing_function(
-        [(100, 0.6), (41, 0.4)], desired_amplitude=25.0
-    )
-    t = np.linspace(0, 500, 1000)
-    fig, ax = plt.subplots(figsize=(8, 3))
-    ax.plot(t, [f(ti) for ti in t])
-    ax.set_xlabel('time (kyr)'); ax.set_ylabel('forcing')
-    ax.set_title('Composite periodic forcing (100 + 41 kyr)')
-    plt.savefig('docs/reference/figures/create_periodic_forcing_function_example.png',
-                dpi=150, bbox_inches='tight')
-    ```
-    """
-    pairs, total_max_amplitude = _validate_periods_powers(periods_powers)
+def _build_periodic_func(periods_powers, desired_amplitude=1.0, y0=0.0):
+    """Return a callable ``f(t)`` for a normalised multi-frequency sine sum."""
+    pairs, total = _validate_periods_powers(periods_powers)
     desired_amplitude = float(desired_amplitude)
     y0 = float(y0)
 
-    def forcing_function(t):
+    def _func(t):
         t_arr = np.asarray(t, dtype=float)
         result = np.full(t_arr.shape, y0, dtype=float)
         for period, power in pairs:
-            frequency = 1.0 / period
-            scaled_power = power / total_max_amplitude * desired_amplitude
-            result += scaled_power * np.sin(2.0 * np.pi * frequency * t_arr)
-        if t_arr.ndim == 0:
-            return float(result)
-        return result
+            scaled = power / total * desired_amplitude
+            result += scaled * np.sin(2.0 * np.pi * t_arr / period)
+        return float(result) if t_arr.ndim == 0 else result
 
-    return forcing_function
+    return _func
 
 
-def create_periodic_forcing(periods_powers, desired_amplitude=1, y0=0):
-    """Build a composite periodic :class:`~climatecritters.core.Forcing` from sine components.
+# ---------------------------------------------------------------------------
+# Unified entry point
+# ---------------------------------------------------------------------------
 
-    Thin wrapper around :func:`create_periodic_forcing_function` that returns
-    a :class:`~climatecritters.core.Forcing` object instead of a bare callable.
+def create_forcing(func, duration=None):
+    """Create a forcing from an arbitrary callable.
 
     Parameters
     ----------
-    periods_powers : sequence of (float, float)
-        Sequence of ``(period, power)`` pairs.  See
-        :func:`create_periodic_forcing_function` for details.
-    desired_amplitude : float
-        Peak amplitude of the composite signal.  Default 1.
-    y0 : float
-        Constant offset.  Default 0.
+    func : callable
+        Function with signature ``f(t) -> float | ndarray``.
+    duration : float, optional
+        If given, returns a bounded :class:`~climatecritters.core.ForcingElement`
+        lasting ``duration`` time units.  If omitted, returns an indefinite
+        :class:`~climatecritters.core.Forcing`.
 
     Returns
     -------
-    forcing : cc.core.Forcing
-        Forcing object wrapping the composite periodic function.
-
-    See also
-    --------
-    create_periodic_forcing_function : Returns the bare callable.
+    Forcing or ForcingElement
+        * No ``duration`` → :class:`~climatecritters.core.Forcing` (indefinite)
+        * With ``duration`` → :class:`~climatecritters.core.ForcingElement` (bounded)
 
     Examples
     --------
     ```python
-    import matplotlib.pyplot as plt
-    from climatecritters.utils.forcing import create_periodic_forcing
-    from climatecritters.model_critters.stommel import Stommel
+    import climatecritters as cc
+    from climatecritters.utils.forcing import create_forcing
 
-    orbital = create_periodic_forcing([(100, 0.6), (41, 0.4)], desired_amplitude=0.3)
-    model = Stommel(E=0.0, T_star=1.0, S_star=0.0)
-    model.register_forcing('E', orbital)
-    output = model.integrate(t_span=(0, 500), y0=[1.0, 0.0], method='RK45')
-    fig, ax = plt.subplots(figsize=(8, 3))
-    ax.plot(output.time, output.diagnostic_variables['q'])
-    ax.axhline(0, color='k', lw=0.8, ls='--')
-    ax.set_xlabel('time'); ax.set_ylabel('q (overturning)')
-    ax.set_title('Stommel with periodic freshwater forcing')
-    plt.savefig('docs/reference/figures/create_periodic_forcing_example.png',
-                dpi=150, bbox_inches='tight')
+    # Indefinite: register directly with a model
+    f = create_forcing(lambda t: 0.1 * t)
+    model.register_forcing('S', f)
+
+    # Bounded: embed in a scenario
+    elem = create_forcing(lambda t: 0.1 * t, duration=50.0)
+    seq  = cc.Hold(10, value=0.0) + elem
+    model.register_forcing('S', seq.compile())
     ```
     """
-    func = create_periodic_forcing_function(
-        periods_powers, desired_amplitude=desired_amplitude, y0=y0
-    )
-    return Forcing(func)
+    if not callable(func):
+        raise TypeError(f"func must be callable; got {type(func)!r}.")
+    if duration is None:
+        return Forcing(func)
+    return ForcingElement(func, float(duration))
 
 
-def create_constant_forcing(value):
-    """Build a constant :class:`~climatecritters.core.Forcing`.
+# ---------------------------------------------------------------------------
+# Named factories (aliases of create_forcing with pre-built lambdas)
+# ---------------------------------------------------------------------------
+
+def create_constant_forcing(value, duration=None):
+    """Build a constant forcing.
 
     Parameters
     ----------
     value : float
-        The constant forcing value returned for all ``t``.
+        The constant value returned for all ``t``.
+    duration : float, optional
+        If given, returns a :class:`~climatecritters.core.ForcingElement`.
+        If omitted, returns an indefinite :class:`~climatecritters.core.Forcing`.
 
     Returns
     -------
-    forcing : cc.core.Forcing
-        Forcing object that always returns ``value``.
+    Forcing or ForcingElement
 
     Examples
     --------
@@ -184,100 +151,39 @@ def create_constant_forcing(value):
     print(f.get_forcing(999.9))  # 8.0
     ```
     """
-    def _constant(t):
+    v = float(value)
+
+    def _func(t):
         t_arr = np.asarray(t, dtype=float)
-        out = np.full(t_arr.shape, float(value), dtype=float)
-        if t_arr.ndim == 0:
-            return float(out)
-        return out
+        out = np.full(t_arr.shape, v, dtype=float)
+        return float(out) if t_arr.ndim == 0 else out
 
-    return Forcing(_constant)
+    return create_forcing(_func, duration=duration)
 
 
-def create_sinusoid_forcing(A, period, y0=0.0):
-    """Build a sinusoidal :class:`~climatecritters.core.Forcing`.
-
-    Returns a forcing object representing:
-
-        f(t) = y0 + A * sin(2 * pi * t / period)
+def create_sinusoid_forcing(A, period, y0=0.0, duration=None):
+    """Build a sinusoidal forcing: ``f(t) = y0 + A * sin(2π t / period)``.
 
     Parameters
     ----------
     A : float
-        Amplitude of the sinusoid.
+        Amplitude.
     period : float
-        Period of the sinusoid (same time units as the model).  Must be > 0.
+        Period (same time units as the model).  Must be > 0.
     y0 : float
         Constant offset.  Default 0.0.
+    duration : float, optional
+        If given, returns a :class:`~climatecritters.core.ForcingElement`.
+        If omitted, returns an indefinite :class:`~climatecritters.core.Forcing`.
 
     Returns
     -------
-    forcing : cc.core.Forcing
-        Forcing object wrapping the sinusoidal function.
+    Forcing or ForcingElement
 
     Raises
     ------
     ValueError
-        If ``period`` is ≤ 0.
-
-    Examples
-    --------
-    ```python
-    import numpy as np
-    import matplotlib.pyplot as plt
-    from climatecritters.utils.forcing import create_sinusoid_forcing
-
-    seasonal = create_sinusoid_forcing(A=0.5, period=1.0)
-    t = np.linspace(0, 3, 300)
-    fig, ax = plt.subplots(figsize=(7, 3))
-    ax.plot(t, [seasonal.get_forcing(ti) for ti in t])
-    ax.set_xlabel('time'); ax.set_ylabel('forcing')
-    ax.set_title('Sinusoidal forcing (A=0.5, period=1)')
-    plt.savefig('docs/reference/figures/create_sinusoid_forcing_example.png',
-                dpi=150, bbox_inches='tight')
-    ```
-    """
-    A = float(A)
-    period = float(period)
-    y0 = float(y0)
-    if period <= 0.0:
-        raise ValueError("period must be > 0.")
-
-    def _sinusoid(t):
-        t_arr = np.asarray(t, dtype=float)
-        out = y0 + A * np.sin(2.0 * np.pi * t_arr / period)
-        if t_arr.ndim == 0:
-            return float(out)
-        return out
-
-    return Forcing(_sinusoid)
-
-
-def create_piecewise_forcing(elements, y0=0.0, label="forcing"):
-    """Build a piecewise :class:`~climatecritters.core.Forcing` from a sequence of elements.
-
-    Delegates directly to :meth:`~climatecritters.core.Forcing.from_elements`.
-
-    Parameters
-    ----------
-    elements : sequence
-        Ordered sequence of forcing elements (dict specs or
-        :class:`~climatecritters.core.Forcing`-compatible objects) defining each
-        piecewise segment.  See :meth:`~climatecritters.core.Forcing.from_elements`
-        for the expected format.
-    y0 : float
-        Initial value before the first element takes effect.  Default 0.0.
-    label : str
-        Human-readable label for the forcing object.  Default ``'forcing'``.
-
-    Returns
-    -------
-    forcing : cc.core.Forcing
-        Piecewise forcing object.
-
-    See also
-    --------
-    climatecritters.core.Forcing.from_elements : Underlying constructor.
+        If ``period`` ≤ 0.
 
     Examples
     --------
@@ -285,21 +191,176 @@ def create_piecewise_forcing(elements, y0=0.0, label="forcing"):
     import numpy as np
     import matplotlib.pyplot as plt
     import climatecritters as cc
+    from climatecritters.utils.forcing import create_sinusoid_forcing
+
+    # Indefinite — plot over two periods
+    seasonal = create_sinusoid_forcing(A=0.5, period=1.0)
+    fig, ax = seasonal.plot(t_span=(0, 2))
+    ax.set_xlabel('time'); ax.set_ylabel('forcing')
+    plt.savefig('docs/reference/figures/create_sinusoid_forcing_example.png',
+                dpi=150, bbox_inches='tight')
+
+    # Bounded — embed in a scenario and plot
+    elem = create_sinusoid_forcing(A=0.5, period=1.0, duration=10.0)
+    seq  = cc.Hold(2, value=0.0) + elem + cc.Hold(2, value=0.0)
+    fig, ax = seq.plot()
+    ax.set_xlabel('time'); ax.set_ylabel('forcing')
+    plt.savefig('docs/reference/figures/create_sinusoid_forcing_scenario_example.png',
+                dpi=150, bbox_inches='tight')
+    ```
+    """
+    period = float(period)
+    if period <= 0.0:
+        raise ValueError("period must be > 0.")
+    return create_forcing(
+        _build_periodic_func([(period, 1.0)], desired_amplitude=float(A), y0=float(y0)),
+        duration=duration,
+    )
+
+
+def create_periodic_forcing(periods_powers, desired_amplitude=1, y0=0, duration=None):
+    """Build a composite periodic forcing from normalised sine components.
+
+    Component amplitudes are rescaled so their summed peak amplitude equals
+    ``desired_amplitude``.
+
+    Parameters
+    ----------
+    periods_powers : sequence of (float, float)
+        Sequence of ``(period, power)`` pairs.  Each ``period`` must be > 0.
+        ``power`` sets the relative weight of that component.
+    desired_amplitude : float
+        Peak amplitude of the composite signal.  Default 1.
+    y0 : float
+        Constant offset.  Default 0.
+    duration : float, optional
+        If given, returns a :class:`~climatecritters.core.ForcingElement`.
+        If omitted, returns an indefinite :class:`~climatecritters.core.Forcing`.
+
+    Returns
+    -------
+    Forcing or ForcingElement
+
+    Examples
+    --------
+    ```python
+    import matplotlib.pyplot as plt
+    from climatecritters.utils.forcing import create_periodic_forcing
+
+    # Milankovitch-like: 100 kyr eccentricity + 41 kyr obliquity
+    orbital = create_periodic_forcing([(100, 0.6), (41, 0.4)], desired_amplitude=25.0)
+    fig, ax = orbital.plot(t_span=(0, 500))
+    ax.set_xlabel('time (kyr)'); ax.set_ylabel('forcing (W m⁻²)')
+    plt.savefig('docs/reference/figures/create_periodic_forcing_example.png',
+                dpi=150, bbox_inches='tight')
+    ```
+    """
+    return create_forcing(
+        _build_periodic_func(periods_powers, desired_amplitude=desired_amplitude, y0=y0),
+        duration=duration,
+    )
+
+
+def create_piecewise_forcing(elements, label="forcing"):
+    """Build a piecewise forcing from a sequence of :class:`~climatecritters.core.ForcingElement` parts.
+
+    Compiles the sequence immediately and returns a callable
+    :class:`~climatecritters.core.Forcing`.
+
+    Parameters
+    ----------
+    elements : sequence of ForcingElement
+        Ordered :class:`~climatecritters.core.Hold`, :class:`~climatecritters.core.Ramp`,
+        :class:`~climatecritters.core.Harmonic`, or general
+        :class:`~climatecritters.core.ForcingElement` instances.
+    label : str
+        Human-readable label.  Default ``'forcing'``.
+
+    Returns
+    -------
+    forcing : Forcing
+
+    Examples
+    --------
+    ```python
+    import matplotlib.pyplot as plt
+    import climatecritters as cc
     from climatecritters.utils.forcing import create_piecewise_forcing
 
-    forcing = create_piecewise_forcing(
-        [cc.core.Hold(duration=50,  value=0.0),
-         cc.core.Ramp(duration=100, y0=0.0, yf=4.0),
-         cc.core.Hold(duration=50,  value=4.0)],
-        label="CO2 ramp"
-    )
-    t = np.linspace(0, 200, 500)
-    fig, ax = plt.subplots(figsize=(7, 3))
-    ax.plot(t, [forcing.get_forcing(ti) for ti in t])
-    ax.set_xlabel('time'); ax.set_ylabel('forcing (W m⁻²)')
-    ax.set_title('Piecewise CO₂ ramp forcing')
+    f = create_piecewise_forcing([
+        cc.Hold(duration=50,  value=0.0),
+        cc.Ramp(duration=100, y0=0.0, yf=4.0),
+        cc.Hold(duration=50,  value=4.0),
+    ], label="CO2 ramp")
+    fig, ax = f.plot()
+    ax.set_xlabel('time'); ax.set_ylabel('forcing')
     plt.savefig('docs/reference/figures/create_piecewise_forcing_example.png',
                 dpi=150, bbox_inches='tight')
     ```
     """
-    return Forcing.from_elements(elements=elements, y0=y0, label=label)
+    return ForcingSequence(parts=list(elements), label=label).compile()
+
+
+# ---------------------------------------------------------------------------
+# Reverse bridge: Forcing → ForcingElement
+# ---------------------------------------------------------------------------
+
+def make_forcing_element(forcing, duration=None):
+    """Convert a :class:`~climatecritters.core.Forcing` into a bounded
+    :class:`~climatecritters.core.ForcingElement`.
+
+    This is the reverse of :meth:`~climatecritters.core.ForcingSequence.compile` —
+    it lets you embed an existing ``Forcing`` as a timed segment inside a
+    :class:`~climatecritters.core.ForcingSequence`.
+
+    Parameters
+    ----------
+    forcing : Forcing
+        The forcing to embed.  Must be callable via ``get_forcing``.
+    duration : float, optional
+        Length of the segment.  **Required** for lambda/callable-backed
+        ``Forcing`` objects.  For array-backed ``Forcing`` objects (created
+        from a CSV or data array) the duration is inferred from
+        ``time[-1] - time[0]`` if not provided.
+
+    Returns
+    -------
+    ForcingElement
+
+    Raises
+    ------
+    ValueError
+        If ``duration`` is not provided and cannot be inferred.
+
+    Examples
+    --------
+    ```python
+    import matplotlib.pyplot as plt
+    import climatecritters as cc
+    from climatecritters.utils.forcing import make_forcing_element
+
+    # Embed empirical insolation data as a bounded segment
+    obs  = cc.Forcing.from_csv(dataset='insolation')
+    elem = make_forcing_element(obs)          # duration inferred from time axis
+    scenario = cc.Hold(50, value=0.0) + elem + cc.Hold(50, value=0.0)
+    fig, ax = scenario.plot()
+    ax.set_xlabel('time (kyr)'); ax.set_ylabel('insolation (W m⁻²)')
+    plt.savefig('docs/reference/figures/make_forcing_element_example.png',
+                dpi=150, bbox_inches='tight')
+    ```
+    """
+    if not isinstance(forcing, Forcing):
+        raise TypeError(f"forcing must be a Forcing instance; got {type(forcing)!r}.")
+
+    if duration is None:
+        # Try to infer from a time axis (array-backed Forcing)
+        if forcing.time is not None:
+            t = np.asarray(forcing.time, dtype=float)
+            duration = float(t[-1] - t[0])
+        else:
+            raise ValueError(
+                "duration must be provided for lambda/callable-backed Forcing objects "
+                "(no time axis to infer from)."
+            )
+
+    return ForcingElement(forcing.get_forcing, float(duration))
