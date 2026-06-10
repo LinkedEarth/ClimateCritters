@@ -31,6 +31,9 @@ jobs:
       - name: add extension
         run: quarto add machow/quartodoc
 
+      - name: move to docs
+        run: cd docs
+
       - name: Build Quartodoc
         run: quartodoc build
         working-directory: docs
