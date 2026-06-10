@@ -60,9 +60,9 @@ For signals that change character over time, build a `ForcingSequence` from `Hol
 
 ```python
 scenario = (
-    cc.Hold(duration=100, value=1360.0)
-    + cc.Ramp(duration=50, y0=1360.0, yf=1380.0, shape='linear')
-    + cc.Hold(duration=100, value=1380.0)
+    cc.forcing.Hold(duration=100, value=1360.0)
+    + cc.forcing.Ramp(duration=50, y0=1360.0, yf=1380.0, shape='linear')
+    + cc.forcing.Hold(duration=100, value=1380.0)
 )
 f = scenario.compile()   # → Forcing, ready to register
 ```
@@ -126,8 +126,8 @@ from climatecritters.model_critters import EBM
 
 # composable forcing: spin-up then a solar ramp
 forcing = cc.Forcing.from_sequence([
-    cc.Hold(duration=500, value=1360.0),
-    cc.Ramp(duration=200, y0=1360.0, yf=1390.0, shape='linear'),
+    cc.forcing.Hold(duration=500, value=1360.0),
+    cc.forcing.Ramp(duration=200, y0=1360.0, yf=1390.0, shape='linear'),
 ])
 
 # time-varying albedo
