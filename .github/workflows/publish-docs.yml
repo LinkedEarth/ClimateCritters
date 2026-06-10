@@ -27,12 +27,11 @@ jobs:
 
       - name: Install quartodoc interlinks filter
         run: python -m quartodoc interlinks
+        working-directory: docs
 
       - name: add extension
         run: quarto add machow/quartodoc
-
-      - name: move to docs
-        run: cd docs
+        working-directory: docs
 
       - name: Build Quartodoc
         run: quartodoc build
