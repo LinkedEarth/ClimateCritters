@@ -37,6 +37,14 @@ jobs:
         run: quartodoc build
         working-directory: docs
 
+      - name: Sync notebooks
+        run: python scripts/sync_notebooks.py
+        working-directory: docs
+
+      - name: Generate tutorials index
+        run: python scripts/generate_tutorials_index.py
+        working-directory: docs
+
       - name: Render and publish
         uses: quarto-dev/quarto-actions/publish@v2
         with:
