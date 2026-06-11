@@ -1,8 +1,4 @@
-import climatecritters.utils as utils
-from .model_critters import *
-
-
-import climatecritters.utils as utils
+from . import utils
 from .model_critters import *          # all concrete models at cc.*
 from .core import Forcing, CCModel, CCOutput   # top-level abstractions
 from .core import forcing as forcing   # builder namespace at cc.forcing.*
