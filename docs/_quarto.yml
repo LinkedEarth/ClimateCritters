@@ -8,6 +8,7 @@ project:
     - objects.txt
   pre-render:
     - python scripts/sync_notebooks.py
+    - python scripts/generate_tutorials_index.py
     - python scripts/inject_doc_figures.py
 
 metadata-files:

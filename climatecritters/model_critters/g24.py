@@ -23,10 +23,10 @@ class Model3(CCModel):
     var_name : str
         Label for the model output.  Default ``'ice volume'``.
     f1 : float or callable or cc.Forcing
-        Insolation threshold for glacial inception (W m\ :sup:`-2`;
+        Insolation threshold for glacial inception (W/m^2;
         typically -20 to -15).  Default -16.
     f2 : float or callable or cc.Forcing
-        Insolation threshold for deglaciation inception (W m^2; typically
+        Insolation threshold for deglaciation inception (W/m^2; typically
         positive).  Default 16.
     t1 : float or callable or cc.Forcing
         Relaxation timescale for glacial inception (kyr).  Default 30.
@@ -168,7 +168,7 @@ class Model3(CCModel):
         v : float
             Current ice volume (normalised).
         f : float
-            Orbital forcing value (W m\ :sup:`-2`).
+            Orbital forcing value (W/m^2).
         f1 : float
             Lower insolation threshold (glaciation onset).
         f2 : float
@@ -199,7 +199,7 @@ class Model3(CCModel):
         Parameters
         ----------
         f : float
-            Orbital forcing value (W m\ :sup:`-2`).
+            Orbital forcing value (W/m^2).
         f1 : float
             Lower insolation threshold.
         f2 : float
@@ -218,7 +218,7 @@ class Model3(CCModel):
         Parameters
         ----------
         f : float
-            Orbital forcing value (W m\ :sup:`-2`).
+            Orbital forcing value (W/m^2).
         f1 : float
             Lower insolation threshold.
         f2 : float
@@ -264,7 +264,7 @@ def calc_df(t, A=25, eps=0.5, T1=100, T2=30):
     t : float
         Time (kyr).
     A : float
-        Forcing amplitude (W m\ :sup:`-2`).  Default 25.
+        Forcing amplitude (W/m^2).  Default 25.
     eps : float
         Eccentricity modulation amplitude.  ``eps=0`` removes eccentricity
         modulation.  Default 0.5.
@@ -290,7 +290,7 @@ def calc_f(t, A=25, eps=0.5, T1=100, T2=30):
     t : float
         Time (kyr).
     A : float
-        Forcing amplitude (W m\ :sup:`-2`).  Default 25.
+        Forcing amplitude (W/m^2).  Default 25.
     eps : float
         Eccentricity modulation amplitude.  Default 0.5.
     T1 : float
