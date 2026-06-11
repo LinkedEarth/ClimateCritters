@@ -2,13 +2,19 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.25">
+<meta name="generator" content="quarto-1.9.38">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Jordan Landers">
+<meta name="dcterms.date" content="2026-06-11">
+<meta name="keywords" content="solver, RK45, rk4, Euler, adaptive, fixed-step, tolerance, discrete-event, SDE, Lorenz96, two-scale, history corruption, timestep">
 
-<title>Solver Demo – ClimateCritters</title>
+<title>Solver Selection Guide – ClimateCritters</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -66,18 +72,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../../">
 <link href="../../notebooks/functionality_demos/downsample_starter.html" rel="prev">
-<link href="../../thumbnails/paleobeasts_logo.png" rel="icon" type="image/png">
+<link href="../../thumbnails/ClimateCritters_logo.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-5b4ad623e5705c0698d39aec6f10cf02.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-bba5ebae505b5c03f3f0d8040a416a6b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -107,7 +112,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 }</script>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 const typesetMath = (el) => {
@@ -147,8 +152,6 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
-    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">ClimateCritters</span>
     </a>
@@ -199,10 +202,6 @@ window.Quarto = {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
-    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
-      <a href="../../index.html" class="sidebar-logo-link">
-      </a>
-      </div>
     <div class="sidebar-menu-container"> 
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
@@ -321,7 +320,7 @@ window.Quarto = {
           <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
- <span class="menu-text">Attrctors</span></a>
+ <span class="menu-text">Attractors</span></a>
           <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -387,13 +386,13 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../notebooks/functionality_demos/noise_demo.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Creating noise using ClimateCritters</span></a>
+ <span class="menu-text">Noise Generation</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../notebooks/functionality_demos/model_noise_starter.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Model Noise Demo</span></a>
+ <span class="menu-text">Noise in Models — Three Injection Modes</span></a>
   </div>
 </li>
       </ul>
@@ -433,38 +432,54 @@ window.Quarto = {
   <li><a href="#lorenz96-stiff-fast-slow-system" id="toc-lorenz96-stiff-fast-slow-system" class="nav-link" data-scroll-target="#lorenz96-stiff-fast-slow-system">Lorenz96: stiff fast-slow system</a></li>
   <li><a href="#summary-solver-selection-guide" id="toc-summary-solver-selection-guide" class="nav-link" data-scroll-target="#summary-solver-selection-guide">Summary: solver selection guide</a></li>
   </ul>
-</nav>
+<div class="quarto-other-links"><h2>Other Links</h2><ul><li><a href="https://mybinder.org/v2/gh/LinkedEarth/ClimateCritters/HEAD?labpath=notebooks/functionality_demos/solver_demo.ipynb"><i class="bi bi-rocket-takeoff"></i>Launch on Binder</a></li><li><a href="https://raw.githubusercontent.com/LinkedEarth/ClimateCritters/main/notebooks/functionality_demos/solver_demo.ipynb"><i class="bi bi-download"></i>Download notebook</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">Functionality demos</li><li class="breadcrumb-item"><a href="../../notebooks/functionality_demos/solver_demo.html">Solvers</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Solver Demo</h1>
+<h1 class="title">Solver Selection Guide</h1>
 </div>
 
 
 
 <div class="quarto-title-meta">
 
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Jordan Landers </p>
+          </div>
+  </div>
     
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">June 11, 2026</p>
+    </div>
+  </div>
   
     
   </div>
   
+<div>
+  <div class="abstract">
+    <div class="block-title">Abstract</div>
+    <p>Choosing the right numerical integrator matters: adaptive RK45 handles smooth ODEs efficiently but can produce spurious structure at loose tolerances; discrete-event models like G24 require fixed-step solvers to avoid missed threshold crossings; SDE models need stochastic-aware integrators; and two-scale Lorenz96 requires fixed-step <code>rk4</code> to prevent history corruption. This notebook provides a practical guide with examples and a model-class-to-solver summary table.</p>
+  </div>
+</div>
 
+<div>
+  <div class="keywords">
+    <div class="block-title">Keywords</div>
+    <p>solver, RK45, rk4, Euler, adaptive, fixed-step, tolerance, discrete-event, SDE, Lorenz96, two-scale, history corruption, timestep</p>
+  </div>
+</div>
 
 </header>
 
 
-<p>Choosing the right integrator matters: the wrong solver can introduce false structure, miss events, or simply give the wrong answer.</p>
-<p>This notebook collects examples drawn from three models that each stress a different solver concern:</p>
-<ul>
-<li><strong>EBM0D</strong> — smooth continuous ODE; illustrates tolerance effects and the cost of fixed-step vs adaptive integration</li>
-<li><strong>G24</strong> — piecewise-smooth discrete-event model; shows how timestep size drives artificial harmonics</li>
-<li><strong>Lorenz96 two-scale</strong> — stiff fast-slow system; demonstrates that adaptive solvers corrupt the accumulated history and <code>rk4</code> is required</li>
-</ul>
-<p>A summary table at the end gives guidance for each model class.</p>
 <div id="imports" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -622,9 +637,9 @@ dt=  6.5 kyr  19 terminations  (mean 105 kyr cycle)
 dt= 10.0 kyr  18 terminations  (mean 111 kyr cycle)</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
-<pre><code>/Users/jlanders/PycharmProjects/PaleoBeasts/climatecritters/model_critters/g24.py:213: RuntimeWarning: invalid value encountered in sqrt
+<pre><code>/Users/jlanders/PycharmProjects/ClimateCritters/climatecritters/model_critters/g24.py:213: RuntimeWarning: invalid value encountered in sqrt
   return 1 + np.sqrt((f2 - f) / (f2 - f1))
-/Users/jlanders/PycharmProjects/PaleoBeasts/climatecritters/model_critters/g24.py:232: RuntimeWarning: invalid value encountered in sqrt
+/Users/jlanders/PycharmProjects/ClimateCritters/climatecritters/model_critters/g24.py:232: RuntimeWarning: invalid value encountered in sqrt
   return 1 - np.sqrt((f2 - f) / (f2 - f1))</code></pre>
 </div>
 </div>
@@ -1024,7 +1039,7 @@ dt= 10.0 kyr  18 terminations  (mean 111 kyr cycle)</code></pre>
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
+        var filterRegex = new RegExp("https:\/\/LinkedEarth\.github\.io\/ClimateCritters\/");
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }

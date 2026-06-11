@@ -2,13 +2,19 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.25">
+<meta name="generator" content="quarto-1.9.38">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Jordan Landers">
+<meta name="dcterms.date" content="2026-06-11">
+<meta name="keywords" content="downsample, sub-sampling, proxy records, sparse sampling, exponential, Poisson, Pareto, random_choice, resolution, pyleoclim">
 
-<title>Downsampling Demo – ClimateCritters</title>
+<title>Downsampling — Simulating Sparse Proxy Records – ClimateCritters</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -67,18 +73,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta name="quarto:offset" content="../../">
 <link href="../../notebooks/functionality_demos/solver_demo.html" rel="next">
 <link href="../../notebooks/functionality_demos/model_noise_starter.html" rel="prev">
-<link href="../../thumbnails/paleobeasts_logo.png" rel="icon" type="image/png">
+<link href="../../thumbnails/ClimateCritters_logo.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-5b4ad623e5705c0698d39aec6f10cf02.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-bba5ebae505b5c03f3f0d8040a416a6b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -119,8 +124,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
-    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">ClimateCritters</span>
     </a>
@@ -171,10 +174,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
-    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
-      <a href="../../index.html" class="sidebar-logo-link">
-      </a>
-      </div>
     <div class="sidebar-menu-container"> 
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
@@ -293,7 +292,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
- <span class="menu-text">Attrctors</span></a>
+ <span class="menu-text">Attractors</span></a>
           <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -359,13 +358,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../notebooks/functionality_demos/noise_demo.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Creating noise using ClimateCritters</span></a>
+ <span class="menu-text">Noise Generation</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../notebooks/functionality_demos/model_noise_starter.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Model Noise Demo</span></a>
+ <span class="menu-text">Noise in Models — Three Injection Modes</span></a>
   </div>
 </li>
       </ul>
@@ -394,67 +393,61 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#how-this-differs-from-reframing-the-time-axis" id="toc-how-this-differs-from-reframing-the-time-axis" class="nav-link active" data-scroll-target="#how-this-differs-from-reframing-the-time-axis">How this differs from reframing the time axis</a></li>
-  <li><a href="#original-series-and-resolution" id="toc-original-series-and-resolution" class="nav-link" data-scroll-target="#original-series-and-resolution">Original series and resolution</a></li>
+  <li><a href="#original-series-and-resolution" id="toc-original-series-and-resolution" class="nav-link active" data-scroll-target="#original-series-and-resolution">Original series and resolution</a></li>
   <li><a href="#exponential" id="toc-exponential" class="nav-link" data-scroll-target="#exponential">Exponential</a></li>
   <li><a href="#poisson" id="toc-poisson" class="nav-link" data-scroll-target="#poisson">Poisson</a></li>
   <li><a href="#pareto" id="toc-pareto" class="nav-link" data-scroll-target="#pareto">Pareto</a></li>
   <li><a href="#random-choice" id="toc-random-choice" class="nav-link" data-scroll-target="#random-choice">Random choice</a></li>
   <li><a href="#method-comparison-gap-size-histograms" id="toc-method-comparison-gap-size-histograms" class="nav-link" data-scroll-target="#method-comparison-gap-size-histograms">Method comparison — gap-size histograms</a></li>
   </ul>
-</nav>
+<div class="quarto-other-links"><h2>Other Links</h2><ul><li><a href="https://mybinder.org/v2/gh/LinkedEarth/ClimateCritters/HEAD?labpath=notebooks/functionality_demos/downsample_starter.ipynb"><i class="bi bi-rocket-takeoff"></i>Launch on Binder</a></li><li><a href="https://raw.githubusercontent.com/LinkedEarth/ClimateCritters/main/notebooks/functionality_demos/downsample_starter.ipynb"><i class="bi bi-download"></i>Download notebook</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">Functionality demos</li><li class="breadcrumb-item"><a href="../../notebooks/functionality_demos/downsample_starter.html">Downsampling</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Downsampling Demo</h1>
+<h1 class="title">Downsampling — Simulating Sparse Proxy Records</h1>
 </div>
 
 
 
 <div class="quarto-title-meta">
 
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Jordan Landers </p>
+          </div>
+  </div>
     
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">June 11, 2026</p>
+    </div>
+  </div>
   
     
   </div>
   
+<div>
+  <div class="abstract">
+    <div class="block-title">Abstract</div>
+    <p><code>resample.downsample</code> sub-samples a regularly spaced model trajectory to simulate the irregular sampling of paleoclimate proxy records. This notebook demonstrates four gap-distribution modes — exponential, Poisson, Pareto, and random_choice — and shows how to inspect the resulting resolution statistics using pyleoclim’s resolution dashboard.</p>
+  </div>
+</div>
 
+<div>
+  <div class="keywords">
+    <div class="block-title">Keywords</div>
+    <p>downsample, sub-sampling, proxy records, sparse sampling, exponential, Poisson, Pareto, random_choice, resolution, pyleoclim</p>
+  </div>
+</div>
 
 </header>
 
 
-<p><code>resample.downsample</code> simulates <strong>irregular sub-sampling</strong>: it randomly selects a subset of points from the original series, keeping their exact values at the selected times.</p>
-<section id="how-this-differs-from-reframing-the-time-axis" class="level3">
-<h3 class="anchored" data-anchor-id="how-this-differs-from-reframing-the-time-axis">How this differs from reframing the time axis</h3>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Operation</th>
-<th>What it does</th>
-<th>When to use</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong><code>downsample</code></strong> (this notebook)</td>
-<td>Randomly <em>skips</em> points — kept values are exact</td>
-<td>Simulate a sparse proxy record from dense model output</td>
-</tr>
-<tr class="even">
-<td><strong><code>interp</code> / <code>common_time</code></strong></td>
-<td>Interpolates onto a new uniform grid — <em>invents</em> values</td>
-<td>Clean up adaptive-timestep solver output; align two series</td>
-</tr>
-</tbody>
-</table>
 <div id="imports" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -470,7 +463,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 {'archiveType': 'Instrumental', 'label': 'Southern Oscillation Index'}</code></pre>
 </div>
 </div>
-</section>
 <section id="original-series-and-resolution" class="level3">
 <h3 class="anchored" data-anchor-id="original-series-and-resolution">Original series and resolution</h3>
 <div id="orig-plot" class="cell" data-execution_count="3">
@@ -848,7 +840,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
+        var filterRegex = new RegExp("https:\/\/LinkedEarth\.github\.io\/ClimateCritters\/");
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
@@ -1177,8 +1169,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../../notebooks/functionality_demos/model_noise_starter.html" class="pagination-link" aria-label="Model Noise Demo">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Model Noise Demo</span>
+      <a href="../../notebooks/functionality_demos/model_noise_starter.html" class="pagination-link" aria-label="Noise in Models — Three Injection Modes">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Noise in Models — Three Injection Modes</span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">

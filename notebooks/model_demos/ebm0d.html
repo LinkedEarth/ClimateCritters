@@ -2,13 +2,19 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.25">
+<meta name="generator" content="quarto-1.9.38">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Jordan Landers">
+<meta name="dcterms.date" content="2026-06-11">
+<meta name="keywords" content="EBM0D, energy balance, albedo, ice-albedo feedback, bistability, OLR, solar forcing, heat capacity, Stefan-Boltzmann, TSI">
 
 <title>EBM0D — Zero-Dimensional Energy Balance Model – ClimateCritters</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -67,18 +73,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta name="quarto:offset" content="../../">
 <link href="../../notebooks/model_demos/ebm1d_lat.html" rel="next">
 <link href="../../notebooks/base_classes/forcing.html" rel="prev">
-<link href="../../thumbnails/paleobeasts_logo.png" rel="icon" type="image/png">
+<link href="../../thumbnails/ClimateCritters_logo.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-5b4ad623e5705c0698d39aec6f10cf02.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-bba5ebae505b5c03f3f0d8040a416a6b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -108,7 +113,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 }</script>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 const typesetMath = (el) => {
@@ -148,8 +153,6 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
-    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">ClimateCritters</span>
     </a>
@@ -200,10 +203,6 @@ window.Quarto = {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
-    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
-      <a href="../../index.html" class="sidebar-logo-link">
-      </a>
-      </div>
     <div class="sidebar-menu-container"> 
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
@@ -322,7 +321,7 @@ window.Quarto = {
           <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
- <span class="menu-text">Attrctors</span></a>
+ <span class="menu-text">Attractors</span></a>
           <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -388,13 +387,13 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../notebooks/functionality_demos/noise_demo.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Creating noise using ClimateCritters</span></a>
+ <span class="menu-text">Noise Generation</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../notebooks/functionality_demos/model_noise_starter.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Model Noise Demo</span></a>
+ <span class="menu-text">Noise in Models — Three Injection Modes</span></a>
   </div>
 </li>
       </ul>
@@ -439,7 +438,7 @@ window.Quarto = {
   <li><a href="#time-evolving-parameters" id="toc-time-evolving-parameters" class="nav-link" data-scroll-target="#time-evolving-parameters">Time-evolving parameters</a></li>
   <li><a href="#solver-notes" id="toc-solver-notes" class="nav-link" data-scroll-target="#solver-notes">Solver notes</a></li>
   </ul>
-</nav>
+<div class="quarto-other-links"><h2>Other Links</h2><ul><li><a href="https://mybinder.org/v2/gh/LinkedEarth/ClimateCritters/HEAD?labpath=notebooks/model_demos/ebm0d.ipynb"><i class="bi bi-rocket-takeoff"></i>Launch on Binder</a></li><li><a href="https://raw.githubusercontent.com/LinkedEarth/ClimateCritters/main/notebooks/model_demos/ebm0d.ipynb"><i class="bi bi-download"></i>Download notebook</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -453,17 +452,41 @@ window.Quarto = {
 
 <div class="quarto-title-meta">
 
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Jordan Landers </p>
+          </div>
+  </div>
     
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">June 11, 2026</p>
+    </div>
+  </div>
   
     
   </div>
   
+<div>
+  <div class="abstract">
+    <div class="block-title">Abstract</div>
+    <p><code>EBM0D</code> is a single-compartment global energy balance model that balances incoming solar radiation against outgoing longwave radiation via Stefan-Boltzmann OLR. This notebook demonstrates equilibration, ice-albedo bistability, custom albedo callables, solar constant forcing using both parameterized and bundled TSI datasets, and how heat capacity controls the system’s thermal inertia.</p>
+  </div>
+</div>
 
+<div>
+  <div class="keywords">
+    <div class="block-title">Keywords</div>
+    <p>EBM0D, energy balance, albedo, ice-albedo feedback, bistability, OLR, solar forcing, heat capacity, Stefan-Boltzmann, TSI</p>
+  </div>
+</div>
 
 </header>
 
 
-<div id="cell-2" class="cell" data-execution_count="1">
+<div id="cell-1" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> climatecritters <span class="im">as</span> cc</span>
@@ -517,14 +540,14 @@ window.Quarto = {
 </section>
 <section id="basic-run" class="level2">
 <h2 class="anchored" data-anchor-id="basic-run">Basic run</h2>
-<div id="cell-5" class="cell" data-execution_count="2">
+<div id="cell-4" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Instantiate with all defaults: S0=1365, alpha=0.3, Stefan-Boltzmann OLR</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> EBM0D()</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Integrate from a cold start (255 K) to equilibrium</span></span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>output <span class="op">=</span> model.integrate(t_span<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">300</span>), y0<span class="op">=</span>[<span class="fl">255.0</span>], method<span class="op">=</span><span class="st">'RK45'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="cell-6" class="cell" data-execution_count="3">
+<div id="cell-5" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Unpack the arrays we will use throughout the notebook</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>time        <span class="op">=</span> output.time</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>T           <span class="op">=</span> output.state_variables[<span class="st">'T'</span>]</span>
@@ -579,7 +602,7 @@ window.Quarto = {
 <p>The thresholds can be shifted with a lambda wrapper:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>albedo<span class="op">=</span><span class="kw">lambda</span> t, state: albedo_func(t, state, T1<span class="op">=</span><span class="fl">255.</span>, T2<span class="op">=</span><span class="fl">285.</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>With <code>albedo_func</code> the model has <strong>two stable equilibria</strong>. Which one you land on depends entirely on the initial condition. Running from several starting temperatures makes this clear:</p>
-<div id="cell-9" class="cell" data-execution_count="4">
+<div id="cell-8" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># --- setup: multiple initial conditions with albedo_func ---</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>initial_temps <span class="op">=</span> [<span class="dv">230</span>, <span class="dv">245</span>, <span class="dv">258</span>, <span class="dv">268</span>, <span class="dv">278</span>, <span class="dv">288</span>, <span class="dv">295</span>]  <span class="co"># K</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -589,7 +612,7 @@ window.Quarto = {
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    out <span class="op">=</span> m.integrate(t_span<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">300</span>), y0<span class="op">=</span>[T0], method<span class="op">=</span><span class="st">'RK45'</span>)</span>
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    runs.append((T0, out))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="cell-10" class="cell" data-execution_count="5">
+<div id="cell-9" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># --- plot: each IC traces to one of two equilibria ---</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">9</span>, <span class="dv">4</span>))</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -617,7 +640,7 @@ window.Quarto = {
 <section id="custom-callable" class="level3">
 <h3 class="anchored" data-anchor-id="custom-callable">3. Custom callable</h3>
 <p>Any function with signature <code>(t)</code>, <code>(t, state)</code>, or <code>(t, state, model)</code> — first argument must be named <code>t</code> or <a href="https://docs.python.org/3/library/time.html#module-time" title="1"><code>time</code></a>. The dispatcher inspects the signature automatically.</p>
-<div id="cell-13" class="cell" data-execution_count="6">
+<div id="cell-12" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># --- setup: smooth tanh albedo transition ---</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> tanh_albedo(t, state):</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Smooth albedo: α ranges from 0.6 (cold) to 0.3 (warm),</span></span>
@@ -630,7 +653,7 @@ window.Quarto = {
 <span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>alb_tanh  <span class="op">=</span> [tanh_albedo(<span class="dv">0</span>, [T]) <span class="cf">for</span> T <span class="kw">in</span> T_range]</span>
 <span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>alb_builtin <span class="op">=</span> [albedo_func(<span class="dv">0</span>, [T]) <span class="cf">for</span> T <span class="kw">in</span> T_range]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="cell-14" class="cell" data-execution_count="7">
+<div id="cell-13" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># --- plot: compare albedo functions ---</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">3</span>))</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>ax.plot(T_range, alb_builtin, color<span class="op">=</span><span class="st">'steelblue'</span>, label<span class="op">=</span><span class="st">'albedo_func (quadratic, default)'</span>)</span>
@@ -647,7 +670,7 @@ window.Quarto = {
 </div>
 </div>
 <p><strong>Figure.</strong> Default (quadratic) vs custom (tanh) albedo as a function of temperature. Both switch from high-albedo (ice) to low-albedo (no ice) across a similar temperature range, but the tanh transition is sharper — a narrower bistable zone and a more abrupt tipping point.</p>
-<div id="cell-16" class="cell" data-execution_count="8">
+<div id="cell-15" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># --- integrate with custom albedo ---</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>model_tanh <span class="op">=</span> EBM0D(albedo<span class="op">=</span>tanh_albedo)</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>out_tanh <span class="op">=</span> model_tanh.integrate(t_span<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">300</span>), y0<span class="op">=</span>[<span class="fl">255.0</span>], method<span class="op">=</span><span class="st">'RK45'</span>)</span>
@@ -663,7 +686,7 @@ window.Quarto = {
 <section id="olr" class="level2">
 <h2 class="anchored" data-anchor-id="olr">OLR</h2>
 <p>The default OLR applies Stefan-Boltzmann at an effective emission level set by a dry-adiabatic pressure ratio. <code>OLR_func(pRad, ps)</code> returns the callable. Lower <code>pRad</code> means emission from higher, colder air → less OLR → warmer equilibrium.</p>
-<div id="cell-18" class="cell" data-execution_count="9">
+<div id="cell-17" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># --- setup: compare two OLR parameterisations ---</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>model_olr600 <span class="op">=</span> EBM0D(OLR<span class="op">=</span>OLR_func(pRad<span class="op">=</span><span class="dv">600</span>))   <span class="co"># higher emission level</span></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>out_olr600 <span class="op">=</span> model_olr600.integrate(t_span<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">300</span>), y0<span class="op">=</span>[<span class="fl">255.0</span>], method<span class="op">=</span><span class="st">'RK45'</span>)</span>
@@ -677,7 +700,7 @@ window.Quarto = {
 pRad=600:           T_eq = 294.8 K</code></pre>
 </div>
 </div>
-<div id="cell-19" class="cell" data-execution_count="10">
+<div id="cell-18" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># --- plot: equilibrium temperatures side by side ---</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">3</span>))</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>ax.plot(time, T,  color<span class="op">=</span><span class="st">'steelblue'</span>, label<span class="op">=</span><span class="st">'pRad=650 (default)'</span>)</span>
@@ -700,7 +723,7 @@ pRad=600:           T_eq = 294.8 K</code></pre>
 <p>Forcings are attached after construction via <code>register_forcing('S0', forcing_obj)</code>. Because <code>S0</code> is a parameter, the default style is <code>'replacement'</code> — the forcing value replaces <code>S0</code> at each solver evaluation.</p>
 <p>See the <a href="../../notebooks/base_classes/forcing.html">Forcing notebook</a> for a full treatment of all construction patterns (<a href="../../api/core.forcing.Hold.html#climatecritters.core.forcing.Hold" title="0"><code>Hold</code></a>, <a href="../../api/core.forcing.Ramp.html#climatecritters.core.forcing.Ramp" title="0"><code>Ramp</code></a>, <a href="../../api/core.forcing.Harmonic.html#climatecritters.core.forcing.Harmonic" title="0"><code>Harmonic</code></a>, array, callable, <code>from_csv</code>).</p>
 <p>A quick example with a solar dimming–recovery sequence:</p>
-<div id="cell-22" class="cell" data-execution_count="11">
+<div id="cell-21" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Build a solar dimming-recovery sequence and plot it before running</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>solar_seq <span class="op">=</span> (</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    cc.forcing.Hold(duration<span class="op">=</span><span class="dv">100</span>, value<span class="op">=</span><span class="fl">1365.0</span>)</span>
@@ -721,7 +744,7 @@ pRad=600:           T_eq = 294.8 K</code></pre>
 </div>
 </div>
 </div>
-<div id="cell-23" class="cell" data-execution_count="12">
+<div id="cell-22" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Attach to S0 and integrate</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>model_solar <span class="op">=</span> EBM0D()</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>model_solar.register_forcing(<span class="st">'S0'</span>, solar_seq.<span class="bu">compile</span>())</span>
@@ -750,7 +773,7 @@ pRad=600:           T_eq = 294.8 K</code></pre>
 <section id="bundled-dataset-from_csv" class="level3">
 <h3 class="anchored" data-anchor-id="bundled-dataset-from_csv">Bundled dataset: <code>from_csv</code></h3>
 <p><code>'vieira_tsi'</code> provides total solar irradiance reconstructed over the last millennium (time in years BP):</p>
-<div id="cell-26" class="cell" data-execution_count="13">
+<div id="cell-25" class="cell" data-execution_count="13">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># --- load the Vieira TSI dataset ---</span></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>solar_vieira <span class="op">=</span> cc.Forcing.from_csv(dataset<span class="op">=</span><span class="st">'vieira_tsi'</span>)</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Dataset span: </span><span class="sc">{</span>solar_vieira<span class="sc">.</span>time<span class="sc">.</span><span class="bu">min</span>()<span class="sc">:.0f}</span><span class="ss"> – </span><span class="sc">{</span>solar_vieira<span class="sc">.</span>time<span class="sc">.</span><span class="bu">max</span>()<span class="sc">:.0f}</span><span class="ss"> yr BP"</span>)</span>
@@ -760,7 +783,7 @@ pRad=600:           T_eq = 294.8 K</code></pre>
 S0 range:     340.01 – 340.41 W m⁻²</code></pre>
 </div>
 </div>
-<div id="cell-27" class="cell" data-execution_count="14">
+<div id="cell-26" class="cell" data-execution_count="14">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># --- plot the dataset ---</span></span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">9</span>, <span class="dv">3</span>))</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>ax.plot(solar_vieira.time, solar_vieira.data, color<span class="op">=</span><span class="st">'goldenrod'</span>, lw<span class="op">=</span><span class="fl">0.8</span>)</span>
@@ -783,7 +806,7 @@ S0 range:     340.01 – 340.41 W m⁻²</code></pre>
 <h2 class="anchored" data-anchor-id="time-evolving-parameters">Time-evolving parameters</h2>
 <p>Any <code>param_values</code> entry can be a callable: <code>(t)</code>, <code>(t, state)</code>, or <code>(t, state, model)</code>.</p>
 <p><code>C</code> (heat capacity) controls the <strong>speed</strong> of equilibration — not the equilibrium temperature itself. The cleanest way to see this is to compare several constant C values all starting from the same initial condition. With Stefan-Boltzmann OLR the timescale is roughly τ ≈ C / (4 · OLR/T), so even modest differences in C produce clearly different approach curves.</p>
-<div id="cell-30" class="cell" data-execution_count="15">
+<div id="cell-29" class="cell" data-execution_count="15">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Integrate from a cold start (255 K) with four different constant heat capacities</span></span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>C_values <span class="op">=</span> [<span class="dv">2</span>, <span class="dv">8</span>, <span class="dv">30</span>, <span class="dv">100</span>]   <span class="co"># W yr m⁻² K⁻¹</span></span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>C_colors  <span class="op">=</span> [<span class="st">"steelblue"</span>, <span class="st">"seagreen"</span>, <span class="st">"orange"</span>, <span class="st">"firebrick"</span>]</span>
@@ -804,7 +827,7 @@ C=  30: T_eq = 288.13 K
 C= 100: T_eq = 288.13 K</code></pre>
 </div>
 </div>
-<div id="cell-31" class="cell" data-execution_count="16">
+<div id="cell-30" class="cell" data-execution_count="16">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">9</span>, <span class="dv">4</span>))</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (C_val, out), color <span class="kw">in</span> <span class="bu">zip</span>(C_runs, C_colors):</span>
@@ -824,7 +847,7 @@ C= 100: T_eq = 288.13 K</code></pre>
 </div>
 </div>
 <p><strong>Figure.</strong> All four runs converge to the same equilibrium temperature — heat capacity <span class="math inline">\(C\)</span> affects the equilibration timescale, not the fixed point. <span class="math inline">\(C=2\)</span> W yr m⁻² (thin atmosphere proxy) equilibrates in ~20 yr; <span class="math inline">\(C=100\)</span> (deep ocean mixed layer) takes ~500 yr. Choose <span class="math inline">\(C\)</span> to match the effective thermal inertia of the system being modelled.</p>
-<div id="cell-33" class="cell" data-execution_count="17">
+<div id="cell-32" class="cell" data-execution_count="17">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># output.to_pyleo returns a pyleoclim Series (or MultipleSeries for multiple vars)</span></span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>ts_T <span class="op">=</span> output.to_pyleo(var_names<span class="op">=</span>[<span class="st">'T'</span>])</span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>ts_T.plot()<span class="op">;</span> plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -922,7 +945,7 @@ C= 100: T_eq = 288.13 K</code></pre>
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
+        var filterRegex = new RegExp("https:\/\/LinkedEarth\.github\.io\/ClimateCritters\/");
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }

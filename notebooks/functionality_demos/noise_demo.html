@@ -2,13 +2,19 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.25">
+<meta name="generator" content="quarto-1.9.38">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Alex James">
+<meta name="dcterms.date" content="2026-06-11">
+<meta name="keywords" content="noise, AR(1), colored noise, power-law, fractional Gaussian noise, white noise, ensemble, from_series, from_param, pyleoclim">
 
-<title>Creating noise using ClimateCritters – ClimateCritters</title>
+<title>Noise Generation – ClimateCritters</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -67,18 +73,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta name="quarto:offset" content="../../">
 <link href="../../notebooks/functionality_demos/model_noise_starter.html" rel="next">
 <link href="../../notebooks/model_demos/box_models_carbon.html" rel="prev">
-<link href="../../thumbnails/paleobeasts_logo.png" rel="icon" type="image/png">
+<link href="../../thumbnails/ClimateCritters_logo.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-5b4ad623e5705c0698d39aec6f10cf02.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-bba5ebae505b5c03f3f0d8040a416a6b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -119,8 +124,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
-    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">ClimateCritters</span>
     </a>
@@ -161,7 +164,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">Functionality demos</li><li class="breadcrumb-item"><a href="../../notebooks/functionality_demos/noise_demo.html">Noise</a></li><li class="breadcrumb-item"><a href="../../notebooks/functionality_demos/noise_demo.html">Creating noise using ClimateCritters</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">Functionality demos</li><li class="breadcrumb-item"><a href="../../notebooks/functionality_demos/noise_demo.html">Noise</a></li><li class="breadcrumb-item"><a href="../../notebooks/functionality_demos/noise_demo.html">Noise Generation</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -171,10 +174,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
-    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
-      <a href="../../index.html" class="sidebar-logo-link">
-      </a>
-      </div>
     <div class="sidebar-menu-container"> 
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
@@ -293,7 +292,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
- <span class="menu-text">Attrctors</span></a>
+ <span class="menu-text">Attractors</span></a>
           <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -359,13 +358,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../notebooks/functionality_demos/noise_demo.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Creating noise using ClimateCritters</span></a>
+ <span class="menu-text">Noise Generation</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../notebooks/functionality_demos/model_noise_starter.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Model Noise Demo</span></a>
+ <span class="menu-text">Noise in Models — Three Injection Modes</span></a>
   </div>
 </li>
       </ul>
@@ -401,41 +400,62 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#the-value-axis" id="toc-the-value-axis" class="nav-link" data-scroll-target="#the-value-axis">The value axis</a></li>
   </ul></li>
   </ul>
-</nav>
+<div class="quarto-other-links"><h2>Other Links</h2><ul><li><a href="https://mybinder.org/v2/gh/LinkedEarth/ClimateCritters/HEAD?labpath=notebooks/functionality_demos/noise_demo.ipynb"><i class="bi bi-rocket-takeoff"></i>Launch on Binder</a></li><li><a href="https://raw.githubusercontent.com/LinkedEarth/ClimateCritters/main/notebooks/functionality_demos/noise_demo.ipynb"><i class="bi bi-download"></i>Download notebook</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">Functionality demos</li><li class="breadcrumb-item"><a href="../../notebooks/functionality_demos/noise_demo.html">Noise</a></li><li class="breadcrumb-item"><a href="../../notebooks/functionality_demos/noise_demo.html">Creating noise using ClimateCritters</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">Functionality demos</li><li class="breadcrumb-item"><a href="../../notebooks/functionality_demos/noise_demo.html">Noise</a></li><li class="breadcrumb-item"><a href="../../notebooks/functionality_demos/noise_demo.html">Noise Generation</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Creating noise using ClimateCritters</h1>
+<h1 class="title">Noise Generation</h1>
 </div>
 
 
 
 <div class="quarto-title-meta">
 
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Alex James </p>
+          </div>
+  </div>
     
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">June 11, 2026</p>
+    </div>
+  </div>
   
     
   </div>
   
+<div>
+  <div class="abstract">
+    <div class="block-title">Abstract</div>
+    <p>This notebook covers the two main entry points for generating noise in ClimateCritters: <code>noise.from_series</code> matches AR(1) or spectral properties to a target time series, and <code>noise.from_param</code> generates power-law colored noise, fractional Gaussian noise, or white noise from explicit parameters. Both support ensemble generation with a reproducible random seed.</p>
+  </div>
+</div>
 
+<div>
+  <div class="keywords">
+    <div class="block-title">Keywords</div>
+    <p>noise, AR(1), colored noise, power-law, fractional Gaussian noise, white noise, ensemble, from_series, from_param, pyleoclim</p>
+  </div>
+</div>
 
 </header>
 
 
-<p>Author : Alexander James</p>
-<p>Intro : The purpose of this notebook is to illustrate the different approaches one can take to generate noise using ClimateCritters.</p>
-<p>Note that to run this notebook at the moment it needs to be moved into the directory containing the <code>utils</code> folder. This will remain true until ClimateCritters is on PyPi and is importable.</p>
-<div id="cell-2" class="cell" data-execution_count="1">
+<div id="cell-1" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pyleoclim <span class="im">as</span> pyleo</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> climatecritters.utils <span class="im">import</span> noise</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <section id="creating-noise-from-a-target-series" class="level3">
 <h3 class="anchored" data-anchor-id="creating-noise-from-a-target-series">Creating noise from a target series</h3>
 <p>The simplest approach to creating noise is to use a pre-defined series you would like emulate. We’ll show how to do this here using the NINO3 index for the past several decades, stored in <code>Pyleoclim</code>.</p>
-<div id="cell-4" class="cell" data-execution_count="2">
+<div id="cell-3" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>nino <span class="op">=</span> pyleo.utils.load_dataset(<span class="st">'NINO3'</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>nino.plot()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
@@ -458,7 +478,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>‘ar1sim’ : Simulate an AR(1) process with the same autocorrelation coefficient as the original series</li>
 <li>‘phaseran’ : Phase randomize the original series and use that as noise</li>
 </ul>
-<div id="cell-6" class="cell" data-execution_count="3">
+<div id="cell-5" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>noise_series <span class="op">=</span> noise.from_series(nino, method<span class="op">=</span><span class="st">'ar1sim'</span>)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>noise_series.plot()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
@@ -477,7 +497,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>You can also specify the <code>number</code> parameter if you would like multiple noise realizations. This will return an ensemble.</p>
-<div id="cell-8" class="cell" data-execution_count="4">
+<div id="cell-7" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>noise_series <span class="op">=</span> noise.from_series(nino, method<span class="op">=</span><span class="st">'ar1sim'</span>,number<span class="op">=</span><span class="dv">10</span>)</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>noise_series.plot_envelope()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
@@ -507,7 +527,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>By specifying the time axis using a pre-defined array (using <code>time_pattern='specified'</code>)</li>
 </ul>
 <p>Using <code>time_pattern='even'</code>:</p>
-<div id="cell-12" class="cell" data-execution_count="5">
+<div id="cell-11" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Specifying the length and type of spacing</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>ts <span class="op">=</span> noise.from_param(method<span class="op">=</span><span class="st">'ar1sim'</span>,length<span class="op">=</span><span class="dv">1000</span>,time_pattern<span class="op">=</span><span class="st">'even'</span>,noise_param<span class="op">=</span>[<span class="dv">1</span>,<span class="dv">1</span>])</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>ts.plot()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -527,7 +547,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>Using <code>time_pattern='random'</code> (note that this re-uses the pyleoclim function <code>random_time_axis</code>, the arguments for which can be passed in <code>settings</code>):</p>
-<div id="cell-14" class="cell" data-execution_count="6">
+<div id="cell-13" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>ts <span class="op">=</span> noise.from_param(method<span class="op">=</span><span class="st">'ar1sim'</span>,noise_param<span class="op">=</span>[<span class="dv">1</span>,<span class="dv">1</span>],length<span class="op">=</span><span class="dv">1000</span>,time_pattern<span class="op">=</span><span class="st">'random'</span>,settings<span class="op">=</span>{<span class="st">'dist_name'</span>:<span class="st">'poisson'</span>,<span class="st">'dist_param'</span>:<span class="dv">2</span>})</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>ts.plot()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
@@ -546,7 +566,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>Using <code>time_pattern='specified'</code>:</p>
-<div id="cell-16" class="cell" data-execution_count="7">
+<div id="cell-15" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Specifying the time axis itself</span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>ts <span class="op">=</span> noise.from_param(method<span class="op">=</span><span class="st">'ar1sim'</span>,noise_param<span class="op">=</span>[<span class="dv">1</span>,<span class="dv">1</span>],time_pattern<span class="op">=</span><span class="st">'specified'</span>,settings<span class="op">=</span>{<span class="st">'time'</span>:nino.time})</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>ts.plot()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -577,7 +597,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
 <p>Each of these methods has it’s own tunable parameter. We’ll illustrate examples of these below.</p>
 <p>Method = ‘ar1sim’</p>
-<div id="cell-19" class="cell" data-execution_count="8">
+<div id="cell-18" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>ts <span class="op">=</span> noise.from_param(method<span class="op">=</span><span class="st">'ar1sim'</span>,noise_param<span class="op">=</span>[<span class="dv">1</span>,<span class="dv">1</span>],length<span class="op">=</span><span class="dv">1000</span>)</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>ts.plot()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
@@ -596,7 +616,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>Method = ‘CN’ (colored noise)</p>
-<div id="cell-21" class="cell" data-execution_count="9">
+<div id="cell-20" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>ts <span class="op">=</span> noise.from_param(method<span class="op">=</span><span class="st">'CN'</span>,noise_param<span class="op">=</span>[<span class="dv">1</span>],length<span class="op">=</span><span class="dv">1000</span>)</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>ts.plot()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
@@ -615,13 +635,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>All of these options are available as ensembles via the <code>number</code> argument.</p>
-<div id="cell-23" class="cell" data-execution_count="10">
+<div id="cell-22" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>ens <span class="op">=</span> noise.from_param(method<span class="op">=</span><span class="st">'ar1sim'</span>,noise_param<span class="op">=</span>[<span class="dv">10</span>,<span class="dv">5</span>],length<span class="op">=</span><span class="dv">1000</span>,number<span class="op">=</span><span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>{'archiveType': 'Instrumental', 'label': 'NINO3 SST'}</code></pre>
 </div>
 </div>
-<div id="cell-24" class="cell" data-execution_count="11">
+<div id="cell-23" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>ens.plot_envelope()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <pre><code>(&lt;Figure size 1000x400 with 1 Axes&gt;,
@@ -718,7 +738,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
+        var filterRegex = new RegExp("https:\/\/LinkedEarth\.github\.io\/ClimateCritters\/");
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
@@ -1052,8 +1072,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../../notebooks/functionality_demos/model_noise_starter.html" class="pagination-link" aria-label="Model Noise Demo">
-        <span class="nav-page-text">Model Noise Demo</span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../../notebooks/functionality_demos/model_noise_starter.html" class="pagination-link" aria-label="Noise in Models — Three Injection Modes">
+        <span class="nav-page-text">Noise in Models — Three Injection Modes</span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

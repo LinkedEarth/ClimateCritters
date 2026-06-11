@@ -2,13 +2,19 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.25">
+<meta name="generator" content="quarto-1.9.38">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Jordan Landers">
+<meta name="dcterms.date" content="2026-06-11">
+<meta name="keywords" content="Stommel, thermohaline circulation, AMOC, overturning, freshwater forcing, bistability, salinity-driven mode, density contrast, bifurcation, register_forcing">
 
 <title>Stommel — Two-Box Thermohaline Circulation Model – ClimateCritters</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -67,18 +73,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta name="quarto:offset" content="../../">
 <link href="../../notebooks/model_demos/roessler.html" rel="next">
 <link href="../../notebooks/model_demos/g24.html" rel="prev">
-<link href="../../thumbnails/paleobeasts_logo.png" rel="icon" type="image/png">
+<link href="../../thumbnails/ClimateCritters_logo.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-5b4ad623e5705c0698d39aec6f10cf02.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-bba5ebae505b5c03f3f0d8040a416a6b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -108,7 +113,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 }</script>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 const typesetMath = (el) => {
@@ -148,8 +153,6 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
-    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">ClimateCritters</span>
     </a>
@@ -200,10 +203,6 @@ window.Quarto = {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
-    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
-      <a href="../../index.html" class="sidebar-logo-link">
-      </a>
-      </div>
     <div class="sidebar-menu-container"> 
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
@@ -322,7 +321,7 @@ window.Quarto = {
           <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
- <span class="menu-text">Attrctors</span></a>
+ <span class="menu-text">Attractors</span></a>
           <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -388,13 +387,13 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../notebooks/functionality_demos/noise_demo.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Creating noise using ClimateCritters</span></a>
+ <span class="menu-text">Noise Generation</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../notebooks/functionality_demos/model_noise_starter.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Model Noise Demo</span></a>
+ <span class="menu-text">Noise in Models — Three Injection Modes</span></a>
   </div>
 </li>
       </ul>
@@ -439,7 +438,7 @@ window.Quarto = {
   <li><a href="#converting-to-pyleoclim" id="toc-converting-to-pyleoclim" class="nav-link" data-scroll-target="#converting-to-pyleoclim">Converting to pyleoclim</a></li>
   <li><a href="#solver-notes" id="toc-solver-notes" class="nav-link" data-scroll-target="#solver-notes">Solver notes</a></li>
   </ul>
-</nav>
+<div class="quarto-other-links"><h2>Other Links</h2><ul><li><a href="https://mybinder.org/v2/gh/LinkedEarth/ClimateCritters/HEAD?labpath=notebooks/model_demos/stommel.ipynb"><i class="bi bi-rocket-takeoff"></i>Launch on Binder</a></li><li><a href="https://raw.githubusercontent.com/LinkedEarth/ClimateCritters/main/notebooks/model_demos/stommel.ipynb"><i class="bi bi-download"></i>Download notebook</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -453,12 +452,36 @@ window.Quarto = {
 
 <div class="quarto-title-meta">
 
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Jordan Landers </p>
+          </div>
+  </div>
     
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">June 11, 2026</p>
+    </div>
+  </div>
   
     
   </div>
   
+<div>
+  <div class="abstract">
+    <div class="block-title">Abstract</div>
+    <p><code>Stommel</code> models Atlantic overturning circulation as two boxes — equatorial and polar — exchanging heat and salinity driven by their density contrast. This notebook demonstrates freshwater perturbation via both parameter replacement and state-additive forcing, the bifurcation between thermally-driven and salinity-dominated overturning modes, and time-evolving parameter sweeps.</p>
+  </div>
+</div>
 
+<div>
+  <div class="keywords">
+    <div class="block-title">Keywords</div>
+    <p>Stommel, thermohaline circulation, AMOC, overturning, freshwater forcing, bistability, salinity-driven mode, density contrast, bifurcation, register_forcing</p>
+  </div>
+</div>
 
 </header>
 
@@ -543,7 +566,7 @@ q = k(\alpha T - \beta S)
 </section>
 <section id="basic-run" class="level2">
 <h2 class="anchored" data-anchor-id="basic-run">Basic run</h2>
-<div id="cell-4" class="cell" data-execution_count="1">
+<div id="cell-3" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> climatecritters <span class="im">as</span> cc</span>
@@ -553,7 +576,7 @@ q = k(\alpha T - \beta S)
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>output <span class="op">=</span> model.integrate(t_span<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">50</span>), y0<span class="op">=</span>[<span class="fl">1.0</span>, <span class="fl">0.0</span>], method<span class="op">=</span><span class="st">'RK45'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>State variables and the overturning diagnostic are accessed directly from the output object:</p>
-<div id="cell-6" class="cell" data-execution_count="2">
+<div id="cell-5" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>T <span class="op">=</span> output.state_variables[<span class="st">'T'</span>]</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>S <span class="op">=</span> output.state_variables[<span class="st">'S'</span>]</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>q <span class="op">=</span> output.diagnostic_variables[<span class="st">'q'</span>]</span>
@@ -580,7 +603,7 @@ q = k(\alpha T - \beta S)
 <h2 class="anchored" data-anchor-id="forcing">Forcing</h2>
 <p>Forcings are attached after construction using <code>register_forcing</code>. There are two meaningfully different places to attach a freshwater forcing in this model, with different physical interpretations.</p>
 <p>First, build the forcing object. <code>cc.Forcing</code> accepts a callable, an array with a time axis, or a sequence of composable <a href="../../api/core.forcing.Hold.html#climatecritters.core.forcing.Hold" title="0"><code>Hold</code></a>, <a href="../../api/core.forcing.Ramp.html#climatecritters.core.forcing.Ramp" title="0"><code>Ramp</code></a>, and <a href="../../api/core.forcing.Harmonic.html#climatecritters.core.forcing.Harmonic" title="0"><code>Harmonic</code></a> elements:</p>
-<div id="cell-9" class="cell" data-execution_count="3">
+<div id="cell-8" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>fw_forcing <span class="op">=</span> cc.Forcing.from_sequence([</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    cc.forcing.Hold(duration<span class="op">=</span><span class="dv">10</span>, value<span class="op">=</span><span class="fl">0.0</span>),</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    cc.forcing.Ramp(duration<span class="op">=</span><span class="dv">5</span>,  y0<span class="op">=</span><span class="fl">0.0</span>, yf<span class="op">=</span><span class="fl">0.5</span>),</span>
@@ -590,7 +613,7 @@ q = k(\alpha T - \beta S)
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Always plot the forcing first so the signal is explicit before running any model:</p>
-<div id="cell-11" class="cell" data-execution_count="4">
+<div id="cell-10" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>t_plot <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">50</span>, <span class="dv">500</span>)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="fl">2.5</span>))</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>ax.plot(t_plot, [fw_forcing.get_forcing(t) <span class="cf">for</span> t <span class="kw">in</span> t_plot], color<span class="op">=</span><span class="st">'teal'</span>)</span>
@@ -607,7 +630,7 @@ q = k(\alpha T - \beta S)
 <section id="approach-1-parameter-replacement-on-e" class="level3">
 <h3 class="anchored" data-anchor-id="approach-1-parameter-replacement-on-e">Approach 1: parameter replacement on <code>E</code></h3>
 <p><code>register_forcing('E', forcing_obj)</code> replaces the <code>E</code> parameter entirely with the forcing value at each timestep. This is the natural physical interpretation: the forcing <em>is</em> the freshwater flux. Any value of <code>E</code> set at construction is overridden during integration.</p>
-<div id="cell-13" class="cell" data-execution_count="5">
+<div id="cell-12" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>m_E <span class="op">=</span> Stommel(E<span class="op">=</span><span class="fl">0.0</span>, T_star<span class="op">=</span><span class="fl">1.0</span>, S_star<span class="op">=</span><span class="fl">0.0</span>)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>m_E.register_forcing(<span class="st">'E'</span>, fw_forcing)    <span class="co"># attachment_style='replacement', timing='pre' by default</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>out_E <span class="op">=</span> m_E.integrate(t_span<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">50</span>), y0<span class="op">=</span>[<span class="fl">1.0</span>, <span class="fl">0.0</span>], method<span class="op">=</span><span class="st">'RK45'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -616,7 +639,7 @@ q = k(\alpha T - \beta S)
 <section id="approach-2-additive-forcing-on-state-variable-s" class="level3">
 <h3 class="anchored" data-anchor-id="approach-2-additive-forcing-on-state-variable-s">Approach 2: additive forcing on state variable <code>S</code></h3>
 <p><code>register_forcing('S', forcing_obj, 'additive', timing='pre')</code> adds the forcing value to <code>dS/dt</code> inside the right-hand side at each function evaluation. This is a perturbation on top of whatever <code>E</code> is already doing.</p>
-<div id="cell-15" class="cell" data-execution_count="6">
+<div id="cell-14" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>m_S <span class="op">=</span> Stommel(E<span class="op">=</span><span class="fl">0.0</span>, T_star<span class="op">=</span><span class="fl">1.0</span>, S_star<span class="op">=</span><span class="fl">0.0</span>)</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>m_S.register_forcing(<span class="st">'S'</span>, fw_forcing, <span class="st">'additive'</span>, timing<span class="op">=</span><span class="st">'pre'</span>)</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>out_S <span class="op">=</span> m_S.integrate(t_span<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">50</span>), y0<span class="op">=</span>[<span class="fl">1.0</span>, <span class="fl">0.0</span>], method<span class="op">=</span><span class="st">'RK45'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -625,7 +648,7 @@ q = k(\alpha T - \beta S)
 <section id="comparing-the-two-approaches" class="level3">
 <h3 class="anchored" data-anchor-id="comparing-the-two-approaches">Comparing the two approaches</h3>
 <p>When <code>E=0</code> at construction, both approaches are <strong>mathematically equivalent</strong>: replacing <code>E</code> with <code>F(t)</code> gives <code>dS/dt = F(t) - ...</code>, and adding <code>F(t)</code> to <code>dS/dt</code> with <code>E=0</code> gives the same expression.</p>
-<div id="cell-17" class="cell" data-execution_count="7">
+<div id="cell-16" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>t_plot <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">50</span>, <span class="dv">500</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">3</span>, <span class="dv">1</span>, figsize<span class="op">=</span>(<span class="dv">9</span>, <span class="dv">8</span>), sharex<span class="op">=</span><span class="va">True</span>)</span>
@@ -658,7 +681,7 @@ q = k(\alpha T - \beta S)
 </div>
 <p><strong>Figure.</strong> With <span class="math inline">\(E=0\)</span> at construction, both forcing approaches are equivalent: the overturning <span class="math inline">\(q\)</span> traces are indistinguishable (top panel for E-replacement, overlapping dashes for S-additive). The freshwater pulse briefly weakens overturning; the system recovers when the pulse ends. The forcing itself is shown in the top panel for reference.</p>
 <p>The distinction matters when there is a non-zero baseline <code>E</code>. <strong>Parameter replacement</strong> overrides the baseline entirely during the forced period. <strong>Additive pre-step</strong> superposes the forcing on top of it:</p>
-<div id="cell-20" class="cell" data-execution_count="8">
+<div id="cell-19" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># E=0.3 baseline — replacement overrides it; additive adds on top</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>m_E_base <span class="op">=</span> Stommel(E<span class="op">=</span><span class="fl">0.3</span>, T_star<span class="op">=</span><span class="fl">1.0</span>, S_star<span class="op">=</span><span class="fl">0.0</span>)</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>m_E_base.register_forcing(<span class="st">'E'</span>, fw_forcing)          <span class="co"># E(t) = fw_forcing, ignoring 0.3</span></span>
@@ -734,7 +757,7 @@ q = k(\alpha T - \beta S)
 <section id="time-evolving-parameters" class="level2">
 <h2 class="anchored" data-anchor-id="time-evolving-parameters">Time-evolving parameters</h2>
 <p>Any parameter in <code>param_values</code> can be a callable instead of a scalar. The dispatcher accepts <code>(t)</code>, <code>(t, state)</code>, or <code>(t, state, model)</code>. Here <code>E</code> drifts upward slowly without using a <a href="../../api/core.Forcing.html#climatecritters.core.Forcing" title="0"><code>Forcing</code></a> object:</p>
-<div id="cell-24" class="cell" data-execution_count="9">
+<div id="cell-23" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> E_ramp(t):</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.clip(<span class="fl">0.012</span> <span class="op">*</span> t, <span class="fl">0.0</span>, <span class="fl">0.6</span>)</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -760,7 +783,7 @@ q = k(\alpha T - \beta S)
 </section>
 <section id="converting-to-pyleoclim" class="level2">
 <h2 class="anchored" data-anchor-id="converting-to-pyleoclim">Converting to pyleoclim</h2>
-<div id="cell-27" class="cell" data-execution_count="10">
+<div id="cell-26" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>ts_q <span class="op">=</span> output.to_pyleo(var_names<span class="op">=</span>[<span class="st">'q'</span>])</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>ts_q.plot()</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -862,7 +885,7 @@ q = k(\alpha T - \beta S)
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
+        var filterRegex = new RegExp("https:\/\/LinkedEarth\.github\.io\/ClimateCritters\/");
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }

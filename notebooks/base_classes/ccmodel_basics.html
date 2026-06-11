@@ -2,13 +2,19 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.25">
+<meta name="generator" content="quarto-1.9.38">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Jordan Landers">
+<meta name="dcterms.date" content="2026-06-11">
+<meta name="keywords" content="CCModel, CCOutput, param_values, integrate, register_forcing, set_function, to_pyleo, callable parameters, base class">
 
 <title>CCModel and CCOutput — Base Class Basics – ClimateCritters</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -67,18 +73,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta name="quarto:offset" content="../../">
 <link href="../../notebooks/base_classes/forcing.html" rel="next">
 <link href="../../tutorials/index.html" rel="prev">
-<link href="../../thumbnails/paleobeasts_logo.png" rel="icon" type="image/png">
+<link href="../../thumbnails/ClimateCritters_logo.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-5b4ad623e5705c0698d39aec6f10cf02.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-bba5ebae505b5c03f3f0d8040a416a6b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -119,8 +124,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
-    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">ClimateCritters</span>
     </a>
@@ -171,10 +174,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
-    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
-      <a href="../../index.html" class="sidebar-logo-link">
-      </a>
-      </div>
     <div class="sidebar-menu-container"> 
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
@@ -293,7 +292,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
- <span class="menu-text">Attrctors</span></a>
+ <span class="menu-text">Attractors</span></a>
           <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -359,13 +358,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../notebooks/functionality_demos/noise_demo.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Creating noise using ClimateCritters</span></a>
+ <span class="menu-text">Noise Generation</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../notebooks/functionality_demos/model_noise_starter.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Model Noise Demo</span></a>
+ <span class="menu-text">Noise in Models — Three Injection Modes</span></a>
   </div>
 </li>
       </ul>
@@ -415,7 +414,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#set_function-swapping-a-calculation-method" id="toc-set_function-swapping-a-calculation-method" class="nav-link" data-scroll-target="#set_function-swapping-a-calculation-method"><code>set_function</code> — swapping a calculation method</a></li>
   </ul></li>
   </ul>
-</nav>
+<div class="quarto-other-links"><h2>Other Links</h2><ul><li><a href="https://mybinder.org/v2/gh/LinkedEarth/ClimateCritters/HEAD?labpath=notebooks/base_classes/ccmodel_basics.ipynb"><i class="bi bi-rocket-takeoff"></i>Launch on Binder</a></li><li><a href="https://raw.githubusercontent.com/LinkedEarth/ClimateCritters/main/notebooks/base_classes/ccmodel_basics.ipynb"><i class="bi bi-download"></i>Download notebook</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -429,38 +428,47 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <div class="quarto-title-meta">
 
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Jordan Landers </p>
+          </div>
+  </div>
     
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">June 11, 2026</p>
+    </div>
+  </div>
   
     
   </div>
   
+<div>
+  <div class="abstract">
+    <div class="block-title">Abstract</div>
+    <p>Every model in ClimateCreatures inherits from <code>CCModel</code>. <code>CCModel.integrate()</code> returns a <code>CCOutput</code> object that carries the full trajectory and exposes output-focused operations. This notebook covers the shared interface both classes provide. Examples use <code>Stommel</code> as a concrete stand-in, but the same patterns apply to every model.</p>
+  </div>
+</div>
 
+<div>
+  <div class="keywords">
+    <div class="block-title">Keywords</div>
+    <p>CCModel, CCOutput, param_values, integrate, register_forcing, set_function, to_pyleo, callable parameters, base class</p>
+  </div>
+</div>
 
 </header>
 
 
-<p>Every model in PaleoBeasts inherits from <code>CCModel</code>. <code>CCModel.integrate()</code> returns a <code>CCOutput</code> object that carries the full trajectory and exposes output-focused operations.</p>
-<p>This notebook covers the shared interface both classes provide. Examples use <code>Stommel</code> as a concrete stand-in, but the same patterns apply to every model.</p>
-<div id="ee2b9b47" class="cell" data-execution_count="1">
+<div id="ee2b9b47" class="cell" data-execution_count="24">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> climatecritters <span class="im">as</span> cc</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> climatecritters.model_critters.stommel <span class="im">import</span> Stommel</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>/Users/jlanders/PycharmProjects/PaleoBeasts/climatecritters/model_critters/g24.py:26: SyntaxWarning: "\ " is an invalid escape sequence. Such sequences will not work in the future. Did you mean "\\ "? A raw string is also an option.
-  Insolation threshold for glacial inception (W m\ :sup:`-2`;
-/Users/jlanders/PycharmProjects/PaleoBeasts/climatecritters/model_critters/g24.py:171: SyntaxWarning: "\ " is an invalid escape sequence. Such sequences will not work in the future. Did you mean "\\ "? A raw string is also an option.
-  Orbital forcing value (W m\ :sup:`-2`).
-/Users/jlanders/PycharmProjects/PaleoBeasts/climatecritters/model_critters/g24.py:202: SyntaxWarning: "\ " is an invalid escape sequence. Such sequences will not work in the future. Did you mean "\\ "? A raw string is also an option.
-  Orbital forcing value (W m\ :sup:`-2`).
-/Users/jlanders/PycharmProjects/PaleoBeasts/climatecritters/model_critters/g24.py:221: SyntaxWarning: "\ " is an invalid escape sequence. Such sequences will not work in the future. Did you mean "\\ "? A raw string is also an option.
-  Orbital forcing value (W m\ :sup:`-2`).
-/Users/jlanders/PycharmProjects/PaleoBeasts/climatecritters/model_critters/g24.py:267: SyntaxWarning: "\ " is an invalid escape sequence. Such sequences will not work in the future. Did you mean "\\ "? A raw string is also an option.
-  Forcing amplitude (W m\ :sup:`-2`).  Default 25.
-/Users/jlanders/PycharmProjects/PaleoBeasts/climatecritters/model_critters/g24.py:293: SyntaxWarning: "\ " is an invalid escape sequence. Such sequences will not work in the future. Did you mean "\\ "? A raw string is also an option.
-  Forcing amplitude (W m\ :sup:`-2`).  Default 25.
-/Users/jlanders/PycharmProjects/PaleoBeasts/climatecritters/model_critters/daisyworld.py:40: SyntaxWarning: "\ " is an invalid escape sequence. Such sequences will not work in the future. Did you mean "\\ "? A raw string is also an option.
-  Solar constant (W m\ :sup:`-2`).  Default 1365.0.</code></pre>
+<div class="cell-output cell-output-stdout">
+<pre><code>{}</code></pre>
 </div>
 </div>
 <section id="ccmodel" class="level2">
@@ -468,13 +476,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="construction-and-param_values" class="level3">
 <h3 class="anchored" data-anchor-id="construction-and-param_values">Construction and <code>param_values</code></h3>
 <p>Model parameters are stored in <code>param_values</code> — a dict mapping names to constants, callables, or <a href="../../api/core.Forcing.html#climatecritters.core.Forcing" title="0"><code>Forcing</code></a> objects. Every subclass populates it at <code>__init__</code>.</p>
-<div id="70a273de" class="cell" data-execution_count="2">
+<div id="70a273de" class="cell" data-execution_count="25">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Construct with keyword arguments</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> Stommel(E<span class="op">=</span><span class="fl">0.3</span>, T_star<span class="op">=</span><span class="fl">1.0</span>, S_star<span class="op">=</span><span class="fl">0.0</span>)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"param_values:"</span>, model.param_values)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>param_values: {'alpha': 1.0, 'beta': 1.0, 'k': 1.0, 'E': 0.3, 'lambda_T': 1.0, 'lambda_S': 1.0, 'T_star': 1.0, 'S_star': 0.0}</code></pre>
+<pre><code>param_values: {'alpha': 1.0, 'beta': 1.0, 'k': 1.0, 'E': 0.3, 'lambda_T': 1.0, 'lambda_S': 1.0, 'T_star': 1.0, 'S_star': 0.0}
+{}</code></pre>
 </div>
 </div>
 </section>
@@ -482,7 +491,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="exploring-a-model-.list-and-.doc">Exploring a model: <code>.list()</code> and <code>.doc()</code></h3>
 <p><code>.list(target)</code> returns the names of a category; <code>.doc(target)</code> pretty-prints descriptions parsed from the class docstring, alongside current values.</p>
 <p>Valid targets: <code>"parameters"</code>, <code>"state_variables"</code>, <code>"diagnostic_variables"</code>.</p>
-<div id="6c2de2b6" class="cell" data-execution_count="3">
+<div id="6c2de2b6" class="cell" data-execution_count="26">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># What parameters does this model have?</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"parameters:          "</span>, model.<span class="bu">list</span>(<span class="st">"parameters"</span>))</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"state_variables:     "</span>, model.<span class="bu">list</span>(<span class="st">"state_variables"</span>))</span>
@@ -490,10 +499,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-stdout">
 <pre><code>parameters:           ['alpha', 'beta', 'k', 'E', 'lambda_T', 'lambda_S', 'T_star', 'S_star']
 state_variables:      ['T', 'S']
-diagnostic_variables: ['q']</code></pre>
+diagnostic_variables: ['q']
+{}</code></pre>
 </div>
 </div>
-<div id="64b4af25" class="cell" data-execution_count="4">
+<div id="64b4af25" class="cell" data-execution_count="27">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Full descriptions + current values for parameters</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>model.doc(<span class="st">"parameters"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -513,10 +523,11 @@ lambda_S  1              Saline restoring rate.  Default 1.0.
 T_star    1              Equilibrium temperature contrast.  Default 1.0.
 S_star    0              Equilibrium salinity contrast.  Default 0.0.
 ═════════════════════════════════════════════════════════════════════════════
-</code></pre>
+
+{}</code></pre>
 </div>
 </div>
-<div id="68936e63" class="cell" data-execution_count="5">
+<div id="68936e63" class="cell" data-execution_count="28">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># State variable descriptions</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>model.doc(<span class="st">"state_variables"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -528,14 +539,15 @@ Name  Kind        Description
 T     integrated  
 S     integrated  
 ══════════════════════════════════════════════════════════════════════
-</code></pre>
+
+{}</code></pre>
 </div>
 </div>
 </section>
 <section id="updating-parameters" class="level3">
 <h3 class="anchored" data-anchor-id="updating-parameters">Updating parameters</h3>
 <p>Two equivalent ways to change a parameter after construction:</p>
-<div id="9ecd758b" class="cell" data-execution_count="6">
+<div id="9ecd758b" class="cell" data-execution_count="29">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Option 1: direct attribute assignment — syncs param_values automatically</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>model.E <span class="op">=</span> <span class="fl">0.5</span></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"E after direct assignment:"</span>, model.param_values[<span class="st">"E"</span>])</span>
@@ -545,30 +557,34 @@ S     integrated
 <span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"E after reset:            "</span>, model.param_values[<span class="st">"E"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>E after direct assignment: 0.5
-E after reset:             0.3</code></pre>
+E after reset:             0.3
+{}</code></pre>
 </div>
 </div>
 </section>
 <section id="callable-parameters" class="level3">
 <h3 class="anchored" data-anchor-id="callable-parameters">Callable parameters</h3>
 <p>Any <code>param_values</code> entry can be a callable instead of a scalar. The dispatcher inspects the signature and accepts <code>(t)</code>, <code>(t, state)</code>, or <code>(t, state, model)</code>. The first argument must be named <code>t</code> or <a href="https://docs.python.org/3/library/time.html#module-time" title="1"><code>time</code></a>.</p>
-<div id="e3925760" class="cell" data-execution_count="7">
+<div id="e3925760" class="cell" data-execution_count="30">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># E as a callable — gradual freshwater increase</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> E_ramp(t):</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.clip(<span class="fl">0.012</span> <span class="op">*</span> t, <span class="fl">0.0</span>, <span class="fl">0.6</span>)</span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>model_callable <span class="op">=</span> Stommel(E<span class="op">=</span>E_ramp, T_star<span class="op">=</span><span class="fl">1.0</span>, S_star<span class="op">=</span><span class="fl">0.0</span>)</span>
 <span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>out_callable <span class="op">=</span> model_callable.integrate(t_span<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">50</span>), y0<span class="op">=</span>[<span class="fl">1.0</span>, <span class="fl">0.0</span>], method<span class="op">=</span><span class="st">"RK45"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{}</code></pre>
 </div>
-<div id="8cb645df" class="cell" data-execution_count="8">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>t_plot <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">50</span>, <span class="dv">300</span>)</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">1</span>, figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">5</span>), sharex<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].plot(t_plot, [E_ramp(t) <span class="cf">for</span> t <span class="kw">in</span> t_plot], color<span class="op">=</span><span class="st">"teal"</span>)</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_ylabel(<span class="st">"E(t)"</span>)<span class="op">;</span> axes[<span class="dv">0</span>].set_title(<span class="st">"Callable parameter E(t)"</span>)</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].plot(out_callable.time, out_callable.diagnostic_variables[<span class="st">"q"</span>], color<span class="op">=</span><span class="st">"purple"</span>)</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].axhline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">"k"</span>, lw<span class="op">=</span><span class="fl">0.8</span>, ls<span class="op">=</span><span class="st">"--"</span>)</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_ylabel(<span class="st">"q"</span>)<span class="op">;</span> axes[<span class="dv">1</span>].set_xlabel(<span class="st">"time"</span>)</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()<span class="op">;</span> plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="8cb645df" class="cell" data-execution_count="31">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>t_plot <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">50</span>, <span class="dv">300</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">1</span>, figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">5</span>), sharex<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].plot(t_plot, [E_ramp(t) <span class="cf">for</span> t <span class="kw">in</span> t_plot], color<span class="op">=</span><span class="st">"teal"</span>)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_ylabel(<span class="st">"E(t)"</span>)<span class="op">;</span> axes[<span class="dv">0</span>].set_title(<span class="st">"Callable parameter E(t)"</span>)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].plot(out_callable.time, out_callable.diagnostic_variables[<span class="st">"q"</span>], color<span class="op">=</span><span class="st">"purple"</span>)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].axhline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">"k"</span>, lw<span class="op">=</span><span class="fl">0.8</span>, ls<span class="op">=</span><span class="st">"--"</span>)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_ylabel(<span class="st">"q"</span>)<span class="op">;</span> axes[<span class="dv">1</span>].set_xlabel(<span class="st">"time"</span>)</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()<span class="op">;</span> plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -576,36 +592,42 @@ E after reset:             0.3</code></pre>
 </figure>
 </div>
 </div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{}</code></pre>
+</div>
 </div>
 </section>
 <section id="register_forcing" class="level3">
 <h3 class="anchored" data-anchor-id="register_forcing"><code>register_forcing</code></h3>
 <p>Attaches a <a href="../../api/core.Forcing.html#climatecritters.core.Forcing" title="0"><code>Forcing</code></a> object to a named parameter or state variable after construction. Wraps <code>dydt</code> transparently — no changes to the model subclass required.</p>
 <p>See the <a href="../../notebooks/base_classes/forcing.html">Forcing notebook</a> for all construction patterns and the full <code>register_forcing</code> contract (attachment styles, timing, noise).</p>
-<div id="0ac16063" class="cell" data-execution_count="9">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Freshwater pulse forcing</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>fw <span class="op">=</span> cc.Forcing.from_sequence([</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    cc.forcing.Hold(duration<span class="op">=</span><span class="dv">10</span>, value<span class="op">=</span><span class="fl">0.0</span>),</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    cc.forcing.Ramp(duration<span class="op">=</span><span class="dv">5</span>,  y0<span class="op">=</span><span class="fl">0.0</span>, yf<span class="op">=</span><span class="fl">0.5</span>),</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    cc.forcing.Hold(duration<span class="op">=</span><span class="dv">15</span>, value<span class="op">=</span><span class="fl">0.5</span>),</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    cc.forcing.Ramp(duration<span class="op">=</span><span class="dv">5</span>,  y0<span class="op">=</span><span class="fl">0.5</span>, yf<span class="op">=</span><span class="fl">0.0</span>),</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    cc.forcing.Hold(duration<span class="op">=</span><span class="dv">15</span>, value<span class="op">=</span><span class="fl">0.0</span>),</span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>])</span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Attach to E parameter (replacement — overrides E=0 set at construction)</span></span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>model_forced <span class="op">=</span> Stommel(E<span class="op">=</span><span class="fl">0.0</span>, T_star<span class="op">=</span><span class="fl">1.0</span>, S_star<span class="op">=</span><span class="fl">0.0</span>)</span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>model_forced.register_forcing(<span class="st">"E"</span>, fw)</span>
-<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>out_forced <span class="op">=</span> model_forced.integrate(t_span<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">50</span>), y0<span class="op">=</span>[<span class="fl">1.0</span>, <span class="fl">0.0</span>], method<span class="op">=</span><span class="st">"RK45"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="0ac16063" class="cell" data-execution_count="32">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Freshwater pulse forcing</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>fw <span class="op">=</span> cc.Forcing.from_sequence([</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    cc.forcing.Hold(duration<span class="op">=</span><span class="dv">10</span>, value<span class="op">=</span><span class="fl">0.0</span>),</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    cc.forcing.Ramp(duration<span class="op">=</span><span class="dv">5</span>,  y0<span class="op">=</span><span class="fl">0.0</span>, yf<span class="op">=</span><span class="fl">0.5</span>),</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    cc.forcing.Hold(duration<span class="op">=</span><span class="dv">15</span>, value<span class="op">=</span><span class="fl">0.5</span>),</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    cc.forcing.Ramp(duration<span class="op">=</span><span class="dv">5</span>,  y0<span class="op">=</span><span class="fl">0.5</span>, yf<span class="op">=</span><span class="fl">0.0</span>),</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    cc.forcing.Hold(duration<span class="op">=</span><span class="dv">15</span>, value<span class="op">=</span><span class="fl">0.0</span>),</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Attach to E parameter (replacement — overrides E=0 set at construction)</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>model_forced <span class="op">=</span> Stommel(E<span class="op">=</span><span class="fl">0.0</span>, T_star<span class="op">=</span><span class="fl">1.0</span>, S_star<span class="op">=</span><span class="fl">0.0</span>)</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>model_forced.register_forcing(<span class="st">"E"</span>, fw)</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>out_forced <span class="op">=</span> model_forced.integrate(t_span<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">50</span>), y0<span class="op">=</span>[<span class="fl">1.0</span>, <span class="fl">0.0</span>], method<span class="op">=</span><span class="st">"RK45"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{}</code></pre>
 </div>
-<div id="224d8a6e" class="cell" data-execution_count="10">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>t_plot <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">50</span>, <span class="dv">500</span>)</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">1</span>, figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">5</span>), sharex<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].plot(t_plot, [fw.get_forcing(t) <span class="cf">for</span> t <span class="kw">in</span> t_plot], color<span class="op">=</span><span class="st">"teal"</span>)</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_ylabel(<span class="st">"E forcing"</span>)<span class="op">;</span> axes[<span class="dv">0</span>].set_title(<span class="st">"Registered forcing on E"</span>)</span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].plot(out_forced.time, out_forced.diagnostic_variables[<span class="st">"q"</span>], color<span class="op">=</span><span class="st">"purple"</span>)</span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].axhline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">"k"</span>, lw<span class="op">=</span><span class="fl">0.8</span>, ls<span class="op">=</span><span class="st">"--"</span>)</span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_ylabel(<span class="st">"q"</span>)<span class="op">;</span> axes[<span class="dv">1</span>].set_xlabel(<span class="st">"time"</span>)</span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()<span class="op">;</span> plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="224d8a6e" class="cell" data-execution_count="33">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>t_plot <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">50</span>, <span class="dv">500</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">1</span>, figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">5</span>), sharex<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].plot(t_plot, [fw.get_forcing(t) <span class="cf">for</span> t <span class="kw">in</span> t_plot], color<span class="op">=</span><span class="st">"teal"</span>)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_ylabel(<span class="st">"E forcing"</span>)<span class="op">;</span> axes[<span class="dv">0</span>].set_title(<span class="st">"Registered forcing on E"</span>)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].plot(out_forced.time, out_forced.diagnostic_variables[<span class="st">"q"</span>], color<span class="op">=</span><span class="st">"purple"</span>)</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].axhline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">"k"</span>, lw<span class="op">=</span><span class="fl">0.8</span>, ls<span class="op">=</span><span class="st">"--"</span>)</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_ylabel(<span class="st">"q"</span>)<span class="op">;</span> axes[<span class="dv">1</span>].set_xlabel(<span class="st">"time"</span>)</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()<span class="op">;</span> plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -613,35 +635,44 @@ E after reset:             0.3</code></pre>
 </figure>
 </div>
 </div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{}</code></pre>
+</div>
 </div>
 </section>
 <section id="copying-a-model" class="level3">
 <h3 class="anchored" data-anchor-id="copying-a-model">Copying a model</h3>
 <p><code>copy.copy(model)</code> creates a shallow copy with reset diagnostic accumulators — useful for running ensembles from the same parameter set without interference.</p>
-<div id="2fdd265a" class="cell" data-execution_count="11">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> copy</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>base <span class="op">=</span> Stommel(E<span class="op">=</span><span class="fl">0.3</span>, T_star<span class="op">=</span><span class="fl">1.0</span>, S_star<span class="op">=</span><span class="fl">0.0</span>)</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>runs <span class="op">=</span> []</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> T0 <span class="kw">in</span> [<span class="fl">0.5</span>, <span class="fl">1.0</span>, <span class="fl">1.5</span>, <span class="fl">2.0</span>]:</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    m <span class="op">=</span> copy.copy(base)   <span class="co"># fresh accumulators, same parameters</span></span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    out <span class="op">=</span> m.integrate(t_span<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">50</span>), y0<span class="op">=</span>[T0, <span class="fl">0.0</span>], method<span class="op">=</span><span class="st">"RK45"</span>)</span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    runs.append((T0, out))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="2fdd265a" class="cell" data-execution_count="34">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> copy</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>base <span class="op">=</span> Stommel(E<span class="op">=</span><span class="fl">0.3</span>, T_star<span class="op">=</span><span class="fl">1.0</span>, S_star<span class="op">=</span><span class="fl">0.0</span>)</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>runs <span class="op">=</span> []</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> T0 <span class="kw">in</span> [<span class="fl">0.5</span>, <span class="fl">1.0</span>, <span class="fl">1.5</span>, <span class="fl">2.0</span>]:</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    m <span class="op">=</span> copy.copy(base)   <span class="co"># fresh accumulators, same parameters</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    out <span class="op">=</span> m.integrate(t_span<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">50</span>), y0<span class="op">=</span>[T0, <span class="fl">0.0</span>], method<span class="op">=</span><span class="st">"RK45"</span>)</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    runs.append((T0, out))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{}</code></pre>
 </div>
-<div id="87f3061e" class="cell" data-execution_count="12">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">4</span>))</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> T0, out <span class="kw">in</span> runs:</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    ax.plot(out.time, out.diagnostic_variables[<span class="st">"q"</span>], label<span class="op">=</span><span class="ss">f"T₀=</span><span class="sc">{</span>T0<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>ax.axhline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">"k"</span>, lw<span class="op">=</span><span class="fl">0.8</span>, ls<span class="op">=</span><span class="st">"--"</span>)</span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"time"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"q"</span>)</span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Ensemble — same parameters, different initial conditions"</span>)</span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>ax.legend()<span class="op">;</span> plt.tight_layout()<span class="op">;</span> plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="87f3061e" class="cell" data-execution_count="35">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">4</span>))</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> T0, out <span class="kw">in</span> runs:</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    ax.plot(out.time, out.diagnostic_variables[<span class="st">"q"</span>], label<span class="op">=</span><span class="ss">f"T₀=</span><span class="sc">{</span>T0<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>ax.axhline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">"k"</span>, lw<span class="op">=</span><span class="fl">0.8</span>, ls<span class="op">=</span><span class="st">"--"</span>)</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"time"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"q"</span>)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Ensemble — same parameters, different initial conditions"</span>)</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>ax.legend()<span class="op">;</span> plt.tight_layout()<span class="op">;</span> plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
 <p><img src="ccmodel_basics_files/figure-html/cell-13-output-1.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{}</code></pre>
 </div>
 </div>
 </section>
@@ -650,40 +681,41 @@ E after reset:             0.3</code></pre>
 <h2 class="anchored" data-anchor-id="ccoutput">CCOutput</h2>
 <p><code>CCModel.integrate()</code> returns a <code>CCOutput</code> — a container for one run’s results. It is never constructed directly; you always get one from <code>integrate()</code>.</p>
 <p>Separating output from model configuration means a single model instance can produce multiple independent outputs without them overwriting each other.</p>
-<div id="263ff2d0" class="cell" data-execution_count="13">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># A basic run to work with throughout this section</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> Stommel(E<span class="op">=</span><span class="fl">0.3</span>, T_star<span class="op">=</span><span class="fl">1.0</span>, S_star<span class="op">=</span><span class="fl">0.0</span>)</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>output <span class="op">=</span> model.integrate(t_span<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">50</span>), y0<span class="op">=</span>[<span class="fl">1.0</span>, <span class="fl">0.0</span>], method<span class="op">=</span><span class="st">"RK45"</span>)</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"run_name:              </span><span class="sc">{</span>output<span class="sc">.</span>run_name<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"time axis length:      </span><span class="sc">{</span><span class="bu">len</span>(output.time)<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"state_variable_names:  </span><span class="sc">{</span>output<span class="sc">.</span>state_variable_names<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"diagnostic keys:       </span><span class="sc">{</span><span class="bu">list</span>(output.diagnostic_variables.keys())<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="263ff2d0" class="cell" data-execution_count="36">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># A basic run to work with throughout this section</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> Stommel(E<span class="op">=</span><span class="fl">0.3</span>, T_star<span class="op">=</span><span class="fl">1.0</span>, S_star<span class="op">=</span><span class="fl">0.0</span>)</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>output <span class="op">=</span> model.integrate(t_span<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">50</span>), y0<span class="op">=</span>[<span class="fl">1.0</span>, <span class="fl">0.0</span>], method<span class="op">=</span><span class="st">"RK45"</span>)</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"run_name:              </span><span class="sc">{</span>output<span class="sc">.</span>run_name<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"time axis length:      </span><span class="sc">{</span><span class="bu">len</span>(output.time)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"state_variable_names:  </span><span class="sc">{</span>output<span class="sc">.</span>state_variable_names<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"diagnostic keys:       </span><span class="sc">{</span><span class="bu">list</span>(output.diagnostic_variables.keys())<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>run_name:              RK45, dt=variable
 time axis length:      84
 state_variable_names:  ['T', 'S']
-diagnostic keys:       ['q']</code></pre>
+diagnostic keys:       ['q']
+{}</code></pre>
 </div>
 </div>
 <section id="accessing-state-variables-and-diagnostics" class="level3">
 <h3 class="anchored" data-anchor-id="accessing-state-variables-and-diagnostics">Accessing state variables and diagnostics</h3>
 <p>State variables are stored in a <strong>structured numpy array</strong>, indexed by name. Diagnostics are in a plain <strong>dict of arrays</strong>. Both are aligned to <code>output.time</code>.</p>
-<div id="ec491c4a" class="cell" data-execution_count="14">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># State variables — structured array, index by name</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>T <span class="op">=</span> output.state_variables[<span class="st">"T"</span>]</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>S <span class="op">=</span> output.state_variables[<span class="st">"S"</span>]</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Diagnostics — dict of arrays</span></span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>q <span class="op">=</span> output.diagnostic_variables[<span class="st">"q"</span>]</span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">3</span>, <span class="dv">1</span>, figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">7</span>), sharex<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].plot(output.time, T, color<span class="op">=</span><span class="st">"firebrick"</span>)<span class="op">;</span> axes[<span class="dv">0</span>].set_ylabel(<span class="st">"T"</span>)</span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].plot(output.time, S, color<span class="op">=</span><span class="st">"steelblue"</span>)<span class="op">;</span> axes[<span class="dv">1</span>].set_ylabel(<span class="st">"S"</span>)</span>
-<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">2</span>].plot(output.time, q, color<span class="op">=</span><span class="st">"purple"</span>)</span>
-<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">2</span>].axhline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">"k"</span>, lw<span class="op">=</span><span class="fl">0.8</span>, ls<span class="op">=</span><span class="st">"--"</span>)</span>
-<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">2</span>].set_ylabel(<span class="st">"q"</span>)<span class="op">;</span> axes[<span class="dv">2</span>].set_xlabel(<span class="st">"time"</span>)</span>
-<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()<span class="op">;</span> plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="ec491c4a" class="cell" data-execution_count="37">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># State variables — structured array, index by name</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>T <span class="op">=</span> output.state_variables[<span class="st">"T"</span>]</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>S <span class="op">=</span> output.state_variables[<span class="st">"S"</span>]</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Diagnostics — dict of arrays</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>q <span class="op">=</span> output.diagnostic_variables[<span class="st">"q"</span>]</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">3</span>, <span class="dv">1</span>, figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">7</span>), sharex<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].plot(output.time, T, color<span class="op">=</span><span class="st">"firebrick"</span>)<span class="op">;</span> axes[<span class="dv">0</span>].set_ylabel(<span class="st">"T"</span>)</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].plot(output.time, S, color<span class="op">=</span><span class="st">"steelblue"</span>)<span class="op">;</span> axes[<span class="dv">1</span>].set_ylabel(<span class="st">"S"</span>)</span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">2</span>].plot(output.time, q, color<span class="op">=</span><span class="st">"purple"</span>)</span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">2</span>].axhline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">"k"</span>, lw<span class="op">=</span><span class="fl">0.8</span>, ls<span class="op">=</span><span class="st">"--"</span>)</span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">2</span>].set_ylabel(<span class="st">"q"</span>)<span class="op">;</span> axes[<span class="dv">2</span>].set_xlabel(<span class="st">"time"</span>)</span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()<span class="op">;</span> plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -691,25 +723,22 @@ diagnostic keys:       ['q']</code></pre>
 </figure>
 </div>
 </div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{}</code></pre>
+</div>
 </div>
 </section>
 <section id="to_pyleo-exporting-to-pyleoclim" class="level3">
 <h3 class="anchored" data-anchor-id="to_pyleo-exporting-to-pyleoclim"><code>to_pyleo</code> — exporting to pyleoclim</h3>
 <p><code>output.to_pyleo(var_names)</code> returns a <code>pyleoclim.Series</code> (single variable) or <code>pyleoclim.MultipleSeries</code> (list of variables). Works for both state variables and diagnostics.</p>
-<div id="fc8b2f71" class="cell" data-execution_count="15">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Single variable → pyleoclim.Series</span></span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>ts_q <span class="op">=</span> output.to_pyleo(var_names<span class="op">=</span>[<span class="st">"q"</span>])</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>ts_q.plot()<span class="op">;</span> plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>/Users/jlanders/miniconda3/envs/cc_env_dev/lib/python3.14/site-packages/pyleoclim/core/surrogateseries.py:217: SyntaxWarning: "\p" is an invalid escape sequence. Such sequences will not work in the future. Did you mean "\\p"? A raw string is also an option.
-  pyleoclim.utils.tsmodel.colored_noise: simulating from a power law spectrum, $S(f) \propto f^{-\beta}$
-/Users/jlanders/miniconda3/envs/cc_env_dev/lib/python3.14/site-packages/pyleoclim/core/ensembleseries.py:914: SyntaxWarning: "\%" is an invalid escape sequence. Such sequences will not work in the future. Did you mean "\\%"? A raw string is also an option.
-  Label for the envelope. The default is '95\% CI'.</code></pre>
-</div>
+<div id="fc8b2f71" class="cell" data-execution_count="38">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Single variable → pyleoclim.Series</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>ts_q <span class="op">=</span> output.to_pyleo(var_names<span class="op">=</span>[<span class="st">"q"</span>])</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>ts_q.plot()<span class="op">;</span> plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="ccmodel_basics_files/figure-html/cell-16-output-2.png" class="img-fluid figure-img"></p>
+<p><img src="ccmodel_basics_files/figure-html/cell-16-output-1.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
@@ -717,10 +746,10 @@ diagnostic keys:       ['q']</code></pre>
 <pre><code>{}</code></pre>
 </div>
 </div>
-<div id="09187399" class="cell" data-execution_count="16">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Multiple variables → pyleoclim.MultipleSeries</span></span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>ms <span class="op">=</span> output.to_pyleo(var_names<span class="op">=</span>[<span class="st">"T"</span>, <span class="st">"S"</span>])</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>ms.plot()<span class="op">;</span> plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="09187399" class="cell" data-execution_count="39">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Multiple variables → pyleoclim.MultipleSeries</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>ms <span class="op">=</span> output.to_pyleo(var_names<span class="op">=</span>[<span class="st">"T"</span>, <span class="st">"S"</span>])</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>ms.plot()<span class="op">;</span> plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -736,30 +765,30 @@ diagnostic keys:       ['q']</code></pre>
 <section id="reframe_time_axis-resampling-onto-a-new-grid" class="level3">
 <h3 class="anchored" data-anchor-id="reframe_time_axis-resampling-onto-a-new-grid"><code>reframe_time_axis</code> — resampling onto a new grid</h3>
 <p>Resamples state variables onto a requested time axis using the solver’s dense output (polynomial interpolation for RK45; linear fallback for fixed-step solvers). <code>output.model_time</code> always retains the solver’s original grid; <code>output.time</code> and <code>output.state_variables</code> are replaced.</p>
-<div id="469908e2" class="cell" data-execution_count="17">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> copy</span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Work on a copy so the original output is unchanged</span></span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>out_reframed <span class="op">=</span> copy.copy(output)</span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>out_reframed.reframe_time_axis(np.linspace(<span class="dv">0</span>, <span class="dv">50</span>, <span class="dv">200</span>))   <span class="co"># uniform 200-point grid</span></span>
-<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"original grid:  </span><span class="sc">{</span><span class="bu">len</span>(output.time)<span class="sc">}</span><span class="ss"> points"</span>)</span>
-<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"reframed grid:  </span><span class="sc">{</span><span class="bu">len</span>(out_reframed.time)<span class="sc">}</span><span class="ss"> points"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="469908e2" class="cell" data-execution_count="40">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> copy</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Work on a copy so the original output is unchanged</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>out_reframed <span class="op">=</span> copy.copy(output)</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>out_reframed.reframe_time_axis(np.linspace(<span class="dv">0</span>, <span class="dv">50</span>, <span class="dv">200</span>))   <span class="co"># uniform 200-point grid</span></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"original grid:  </span><span class="sc">{</span><span class="bu">len</span>(output.time)<span class="sc">}</span><span class="ss"> points"</span>)</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"reframed grid:  </span><span class="sc">{</span><span class="bu">len</span>(out_reframed.time)<span class="sc">}</span><span class="ss"> points"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>original grid:  84 points
 reframed grid:  200 points
 {}</code></pre>
 </div>
 </div>
-<div id="59cd5d77" class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">3</span>))</span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>ax.plot(output.time,        output.state_variables[<span class="st">"T"</span>],</span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">"o"</span>, ms<span class="op">=</span><span class="dv">2</span>, color<span class="op">=</span><span class="st">"steelblue"</span>, label<span class="op">=</span><span class="ss">f"solver grid (</span><span class="sc">{</span><span class="bu">len</span>(output.time)<span class="sc">}</span><span class="ss"> pts)"</span>)</span>
-<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>ax.plot(out_reframed.time,  out_reframed.state_variables[<span class="st">"T"</span>],</span>
-<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span><span class="st">"firebrick"</span>, lw<span class="op">=</span><span class="fl">1.5</span>, label<span class="op">=</span><span class="st">"reframed (200 pts uniform)"</span>)</span>
-<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"time"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"T"</span>)</span>
-<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"reframe_time_axis — dense-output interpolation"</span>)</span>
-<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>ax.legend()<span class="op">;</span> plt.tight_layout()<span class="op">;</span> plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="59cd5d77" class="cell" data-execution_count="41">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">3</span>))</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>ax.plot(output.time,        output.state_variables[<span class="st">"T"</span>],</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">"o"</span>, ms<span class="op">=</span><span class="dv">2</span>, color<span class="op">=</span><span class="st">"steelblue"</span>, label<span class="op">=</span><span class="ss">f"solver grid (</span><span class="sc">{</span><span class="bu">len</span>(output.time)<span class="sc">}</span><span class="ss"> pts)"</span>)</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>ax.plot(out_reframed.time,  out_reframed.state_variables[<span class="st">"T"</span>],</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span><span class="st">"firebrick"</span>, lw<span class="op">=</span><span class="fl">1.5</span>, label<span class="op">=</span><span class="st">"reframed (200 pts uniform)"</span>)</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"time"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"T"</span>)</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"reframe_time_axis — dense-output interpolation"</span>)</span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>ax.legend()<span class="op">;</span> plt.tight_layout()<span class="op">;</span> plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -775,32 +804,32 @@ reframed grid:  200 points
 <section id="add_noise-remove_noise-post-hoc-noise" class="level3">
 <h3 class="anchored" data-anchor-id="add_noise-remove_noise-post-hoc-noise"><code>add_noise</code> / <code>remove_noise</code> — post-hoc noise</h3>
 <p>Adds externally supplied noise to any state or diagnostic variable after integration. The original clean values are saved on the first call so <code>remove_noise</code> can restore them. Useful for simulating observation uncertainty without re-running the model.</p>
-<div id="14ee13c5" class="cell" data-execution_count="19">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> copy</span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>out_noisy <span class="op">=</span> copy.copy(output)   <span class="co"># work on a copy</span></span>
-<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate white noise scaled to ~2% of the q range</span></span>
-<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>rng   <span class="op">=</span> np.random.default_rng(<span class="dv">42</span>)</span>
-<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>noise <span class="op">=</span> rng.normal(<span class="dv">0</span>, <span class="fl">0.02</span>, size<span class="op">=</span><span class="bu">len</span>(out_noisy.diagnostic_variables[<span class="st">"q"</span>]))</span>
-<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>out_noisy.add_noise(<span class="st">"q"</span>, noise)</span>
-<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"noisy  q range:"</span>, out_noisy.diagnostic_variables[<span class="st">"q"</span>].<span class="bu">min</span>().<span class="bu">round</span>(<span class="dv">3</span>),</span>
-<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>      <span class="st">"–"</span>, out_noisy.diagnostic_variables[<span class="st">"q"</span>].<span class="bu">max</span>().<span class="bu">round</span>(<span class="dv">3</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="14ee13c5" class="cell" data-execution_count="42">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> copy</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>out_noisy <span class="op">=</span> copy.copy(output)   <span class="co"># work on a copy</span></span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate white noise scaled to ~2% of the q range</span></span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>rng   <span class="op">=</span> np.random.default_rng(<span class="dv">42</span>)</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>noise <span class="op">=</span> rng.normal(<span class="dv">0</span>, <span class="fl">0.02</span>, size<span class="op">=</span><span class="bu">len</span>(out_noisy.diagnostic_variables[<span class="st">"q"</span>]))</span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>out_noisy.add_noise(<span class="st">"q"</span>, noise)</span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"noisy  q range:"</span>, out_noisy.diagnostic_variables[<span class="st">"q"</span>].<span class="bu">min</span>().<span class="bu">round</span>(<span class="dv">3</span>),</span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>      <span class="st">"–"</span>, out_noisy.diagnostic_variables[<span class="st">"q"</span>].<span class="bu">max</span>().<span class="bu">round</span>(<span class="dv">3</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>noisy  q range: 0.441 – 1.006
 {}</code></pre>
 </div>
 </div>
-<div id="8b4dc595" class="cell" data-execution_count="20">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">3</span>))</span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>ax.plot(output.time,      output.diagnostic_variables[<span class="st">"q"</span>],</span>
-<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span><span class="st">"purple"</span>, lw<span class="op">=</span><span class="fl">1.5</span>, label<span class="op">=</span><span class="st">"clean"</span>)</span>
-<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>ax.plot(out_noisy.time,   out_noisy.diagnostic_variables[<span class="st">"q"</span>],</span>
-<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span><span class="st">"gray"</span>, lw<span class="op">=</span><span class="fl">0.8</span>, alpha<span class="op">=</span><span class="fl">0.8</span>, label<span class="op">=</span><span class="st">"+ noise"</span>)</span>
-<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"time"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"q"</span>)</span>
-<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"add_noise — white noise on overturning diagnostic"</span>)</span>
-<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>ax.legend()<span class="op">;</span> plt.tight_layout()<span class="op">;</span> plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="8b4dc595" class="cell" data-execution_count="43">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">3</span>))</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>ax.plot(output.time,      output.diagnostic_variables[<span class="st">"q"</span>],</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span><span class="st">"purple"</span>, lw<span class="op">=</span><span class="fl">1.5</span>, label<span class="op">=</span><span class="st">"clean"</span>)</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>ax.plot(out_noisy.time,   out_noisy.diagnostic_variables[<span class="st">"q"</span>],</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span><span class="st">"gray"</span>, lw<span class="op">=</span><span class="fl">0.8</span>, alpha<span class="op">=</span><span class="fl">0.8</span>, label<span class="op">=</span><span class="st">"+ noise"</span>)</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"time"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"q"</span>)</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"add_noise — white noise on overturning diagnostic"</span>)</span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>ax.legend()<span class="op">;</span> plt.tight_layout()<span class="op">;</span> plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -812,12 +841,12 @@ reframed grid:  200 points
 <pre><code>{}</code></pre>
 </div>
 </div>
-<div id="8e606e52" class="cell" data-execution_count="21">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Restore the clean series</span></span>
-<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>out_noisy.remove_noise(<span class="st">"q"</span>)</span>
-<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"after remove_noise, q matches original:"</span>,</span>
-<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>      np.allclose(out_noisy.diagnostic_variables[<span class="st">"q"</span>],</span>
-<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>                  output.diagnostic_variables[<span class="st">"q"</span>]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="8e606e52" class="cell" data-execution_count="44">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Restore the clean series</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>out_noisy.remove_noise(<span class="st">"q"</span>)</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"after remove_noise, q matches original:"</span>,</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>      np.allclose(out_noisy.diagnostic_variables[<span class="st">"q"</span>],</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>                  output.diagnostic_variables[<span class="st">"q"</span>]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>after remove_noise, q matches original: True
 {}</code></pre>
@@ -831,33 +860,33 @@ reframed grid:  200 points
 <section id="set_function-swapping-a-calculation-method" class="level3">
 <h3 class="anchored" data-anchor-id="set_function-swapping-a-calculation-method"><code>set_function</code> — swapping a calculation method</h3>
 <p>Replaces a model calculation method on a single instance without subclassing. The replacement callable can be bound as an instance method (first arg named <code>self</code> or <code>model</code>) or as a plain function (any other first arg name); <code>bind</code> is inferred automatically or can be set explicitly.</p>
-<div id="d1b0ca28" class="cell" data-execution_count="22">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Replace the overturning formula on one instance only</span></span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> weaker_overturning(<span class="va">self</span>, t, x):</span>
-<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Overturning with halved hydraulic constant k."""</span></span>
-<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>    T, S <span class="op">=</span> x[<span class="dv">0</span>], x[<span class="dv">1</span>]</span>
-<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>    alpha <span class="op">=</span> <span class="va">self</span>.get_param_value(<span class="st">"alpha"</span>, t, x)</span>
-<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>    beta  <span class="op">=</span> <span class="va">self</span>.get_param_value(<span class="st">"beta"</span>,  t, x)</span>
-<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>    k     <span class="op">=</span> <span class="va">self</span>.get_param_value(<span class="st">"k"</span>,     t, x)</span>
-<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (k <span class="op">/</span> <span class="fl">2.0</span>) <span class="op">*</span> (alpha <span class="op">*</span> T <span class="op">-</span> beta <span class="op">*</span> S)</span>
-<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>model_alt <span class="op">=</span> Stommel(E<span class="op">=</span><span class="fl">0.3</span>, T_star<span class="op">=</span><span class="fl">1.0</span>, S_star<span class="op">=</span><span class="fl">0.0</span>)</span>
-<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>model_alt.set_function(<span class="st">"overturning"</span>, weaker_overturning)</span>
-<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a>out_alt <span class="op">=</span> model_alt.integrate(t_span<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">50</span>), y0<span class="op">=</span>[<span class="fl">1.0</span>, <span class="fl">0.0</span>], method<span class="op">=</span><span class="st">"RK45"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="d1b0ca28" class="cell" data-execution_count="45">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Replace the overturning formula on one instance only</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> weaker_overturning(<span class="va">self</span>, t, x):</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Overturning with halved hydraulic constant k."""</span></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>    T, S <span class="op">=</span> x[<span class="dv">0</span>], x[<span class="dv">1</span>]</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>    alpha <span class="op">=</span> <span class="va">self</span>.get_param_value(<span class="st">"alpha"</span>, t, x)</span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>    beta  <span class="op">=</span> <span class="va">self</span>.get_param_value(<span class="st">"beta"</span>,  t, x)</span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>    k     <span class="op">=</span> <span class="va">self</span>.get_param_value(<span class="st">"k"</span>,     t, x)</span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (k <span class="op">/</span> <span class="fl">2.0</span>) <span class="op">*</span> (alpha <span class="op">*</span> T <span class="op">-</span> beta <span class="op">*</span> S)</span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>model_alt <span class="op">=</span> Stommel(E<span class="op">=</span><span class="fl">0.3</span>, T_star<span class="op">=</span><span class="fl">1.0</span>, S_star<span class="op">=</span><span class="fl">0.0</span>)</span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a>model_alt.set_function(<span class="st">"overturning"</span>, weaker_overturning)</span>
+<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a>out_alt <span class="op">=</span> model_alt.integrate(t_span<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">50</span>), y0<span class="op">=</span>[<span class="fl">1.0</span>, <span class="fl">0.0</span>], method<span class="op">=</span><span class="st">"RK45"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>{}</code></pre>
 </div>
 </div>
-<div id="3afe4f67" class="cell" data-execution_count="23">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">3</span>))</span>
-<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>ax.plot(output.time,   output.diagnostic_variables[<span class="st">"q"</span>],</span>
-<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span><span class="st">"purple"</span>, lw<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">"default k"</span>)</span>
-<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>ax.plot(out_alt.time,  out_alt.diagnostic_variables[<span class="st">"q"</span>],</span>
-<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span><span class="st">"steelblue"</span>, ls<span class="op">=</span><span class="st">"--"</span>, lw<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">"k/2 (set_function)"</span>)</span>
-<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>ax.axhline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">"k"</span>, lw<span class="op">=</span><span class="fl">0.8</span>, ls<span class="op">=</span><span class="st">":"</span>)</span>
-<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"time"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"q"</span>)</span>
-<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"set_function — swap overturning formula without subclassing"</span>)</span>
-<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>ax.legend()<span class="op">;</span> plt.tight_layout()<span class="op">;</span> plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="3afe4f67" class="cell" data-execution_count="46">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">3</span>))</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>ax.plot(output.time,   output.diagnostic_variables[<span class="st">"q"</span>],</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span><span class="st">"purple"</span>, lw<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">"default k"</span>)</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>ax.plot(out_alt.time,  out_alt.diagnostic_variables[<span class="st">"q"</span>],</span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span><span class="st">"steelblue"</span>, ls<span class="op">=</span><span class="st">"--"</span>, lw<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">"k/2 (set_function)"</span>)</span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>ax.axhline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">"k"</span>, lw<span class="op">=</span><span class="fl">0.8</span>, ls<span class="op">=</span><span class="st">":"</span>)</span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"time"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"q"</span>)</span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"set_function — swap overturning formula without subclassing"</span>)</span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a>ax.legend()<span class="op">;</span> plt.tight_layout()<span class="op">;</span> plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -948,7 +977,7 @@ reframed grid:  200 points
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
+        var filterRegex = new RegExp("https:\/\/LinkedEarth\.github\.io\/ClimateCritters\/");
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }

@@ -2,13 +2,16 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.25">
+<meta name="generator" content="quarto-1.9.38">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
 <title>Tutorials – ClimateCritters</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -31,18 +34,17 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
 <link href="../notebooks/base_classes/ccmodel_basics.html" rel="next">
-<link href="../thumbnails/paleobeasts_logo.png" rel="icon" type="image/png">
+<link href="../thumbnails/ClimateCritters_logo.png" rel="icon" type="image/png">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-5b4ad623e5705c0698d39aec6f10cf02.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-bba5ebae505b5c03f3f0d8040a416a6b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -83,8 +85,6 @@ ul.task-list li input[type="checkbox"] {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a href="../index.html" class="navbar-brand navbar-brand-logo">
-    </a>
     <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">ClimateCritters</span>
     </a>
@@ -135,10 +135,6 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
-    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
-      <a href="../index.html" class="sidebar-logo-link">
-      </a>
-      </div>
     <div class="sidebar-menu-container"> 
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
@@ -257,7 +253,7 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
- <span class="menu-text">Attrctors</span></a>
+ <span class="menu-text">Attractors</span></a>
           <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -323,13 +319,13 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../notebooks/functionality_demos/noise_demo.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Creating noise using ClimateCritters</span></a>
+ <span class="menu-text">Noise Generation</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../notebooks/functionality_demos/model_noise_starter.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Model Noise Demo</span></a>
+ <span class="menu-text">Noise in Models — Three Injection Modes</span></a>
   </div>
 </li>
       </ul>
@@ -363,11 +359,14 @@ ul.task-list li input[type="checkbox"] {
   <ul>
   <li><a href="#energy-balance-models" id="toc-energy-balance-models" class="nav-link" data-scroll-target="#energy-balance-models">Energy Balance Models</a></li>
   <li><a href="#oscillators" id="toc-oscillators" class="nav-link" data-scroll-target="#oscillators">Oscillators</a></li>
-  <li><a href="#climate-models" id="toc-climate-models" class="nav-link" data-scroll-target="#climate-models">Climate Models</a></li>
+  <li><a href="#climate" id="toc-climate" class="nav-link" data-scroll-target="#climate">Climate</a></li>
   <li><a href="#attractors" id="toc-attractors" class="nav-link" data-scroll-target="#attractors">Attractors</a></li>
   <li><a href="#box-models" id="toc-box-models" class="nav-link" data-scroll-target="#box-models">Box Models</a></li>
   </ul></li>
-  <li><a href="#functionality-demos" id="toc-functionality-demos" class="nav-link" data-scroll-target="#functionality-demos">Functionality demos</a></li>
+  <li><a href="#functionality-demos" id="toc-functionality-demos" class="nav-link" data-scroll-target="#functionality-demos">Functionality demos</a>
+  <ul>
+  <li><a href="#noise" id="toc-noise" class="nav-link" data-scroll-target="#noise">Noise</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -394,6 +393,7 @@ ul.task-list li input[type="checkbox"] {
 
 
 <p>The tutorials below are executable Jupyter notebooks demonstrating ClimateCritters models and utilities. Each notebook can be run locally after <a href="../get-started/installation.html">installing the package</a>.</p>
+<!-- AUTO-GENERATED by scripts/generate_tutorials_index.py — do not edit by hand -->
 <section id="getting-started" class="level2">
 <h2 class="anchored" data-anchor-id="getting-started">Getting started</h2>
 <table class="caption-top table">
@@ -405,39 +405,35 @@ ul.task-list li input[type="checkbox"] {
 </thead>
 <tbody>
 <tr class="odd">
-<td><a href="../../notebooks/base_classes/ccmodel_basics.ipynb">CCModel Basics</a></td>
+<td><a href="../notebooks/base_classes/ccmodel_basics.html">CCModel Basics</a></td>
 <td>Base class interface: construction, <code>param_values</code>, integration, <code>CCOutput</code>, callable parameters, <code>register_forcing</code>, <code>set_function</code>, copying, <code>to_pyleo</code></td>
 </tr>
 <tr class="even">
-<td><a href="../../notebooks/base_classes/forcing.ipynb">Forcing Basics</a></td>
-<td>All four <a href="../api/core.Forcing.html#climatecritters.core.Forcing" title="0"><code>Forcing</code></a> construction patterns; <a href="../api/core.forcing.Hold.html#climatecritters.core.forcing.Hold" title="0"><code>Hold</code></a>, <a href="../api/core.forcing.Ramp.html#climatecritters.core.forcing.Ramp" title="0"><code>Ramp</code></a>, <a href="../api/core.forcing.Harmonic.html#climatecritters.core.forcing.Harmonic" title="0"><code>Harmonic</code></a> elements; bundled datasets; <code>register_forcing</code> options</td>
+<td><a href="../notebooks/base_classes/forcing.html">Forcing Basics</a></td>
+<td>Four construction patterns (callable, array, <a href="../api/core.forcing.Hold.html#climatecritters.core.forcing.Hold" title="0"><code>Hold</code></a>/<a href="../api/core.forcing.Ramp.html#climatecritters.core.forcing.Ramp" title="0"><code>Ramp</code></a>/<a href="../api/core.forcing.Harmonic.html#climatecritters.core.forcing.Harmonic" title="0"><code>Harmonic</code></a> elements, bundled datasets); attachment modes (replacement, additive); timing (pre, post); noise and SDE integration</td>
 </tr>
 </tbody>
 </table>
 </section>
 <section id="model-demos" class="level2">
 <h2 class="anchored" data-anchor-id="model-demos">Model demos</h2>
-<p>These notebooks each cover a single model: setup, parameters, forcing, and output.</p>
 <section id="energy-balance-models" class="level3">
 <h3 class="anchored" data-anchor-id="energy-balance-models">Energy Balance Models</h3>
 <table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Notebook</th>
-<th>Model</th>
 <th>What it shows</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><a href="../../notebooks/model_demos/ebm0d.ipynb">0D EBM</a></td>
-<td><code>EBM0D</code></td>
-<td>Zero-dimensional EBM, albedo options (constant / <code>albedo_func</code> / custom callable), OLR, time-varying parameters, Euler vs RK45</td>
+<td><a href="../notebooks/model_demos/ebm0d.html">0D</a></td>
+<td>Equilibration, albedo options (constant, <code>albedo_func</code>, custom callable), OLR, ice-albedo bistability, solar forcing, bundled TSI data, heat capacity effects on timescale</td>
 </tr>
 <tr class="even">
-<td><a href="../../notebooks/model_demos/ebm1d_lat.ipynb">1D EBM (latitude)</a></td>
-<td><code>EBM1DLat</code></td>
-<td>Diffusive latitudinal EBM, ice-line, multi-axis latitude profiles, custom albedo via <code>set_function</code></td>
+<td><a href="../notebooks/model_demos/ebm1d_lat.html">1D (latitude)</a></td>
+<td>Latitudinal grid, meridional heat diffusion, ice-line dynamics, zonal-mean temperature profiles, CO₂ forcing, Budyko OLR, <code>set_function</code>, Mid-Pleistocene Transition scenarios</td>
 </tr>
 </tbody>
 </table>
@@ -448,49 +444,42 @@ ul.task-list li input[type="checkbox"] {
 <thead>
 <tr class="header">
 <th>Notebook</th>
-<th>Model</th>
 <th>What it shows</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><a href="../../notebooks/model_demos/pendulums_and_spring.ipynb">SimplePendulum &amp; Spring</a></td>
-<td><code>SimplePendulum</code>, <code>DampedSpring</code></td>
-<td>Simple harmonic oscillators, damping, forcing</td>
+<td><a href="../notebooks/model_demos/pendulums_and_spring.html">SimplePendulum &amp; Spring</a></td>
+<td><code>DampedSpring</code> damping regimes (underdamped, critical, overdamped), <code>SimplePendulum</code> nonlinear behavior, driven pendulum period-doubling route to chaos, resonance, frequency response</td>
 </tr>
 <tr class="even">
-<td><a href="../../notebooks/model_demos/double_pendulum.ipynb">Double Pendulum</a></td>
-<td><code>DoublePendulum</code></td>
-<td>Chaotic double pendulum, sensitivity to initial conditions</td>
+<td><a href="../notebooks/model_demos/double_pendulum.html">Double Pendulum</a></td>
+<td>Hamiltonian double pendulum, sensitive dependence on initial conditions, energy conservation vs solver tolerance tradeoffs, trajectory divergence, phase space</td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="climate-models" class="level3">
-<h3 class="anchored" data-anchor-id="climate-models">Climate Models</h3>
+<section id="climate" class="level3">
+<h3 class="anchored" data-anchor-id="climate">Climate</h3>
 <table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Notebook</th>
-<th>Model</th>
 <th>What it shows</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><a href="../../notebooks/model_demos/enso_recharge.ipynb">ENSO</a></td>
-<td><code>ENSORechargeOscillator</code></td>
-<td>Recharge oscillator model of ENSO variability</td>
+<td><a href="../notebooks/model_demos/enso_recharge.html">ENSO</a></td>
+<td>Recharge-discharge paradigm, Bjerknes coupling regimes (damped, self-sustained, nonlinear), thermocline depth anomaly, SST anomaly, seasonal forcing entrainment</td>
 </tr>
 <tr class="even">
-<td><a href="../../notebooks/model_demos/g24.ipynb">Ganopolski 2024, Model 3</a></td>
-<td><code>Model3</code></td>
-<td>Glacial-cycle model with ice-sheet and CO₂ feedbacks</td>
+<td><a href="../notebooks/model_demos/g24.html">Ganopolski 2024, Model 3</a></td>
+<td>Orbital forcing (precession + eccentricity modulation), discrete regime switching, ~100 kyr glacial cycles, Mid-Pleistocene Transition via <code>vc(t)</code> ramp, threshold-based initiation and termination</td>
 </tr>
 <tr class="odd">
-<td><a href="../../notebooks/model_demos/stommel.ipynb">Stommel THC</a></td>
-<td><code>Stommel</code></td>
-<td>Two-box thermohaline circulation, overturning diagnostic, two forcing attachment styles</td>
+<td><a href="../notebooks/model_demos/stommel.html">Stommel</a></td>
+<td>Temperature-salinity density contrast, overturning strength diagnostic, freshwater forcing (two attachment styles), thermally-driven vs salinity-driven bifurcation, time-varying parameters</td>
 </tr>
 </tbody>
 </table>
@@ -501,25 +490,21 @@ ul.task-list li input[type="checkbox"] {
 <thead>
 <tr class="header">
 <th>Notebook</th>
-<th>Model</th>
 <th>What it shows</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><a href="../../notebooks/model_demos/roessler.ipynb">Roessler</a></td>
-<td><code>Roessler</code></td>
-<td>Roessler attractor, phase-space visualization</td>
+<td><a href="../notebooks/model_demos/roessler.html">Roessler</a></td>
+<td>Single-scroll strange attractor, parameter c periodic-to-chaotic transition, period-doubling bifurcation cascade, phase portrait, quasi-periodic spirals with irregular z-spikes</td>
 </tr>
 <tr class="even">
-<td><a href="../../notebooks/model_demos/lorenz63.ipynb">Lorenz63</a></td>
-<td><code>Lorenz63</code></td>
-<td>Classic Lorenz butterfly attractor, chaos and sensitivity</td>
+<td><a href="../notebooks/model_demos/lorenz63.html">Lorenz63</a></td>
+<td>Butterfly attractor, sensitive dependence on initial conditions, lobe-switching dynamics, bifurcation from stable fixed points to chaos, Rayleigh number, Prandtl number</td>
 </tr>
 <tr class="odd">
-<td><a href="../../notebooks/model_demos/lorenz96.ipynb">Lorenz96</a></td>
-<td><code>Lorenz96</code></td>
-<td>Multi-scale Lorenz 1996 atmosphere model</td>
+<td><a href="../notebooks/model_demos/lorenz96.html">Lorenz96</a></td>
+<td>Periodic-ring single-scale chaos, quadratic advection, wave packets, two-scale fast-slow coupling (X/Y variables), timescale separation, data assimilation benchmark</td>
 </tr>
 </tbody>
 </table>
@@ -530,15 +515,13 @@ ul.task-list li input[type="checkbox"] {
 <thead>
 <tr class="header">
 <th>Notebook</th>
-<th>Model</th>
 <th>What it shows</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><a href="../../notebooks/model_demos/box_models_carbon.ipynb">Carbon Cycle</a></td>
-<td><code>TwoBoxCarbon</code></td>
-<td>Two-reservoir carbon cycle model using the composable box-model framework</td>
+<td><a href="../notebooks/model_demos/box_models_carbon.html">Carbon Cycle Demo</a></td>
+<td><code>TwoBoxCarbon</code> air-sea exchange, <code>BoxModelSpec</code> declarative network framework, concentration-gradient flux, three-box extension, biological pump, mass conservation</td>
 </tr>
 </tbody>
 </table>
@@ -546,6 +529,8 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="functionality-demos" class="level2">
 <h2 class="anchored" data-anchor-id="functionality-demos">Functionality demos</h2>
+<section id="noise" class="level3">
+<h3 class="anchored" data-anchor-id="noise">Noise</h3>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -555,25 +540,36 @@ ul.task-list li input[type="checkbox"] {
 </thead>
 <tbody>
 <tr class="odd">
-<td><a href="../../notebooks/functionality_demos/noise_demo.ipynb">Noise</a></td>
-<td>Generating colored noise and AR(1) surrogates</td>
+<td><a href="../notebooks/functionality_demos/noise_demo.html">Noise</a></td>
+<td><code>noise.from_series</code> (AR(1) emulation from target), <code>noise.from_param</code> (power-law, fractional Gaussian, white noise), ensemble generation</td>
 </tr>
 <tr class="even">
-<td><a href="../../notebooks/functionality_demos/model_noise_starter.ipynb">Model noise</a></td>
-<td>Adding stochastic noise to model output</td>
+<td><a href="../notebooks/functionality_demos/model_noise_starter.html">Model noise</a></td>
+<td>Noisy forcing (input feedback), SDE integration with <code>euler_maruyama</code>/<code>heun_maruyama</code>/<code>milstein</code> (state feedback), post-integration observation noise; comparison on <code>EBM0D</code></td>
 </tr>
+</tbody>
+</table>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Notebook</th>
+<th>What it shows</th>
+</tr>
+</thead>
+<tbody>
 <tr class="odd">
-<td><a href="../../notebooks/functionality_demos/downsample_starter.ipynb">Downsampling</a></td>
-<td>Simulating irregular sampling from a model trajectory</td>
+<td><a href="../notebooks/functionality_demos/downsample_starter.html">Downsampling</a></td>
+<td><code>resample.downsample</code>, gap distributions (exponential, Poisson, Pareto, <code>random_choice</code>), sparse sampling from regular trajectories, resolution dashboard</td>
 </tr>
 <tr class="even">
-<td><a href="../../notebooks/functionality_demos/solver_demo.ipynb">Solvers</a></td>
-<td>Comparing numerical integration backends (Euler, RK45, SDE solvers)</td>
+<td><a href="../notebooks/functionality_demos/solver_demo.html">Solvers</a></td>
+<td>RK45 tolerances, fixed-step (<code>rk4</code>, Euler) requirements, discrete-event models (G24), SDE-aware integrators, two-scale Lorenz96 history corruption, model-class-to-solver mapping</td>
 </tr>
 </tbody>
 </table>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
@@ -650,7 +646,7 @@ ul.task-list li input[type="checkbox"] {
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
+        var filterRegex = new RegExp("https:\/\/LinkedEarth\.github\.io\/ClimateCritters\/");
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }

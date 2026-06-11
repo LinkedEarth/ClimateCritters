@@ -2,13 +2,19 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.25">
+<meta name="generator" content="quarto-1.9.38">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Jordan Landers">
+<meta name="dcterms.date" content="2026-06-11">
+<meta name="keywords" content="EBM1DLat, latitudinal EBM, diffusion, ice-line, zonal-mean, CO2 forcing, Budyko OLR, meridional heat transport, grid discretization, set_function">
 
 <title>EBM1DLat — Diffusive Latitudinal Energy Balance Model – ClimateCritters</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -67,18 +73,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta name="quarto:offset" content="../../">
 <link href="../../notebooks/model_demos/pendulums_and_spring.html" rel="next">
 <link href="../../notebooks/model_demos/ebm0d.html" rel="prev">
-<link href="../../thumbnails/paleobeasts_logo.png" rel="icon" type="image/png">
+<link href="../../thumbnails/ClimateCritters_logo.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-5b4ad623e5705c0698d39aec6f10cf02.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-bba5ebae505b5c03f3f0d8040a416a6b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -108,7 +113,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 }</script>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 const typesetMath = (el) => {
@@ -148,8 +153,6 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
-    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">ClimateCritters</span>
     </a>
@@ -200,10 +203,6 @@ window.Quarto = {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
-    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
-      <a href="../../index.html" class="sidebar-logo-link">
-      </a>
-      </div>
     <div class="sidebar-menu-container"> 
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
@@ -322,7 +321,7 @@ window.Quarto = {
           <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
- <span class="menu-text">Attrctors</span></a>
+ <span class="menu-text">Attractors</span></a>
           <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -388,13 +387,13 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../notebooks/functionality_demos/noise_demo.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Creating noise using ClimateCritters</span></a>
+ <span class="menu-text">Noise Generation</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../notebooks/functionality_demos/model_noise_starter.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Model Noise Demo</span></a>
+ <span class="menu-text">Noise in Models — Three Injection Modes</span></a>
   </div>
 </li>
       </ul>
@@ -439,7 +438,7 @@ window.Quarto = {
   <li><a href="#time-evolving-parameters" id="toc-time-evolving-parameters" class="nav-link" data-scroll-target="#time-evolving-parameters">Time-evolving parameters</a></li>
   <li><a href="#solver-notes" id="toc-solver-notes" class="nav-link" data-scroll-target="#solver-notes">Solver notes</a></li>
   </ul>
-</nav>
+<div class="quarto-other-links"><h2>Other Links</h2><ul><li><a href="https://mybinder.org/v2/gh/LinkedEarth/ClimateCritters/HEAD?labpath=notebooks/model_demos/ebm1d_lat.ipynb"><i class="bi bi-rocket-takeoff"></i>Launch on Binder</a></li><li><a href="https://raw.githubusercontent.com/LinkedEarth/ClimateCritters/main/notebooks/model_demos/ebm1d_lat.ipynb"><i class="bi bi-download"></i>Download notebook</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -453,12 +452,36 @@ window.Quarto = {
 
 <div class="quarto-title-meta">
 
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Jordan Landers </p>
+          </div>
+  </div>
     
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">June 11, 2026</p>
+    </div>
+  </div>
   
     
   </div>
   
+<div>
+  <div class="abstract">
+    <div class="block-title">Abstract</div>
+    <p><code>EBM1DLat</code> extends <code>EBM0D</code> to a one-dimensional latitudinal grid, resolving zonal-mean temperature as a function of latitude via meridional heat diffusion. This notebook covers ice-line dynamics, multi-axis latitude profiles, CO₂ forcing effects, custom albedo via <code>set_function</code>, and how time-varying diffusion coefficients can represent Mid-Pleistocene Transition scenarios.</p>
+  </div>
+</div>
 
+<div>
+  <div class="keywords">
+    <div class="block-title">Keywords</div>
+    <p>EBM1DLat, latitudinal EBM, diffusion, ice-line, zonal-mean, CO2 forcing, Budyko OLR, meridional heat transport, grid discretization, set_function</p>
+  </div>
+</div>
 
 </header>
 
@@ -584,7 +607,7 @@ C \frac{\partial T}{\partial t} = S(x)(1 - \alpha(T)) - \bigl[(A - F_{\mathrm{CO
 <h2 class="anchored" data-anchor-id="basic-run">Basic run</h2>
 <p>The initial condition <code>y0</code> can be a <strong>scalar</strong> (broadcast to all grid points) or an array of length <code>grid_n</code>. The model has <strong>two stable equilibria</strong> depending on initial conditions: a warm state and a snowball state. Starting from 15 °C gives the warm branch.</p>
 <p>A note on <code>D</code>: the default <code>D=0.55</code> transports enough heat poleward that polar temperatures settle just above −10 °C from a warm start, leaving the model technically ice-free. Using <code>D=0.35</code> gives a realistic mid-latitude ice line (~52°) from the same warm start.</p>
-<div id="cell-4" class="cell" data-execution_count="1">
+<div id="cell-3" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> climatecritters <span class="im">as</span> cc</span>
@@ -594,7 +617,7 @@ C \frac{\partial T}{\partial t} = S(x)(1 - \alpha(T)) - \bigl[(A - F_{\mathrm{CO
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>output <span class="op">=</span> model.integrate(t_span<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">2000</span>), y0<span class="op">=</span>[<span class="fl">15.0</span>], method<span class="op">=</span><span class="st">'RK45'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>State variables are named <code>T_0</code> through <code>T_{grid_n-1}</code>. The latitude grid is on <code>model.phi</code>.</p>
-<div id="cell-6" class="cell" data-execution_count="2">
+<div id="cell-5" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>grid_n <span class="op">=</span> model.grid_n</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>phi    <span class="op">=</span> model.phi   <span class="co"># degrees, shape (grid_n,)</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -614,7 +637,7 @@ Equilibrium ice line: 52.3°</code></pre>
 </div>
 <section id="latitude-profile-t-albedo-and-olr" class="level3">
 <h3 class="anchored" data-anchor-id="latitude-profile-t-albedo-and-olr">Latitude profile: T, albedo, and OLR</h3>
-<div id="cell-8" class="cell" data-execution_count="3">
+<div id="cell-7" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fig, ax1 <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">15</span>, <span class="dv">5</span>))</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Temperature — left axis</span></span>
@@ -666,7 +689,7 @@ Equilibrium ice line: 52.3°</code></pre>
 </section>
 <section id="time-series-of-global-diagnostics" class="level3">
 <h3 class="anchored" data-anchor-id="time-series-of-global-diagnostics">Time series of global diagnostics</h3>
-<div id="cell-11" class="cell" data-execution_count="4">
+<div id="cell-10" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">1</span>, figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">5</span>), sharex<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].plot(time, Tglobal, color<span class="op">=</span><span class="st">'firebrick'</span>)</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_ylabel(<span class="st">'T_global (°C)'</span>)<span class="op">;</span> axes[<span class="dv">0</span>].set_title(<span class="st">'Global mean temperature'</span>)</span>
@@ -690,7 +713,7 @@ Equilibrium ice line: 52.3°</code></pre>
 <h2 class="anchored" data-anchor-id="changing-the-albedo-function">Changing the albedo function</h2>
 <p>Use <code>set_function('calc_albedo', fn)</code> to replace the albedo scheme on a single instance without subclassing. The replacement must have signature <code>(self, T, t)</code> (bound method) or <code>(T, t)</code> (unbound); the <code>bind</code> parameter is inferred from whether the first argument is named <code>self</code> or <code>model</code>.</p>
 <p>Here a sharper transition that switches fully to ice-covered below −5 °C and fully ice-free above 5 °C. With <code>D=0.35</code> this produces a stronger ice-albedo feedback — the model collapses to a snowball state, with no stable partial ice line. This is physically meaningful: tighter albedo transitions reduce the range of stable partial-ice states.</p>
-<div id="cell-14" class="cell" data-execution_count="5">
+<div id="cell-13" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> sharper_albedo(<span class="va">self</span>, T, t):</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Sharper ice-line: transition between −5 °C and +5 °C."""</span></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    temperature <span class="op">=</span> np.asarray(T, dtype<span class="op">=</span><span class="bu">float</span>)</span>
@@ -717,7 +740,7 @@ Equilibrium ice line: 52.3°</code></pre>
 Sharper albedo: ice line = 0° (snowball)</code></pre>
 </div>
 </div>
-<div id="cell-15" class="cell" data-execution_count="6">
+<div id="cell-14" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">11</span>, <span class="dv">4</span>))</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].plot(phi, T_final,  color<span class="op">=</span><span class="st">'steelblue'</span>, label<span class="op">=</span><span class="ss">f'default (ice line </span><span class="sc">{</span>ice_line[<span class="op">-</span><span class="dv">1</span>]<span class="sc">:.0f}</span><span class="ss">°)'</span>)</span>
@@ -747,7 +770,7 @@ Sharper albedo: ice line = 0° (snowball)</code></pre>
 <h2 class="anchored" data-anchor-id="forcing-via-co2_forcing">Forcing via <code>CO2_forcing</code></h2>
 <p><code>CO2_forcing</code> is the natural way to add a radiative perturbation to this model — it subtracts from the Budyko OLR intercept <code>A</code>, warming the climate. Attach it with <code>register_forcing</code> after construction.</p>
 <p><code>cc.Forcing</code> accepts a callable, an array with a time axis, or composable <a href="../../api/core.forcing.Hold.html#climatecritters.core.forcing.Hold" title="0"><code>Hold</code></a>/<a href="../../api/core.forcing.Ramp.html#climatecritters.core.forcing.Ramp" title="0"><code>Ramp</code></a>/<a href="../../api/core.forcing.Harmonic.html#climatecritters.core.forcing.Harmonic" title="0"><code>Harmonic</code></a> elements:</p>
-<div id="cell-18" class="cell" data-execution_count="7">
+<div id="cell-17" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>co2_seq <span class="op">=</span> cc.Forcing.from_sequence([</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    cc.forcing.Hold(duration<span class="op">=</span><span class="dv">500</span>,  value<span class="op">=</span><span class="fl">0.0</span>),</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    cc.forcing.Ramp(duration<span class="op">=</span><span class="dv">500</span>, y0<span class="op">=</span><span class="fl">0.0</span>, yf<span class="op">=</span><span class="fl">4.0</span>),</span>
@@ -755,7 +778,7 @@ Sharper albedo: ice line = 0° (snowball)</code></pre>
 <span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Always plot the forcing before running, so the signal is explicit:</p>
-<div id="cell-20" class="cell" data-execution_count="8">
+<div id="cell-19" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>t_plot <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">2000</span>, <span class="dv">1000</span>)</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="fl">2.5</span>))</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>ax.plot(t_plot, [co2_seq.get_forcing(t) <span class="cf">for</span> t <span class="kw">in</span> t_plot], color<span class="op">=</span><span class="st">'darkred'</span>)</span>
@@ -770,7 +793,7 @@ Sharper albedo: ice line = 0° (snowball)</code></pre>
 </div>
 </div>
 </div>
-<div id="cell-21" class="cell" data-execution_count="9">
+<div id="cell-20" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>model_co2 <span class="op">=</span> EBM1DLat(S0<span class="op">=</span><span class="fl">1365.0</span>, grid_n<span class="op">=</span><span class="dv">50</span>, D<span class="op">=</span><span class="fl">0.35</span>)</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>model_co2.register_forcing(<span class="st">'CO2_forcing'</span>, co2_seq)</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>out_co2 <span class="op">=</span> model_co2.integrate(t_span<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">2000</span>), y0<span class="op">=</span>[<span class="fl">15.0</span>], method<span class="op">=</span><span class="st">'RK45'</span>)</span>
@@ -802,7 +825,7 @@ Sharper albedo: ice line = 0° (snowball)</code></pre>
 <section id="time-evolving-parameters" class="level2">
 <h2 class="anchored" data-anchor-id="time-evolving-parameters">Time-evolving parameters</h2>
 <p>Any <code>param_values</code> entry can be a callable with signature <code>(t)</code>, <code>(t, state)</code>, or <code>(t, state, model)</code>. Here <code>D</code> increases over time, representing a gradually strengthening poleward heat transport:</p>
-<div id="cell-24" class="cell" data-execution_count="10">
+<div id="cell-23" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> D_ramp(t):</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="fl">0.20</span> <span class="op">+</span> <span class="fl">0.15</span> <span class="op">*</span> np.clip(t <span class="op">/</span> <span class="fl">1000.0</span>, <span class="fl">0.0</span>, <span class="fl">1.0</span>)</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -820,7 +843,7 @@ Sharper albedo: ice line = 0° (snowball)</code></pre>
 </div>
 </div>
 <p><strong>Figure.</strong> The diffusion coefficient ramp: <span class="math inline">\(D\)</span> increases linearly from 0.20 to 0.35 W m⁻² °C⁻¹ over the first 1000 yr, then holds constant. Stronger diffusion = more efficient poleward heat transport.</p>
-<div id="cell-26" class="cell" data-execution_count="11">
+<div id="cell-25" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>model_D <span class="op">=</span> EBM1DLat(S0<span class="op">=</span><span class="fl">1365.0</span>, grid_n<span class="op">=</span><span class="dv">50</span>, D<span class="op">=</span>D_ramp)</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>out_D <span class="op">=</span> model_D.integrate(t_span<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">2000</span>), y0<span class="op">=</span>[<span class="fl">15.0</span>], method<span class="op">=</span><span class="st">'RK45'</span>)</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -936,7 +959,7 @@ Sharper albedo: ice line = 0° (snowball)</code></pre>
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
+        var filterRegex = new RegExp("https:\/\/LinkedEarth\.github\.io\/ClimateCritters\/");
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }

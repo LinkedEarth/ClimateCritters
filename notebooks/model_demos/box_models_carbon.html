@@ -2,13 +2,19 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.25">
+<meta name="generator" content="quarto-1.9.38">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Jordan Landers">
+<meta name="dcterms.date" content="2026-06-11">
+<meta name="keywords" content="TwoBoxCarbon, BoxModelSpec, carbon cycle, box model, air-sea exchange, concentration gradient, mass conservation, biological pump, network topology, declarative">
 
 <title>TwoBoxCarbon and BoxModelSpec — Carbon Cycle Box Models – ClimateCritters</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -67,18 +73,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta name="quarto:offset" content="../../">
 <link href="../../notebooks/functionality_demos/noise_demo.html" rel="next">
 <link href="../../notebooks/model_demos/lorenz96.html" rel="prev">
-<link href="../../thumbnails/paleobeasts_logo.png" rel="icon" type="image/png">
+<link href="../../thumbnails/ClimateCritters_logo.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-5b4ad623e5705c0698d39aec6f10cf02.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-bba5ebae505b5c03f3f0d8040a416a6b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -108,7 +113,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 }</script>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 const typesetMath = (el) => {
@@ -148,8 +153,6 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
-    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">ClimateCritters</span>
     </a>
@@ -200,10 +203,6 @@ window.Quarto = {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
-    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
-      <a href="../../index.html" class="sidebar-logo-link">
-      </a>
-      </div>
     <div class="sidebar-menu-container"> 
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
@@ -322,7 +321,7 @@ window.Quarto = {
           <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
- <span class="menu-text">Attrctors</span></a>
+ <span class="menu-text">Attractors</span></a>
           <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -388,13 +387,13 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../notebooks/functionality_demos/noise_demo.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Creating noise using ClimateCritters</span></a>
+ <span class="menu-text">Noise Generation</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../notebooks/functionality_demos/model_noise_starter.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Model Noise Demo</span></a>
+ <span class="menu-text">Noise in Models — Three Injection Modes</span></a>
   </div>
 </li>
       </ul>
@@ -423,25 +422,19 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a>
-  <ul>
-  <li><a href="#twoboxcarbon" id="toc-twoboxcarbon" class="nav-link" data-scroll-target="#twoboxcarbon">TwoBoxCarbon</a></li>
-  <li><a href="#boxmodelspec" id="toc-boxmodelspec" class="nav-link" data-scroll-target="#boxmodelspec">BoxModelSpec</a></li>
-  <li><a href="#parameters-twoboxcarbon" id="toc-parameters-twoboxcarbon" class="nav-link" data-scroll-target="#parameters-twoboxcarbon">Parameters — TwoBoxCarbon</a></li>
-  </ul></li>
-  <li><a href="#twoboxcarbon-1" id="toc-twoboxcarbon-1" class="nav-link" data-scroll-target="#twoboxcarbon-1">TwoBoxCarbon</a>
+  <li><a href="#twoboxcarbon" id="toc-twoboxcarbon" class="nav-link active" data-scroll-target="#twoboxcarbon">TwoBoxCarbon</a>
   <ul>
   <li><a href="#closed-system-mass-conservation" id="toc-closed-system-mass-conservation" class="nav-link" data-scroll-target="#closed-system-mass-conservation">Closed system: mass conservation</a></li>
   <li><a href="#forced-case-time-varying-carbon-source" id="toc-forced-case-time-varying-carbon-source" class="nav-link" data-scroll-target="#forced-case-time-varying-carbon-source">Forced case: time-varying carbon source</a></li>
   </ul></li>
-  <li><a href="#boxmodelspec-1" id="toc-boxmodelspec-1" class="nav-link" data-scroll-target="#boxmodelspec-1">BoxModelSpec</a>
+  <li><a href="#boxmodelspec" id="toc-boxmodelspec" class="nav-link" data-scroll-target="#boxmodelspec">BoxModelSpec</a>
   <ul>
   <li><a href="#declarative-rebuild-of-twoboxcarbon" id="toc-declarative-rebuild-of-twoboxcarbon" class="nav-link" data-scroll-target="#declarative-rebuild-of-twoboxcarbon">Declarative rebuild of TwoBoxCarbon</a></li>
   <li><a href="#automatic-network-exchange-and-transport" id="toc-automatic-network-exchange-and-transport" class="nav-link" data-scroll-target="#automatic-network-exchange-and-transport">Automatic network: exchange and transport</a></li>
   </ul></li>
   <li><a href="#solver-notes" id="toc-solver-notes" class="nav-link" data-scroll-target="#solver-notes">Solver notes</a></li>
   </ul>
-</nav>
+<div class="quarto-other-links"><h2>Other Links</h2><ul><li><a href="https://mybinder.org/v2/gh/LinkedEarth/ClimateCritters/HEAD?labpath=notebooks/model_demos/box_models_carbon.ipynb"><i class="bi bi-rocket-takeoff"></i>Launch on Binder</a></li><li><a href="https://raw.githubusercontent.com/LinkedEarth/ClimateCritters/main/notebooks/model_demos/box_models_carbon.ipynb"><i class="bi bi-download"></i>Download notebook</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -455,68 +448,40 @@ window.Quarto = {
 
 <div class="quarto-title-meta">
 
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Jordan Landers </p>
+          </div>
+  </div>
     
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">June 11, 2026</p>
+    </div>
+  </div>
   
     
   </div>
   
+<div>
+  <div class="abstract">
+    <div class="block-title">Abstract</div>
+    <p>This notebook demonstrates two approaches to building carbon cycle box models. <code>TwoBoxCarbon</code> is a concrete two-reservoir model tracking atmospheric and surface-ocean carbon inventories via concentration-gradient exchange. <code>BoxModelSpec</code> provides a declarative framework for assembling arbitrary box networks using exchange and transport links, enabling three-box and more complex topologies without subclassing.</p>
+  </div>
+</div>
 
+<div>
+  <div class="keywords">
+    <div class="block-title">Keywords</div>
+    <p>TwoBoxCarbon, BoxModelSpec, carbon cycle, box model, air-sea exchange, concentration gradient, mass conservation, biological pump, network topology, declarative</p>
+  </div>
+</div>
 
 </header>
 
 
-<section id="overview" class="level2">
-<h2 class="anchored" data-anchor-id="overview">Overview</h2>
-<p>Two complementary approaches to building box models in ClimateCritters.</p>
-<section id="twoboxcarbon" class="level3">
-<h3 class="anchored" data-anchor-id="twoboxcarbon">TwoBoxCarbon</h3>
-<p>A concrete model tracking atmospheric (<code>A</code>) and surface-ocean (<code>S</code>) carbon inventories. Exchange is driven by the <strong>concentration</strong> gradient (not raw inventory difference), so mass conservation holds even when boxes have different volumes:</p>
-<p><span class="math display">\[F_{A\leftrightarrow S} = k\left(\frac{A}{V_{\text{atm}}} - \frac{S}{V_{\text{surf}}}\right)\]</span></p>
-<p><span class="math display">\[\frac{dA}{dt} = -F + R - l_s A \qquad \frac{dS}{dt} = F\]</span></p>
-</section>
-<section id="boxmodelspec" class="level3">
-<h3 class="anchored" data-anchor-id="boxmodelspec">BoxModelSpec</h3>
-<p>A declarative framework for building any ODE box model without writing a full <code>CCModel</code> subclass. Supports explicit callable tendencies <strong>or</strong> automatic network assembly from reciprocal exchange and directed transport terms.</p>
-</section>
-<section id="parameters-twoboxcarbon" class="level3">
-<h3 class="anchored" data-anchor-id="parameters-twoboxcarbon">Parameters — TwoBoxCarbon</h3>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Description</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>k</code></td>
-<td>Air-sea exchange rate constant</td>
-<td>0.2</td>
-</tr>
-<tr class="even">
-<td><code>R</code></td>
-<td>Atmospheric carbon source flux</td>
-<td>0.0</td>
-</tr>
-<tr class="odd">
-<td><code>l_s</code></td>
-<td>First-order atmospheric loss</td>
-<td>0.0</td>
-</tr>
-<tr class="even">
-<td><code>V_atm</code></td>
-<td>Atmospheric box volume</td>
-<td>1.0</td>
-</tr>
-<tr class="odd">
-<td><code>V_surf</code></td>
-<td>Surface-ocean box volume</td>
-<td>1.0</td>
-</tr>
-</tbody>
-</table>
-<p>Diagnostic: <code>net_flux</code> (atmospheric tendency <code>dA/dt</code>).</p>
 <div id="d1624cd6bc50d199" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -524,10 +489,8 @@ window.Quarto = {
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> climatecritters.model_critters.two_box_carbon <span class="im">import</span> TwoBoxCarbon</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> climatecritters.model_critters.box_model <span class="im">import</span> BoxModelSpec</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-</section>
-</section>
-<section id="twoboxcarbon-1" class="level2">
-<h2 class="anchored" data-anchor-id="twoboxcarbon-1">TwoBoxCarbon</h2>
+<section id="twoboxcarbon" class="level2">
+<h2 class="anchored" data-anchor-id="twoboxcarbon">TwoBoxCarbon</h2>
 <section id="closed-system-mass-conservation" class="level3">
 <h3 class="anchored" data-anchor-id="closed-system-mass-conservation">Closed system: mass conservation</h3>
 <p>With <code>R=0</code> and <code>l_s=0</code> the system is closed: total carbon <code>A + S</code> must remain constant to numerical precision. This checks that the concentration-gradient exchange (not raw inventory difference) conserves mass correctly even when <code>V_atm ≠ V_surf</code>.</p>
@@ -616,8 +579,8 @@ Max drift:     1.71e-13  (numerical precision)</code></pre>
 <p><strong>Figure.</strong> Top: step forcing pulse (<span class="math inline">\(R=1\)</span> for <span class="math inline">\(t&lt;30\)</span>, then off). Middle: <span class="math inline">\(A\)</span> rises during the pulse then decays as air-sea exchange transfers carbon to the ocean; <span class="math inline">\(S\)</span> follows with a slight lag and retains most of the perturbation. Bottom: net atmospheric flux is positive (net source) during the pulse, then negative (net uptake by ocean) during relaxation.</p>
 </section>
 </section>
-<section id="boxmodelspec-1" class="level2">
-<h2 class="anchored" data-anchor-id="boxmodelspec-1">BoxModelSpec</h2>
+<section id="boxmodelspec" class="level2">
+<h2 class="anchored" data-anchor-id="boxmodelspec">BoxModelSpec</h2>
 <section id="declarative-rebuild-of-twoboxcarbon" class="level3">
 <h3 class="anchored" data-anchor-id="declarative-rebuild-of-twoboxcarbon">Declarative rebuild of TwoBoxCarbon</h3>
 <p><code>BoxModelSpec</code> lets you define the same equations without subclassing <code>CCModel</code>. Register state variables, parameters, tendency relations, and diagnostics; call <code>make_boxmodel()</code> to get an integrable model.</p>
@@ -788,7 +751,7 @@ max |S_generic − S_concrete| = 0.00e+00</code></pre>
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
+        var filterRegex = new RegExp("https:\/\/LinkedEarth\.github\.io\/ClimateCritters\/");
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
@@ -1122,8 +1085,8 @@ max |S_generic − S_concrete| = 0.00e+00</code></pre>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../../notebooks/functionality_demos/noise_demo.html" class="pagination-link" aria-label="Creating noise using ClimateCritters">
-        <span class="nav-page-text">Creating noise using ClimateCritters</span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../../notebooks/functionality_demos/noise_demo.html" class="pagination-link" aria-label="Noise Generation">
+        <span class="nav-page-text">Noise Generation</span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
