@@ -74,7 +74,7 @@ def _format_value(v):
 
 
 class CCModel:
-    """The overarching model structure for PaleoBeasts.
+    """The overarching model structure for ClimateCritters.
 
     CCModel serves as the archetype/parent class for models within the
     ``model_critters`` directory.  It is not meant to be instantiated directly.

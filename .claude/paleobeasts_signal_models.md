@@ -1,12 +1,12 @@
-# PaleoBeasts Signal Models Reference
+# ClimateCritters Signal Models Reference
 
-> **Maintenance note:** Update when models are added, removed, or refactored. Cross-reference with [paleobeasts_core.md](paleobeasts_core.md) when core API changes affect conformance.
+> **Maintenance note:** Update when models are added, removed, or refactored. Cross-reference with [ClimateCritters_core.md](ClimateCritters_core.md) when core API changes affect conformance.
 
 ---
 
 ## Quick-Reference Summary
 
-| Model | Class | File | State vars | Diagnostic vars | Forcing | Stochastic | Notebook(s) | PBModel conformant |
+| Model | Class | File | State vars | Diagnostic vars | Forcing | Stochastic | Notebook(s) | ccmodel conformant |
 |-------|-------|------|------------|-----------------|---------|------------|-------------|-------------------|
 | Lorenz 63 | `Lorenz63` | `lorenz.py` | x, y, z | — | scalar/3-vector additive | No | `lorenz63_demo` | ⚠ Side effects in dydt |
 | Energy Balance | `EBM` | `ebm.py` | T | albedo, absorbed_SW, OLR, solar_incoming | S₀(t) | No | `ebm_demo` | ⚠ Side effects in dydt |
@@ -24,7 +24,7 @@
 
 ## Design Conformance
 
-The `PBModel` design expects `dydt` to be a pure function: compute derivatives, return them, nothing else. State reconstruction happens post-integration via `post_integrate` → `build_state_from_history`. Diagnostics are populated post-solve via `populate_diagnostics_from_history` (when `uses_post_history()` returns `True`).
+The `ccmodel` design expects `dydt` to be a pure function: compute derivatives, return them, nothing else. State reconstruction happens post-integration via `post_integrate` → `build_state_from_history`. Diagnostics are populated post-solve via `populate_diagnostics_from_history` (when `uses_post_history()` returns `True`).
 
 ### Conformant pattern (Melcher2025DO, Stocker2003 family)
 ```
@@ -35,7 +35,7 @@ integrate() → solver calls dydt() [pure] → post_integrate() → populate_dia
 ```
 integrate() → solver calls dydt() [accumulates state + diagnostics as side effect]
 ```
-The non-conformant models manually concatenate to `self.state_variables` and append to `self.time` on every `dydt` call. This is functional but inefficient (O(n²) memory due to repeated concatenation), makes `dydt` non-reentrant, and conflicts with PBModel's post-solve state building.
+The non-conformant models manually concatenate to `self.state_variables` and append to `self.time` on every `dydt` call. This is functional but inefficient (O(n²) memory due to repeated concatenation), makes `dydt` non-reentrant, and conflicts with ccmodel's post-solve state building.
 
 ---
 
@@ -306,7 +306,7 @@ Stocker2003BipolarSeesaw(forcing=None, var_name='stocker2003_bipolar_seesaw',
 
 **Forcing:** Provides Tn(t). If not provided, `Tn` constant from `param_values` is used. Validation: raises `ValueError` if `tau <= 0`.
 
-**Additional methods:** None beyond PBModel.
+**Additional methods:** None beyond ccmodel.
 
 **Hooks used:**
 - `uses_post_history()` returns `True`
@@ -518,7 +518,7 @@ Not a model class. Provides two pure functions for computing solar radiation at 
 
 **Implementation:** Berger (1978) eqn. 10. Fully vectorized; returns numpy array or xarray.DataArray depending on inputs. Depends on `climlab` for orbital parameter handling.
 
-**Usage:** Generate forcing time series to pass into `pb.Forcing(...)` for orbital-driven models (e.g., EBM, G24). No dedicated demo notebook.
+**Usage:** Generate forcing time series to pass into `cc.Forcing(...)` for orbital-driven models (e.g., EBM, G24). No dedicated demo notebook.
 
 ---
 
@@ -535,4 +535,4 @@ EBM, Stommel, Daisyworld, and G24 all append diagnostics inside `dydt`. For adap
 Demonstrated in: EBM demo (diagnostic stacking), Stocker 2003 Bipolar Seesaw demo (Ts series). Inherited by all models but rarely exercised.
 
 ### `time_util` lambda pattern (G24)
-`Model3` uses a `time_util(t)` lambda to remap integration time to the time axis of the insolation data. This is a user-defined mapping set at instantiation; no built-in PBModel support. Other models may need a similar pattern when forcing data time and integration time differ in scale/offset.
+`Model3` uses a `time_util(t)` lambda to remap integration time to the time axis of the insolation data. This is a user-defined mapping set at instantiation; no built-in ccmodel support. Other models may need a similar pattern when forcing data time and integration time differ in scale/offset.

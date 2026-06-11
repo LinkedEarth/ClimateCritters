@@ -9,3 +9,4 @@ _objects_*.json
 notebooks/
 
 **/*.quarto_ipynb
+tutorials/_tutorials_table.qmd

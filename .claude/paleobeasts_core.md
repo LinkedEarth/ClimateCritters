@@ -1,27 +1,27 @@
-# PaleoBeasts Core Module Reference
+# ClimateCritters Core Module Reference
 
-> **Maintenance note:** Update this document when functionality in `paleobeasts/core/` is added, changed, or removed.
+> **Maintenance note:** Update this document when functionality in `ClimateCritters/core/` is added, changed, or removed.
 
 ---
 
 ## Overview
 
-`paleobeasts/core` is the foundational layer for all paleoclimate signal models in PaleoBeasts. Its purpose is to provide minimal model "organisms" for studying key aspects of climate dynamics — chaos, multiple equilibria, tipping points — and how those signals are recorded in paleoclimate archives (ice cores, sediment cores, tree rings, etc.).
+`ClimateCritters/core` is the foundational layer for all paleoclimate signal models in ClimateCritters. Its purpose is to provide minimal model "organisms" for studying key aspects of climate dynamics — chaos, multiple equilibria, tipping points — and how those signals are recorded in paleoclimate archives (ice cores, sediment cores, tree rings, etc.).
 
 The module exports two public objects:
 
 | Export | Source | Role |
 |--------|--------|------|
-| `PBModel` | `pbmodel.py` | Parent class for all concrete models |
+| `ccmodel` | `ccmodel.py` | Parent class for all concrete models |
 | `Forcing` | `forcing.py` | Unified time-varying parameter wrapper |
 
-Concrete models subclass `PBModel` and are housed in `paleobeasts/models/`.
+Concrete models subclass `ccmodel` and are housed in `ClimateCritters/models/`.
 
 ---
 
-## PBModel (`pbmodel.py`)
+## ccmodel (`ccmodel.py`)
 
-`PBModel` is an abstract parent class. It is not instantiated directly; child classes override `dydt()` to define their ODE(s) and optionally override hook methods for diagnostics and stochastic noise.
+`ccmodel` is an abstract parent class. It is not instantiated directly; child classes override `dydt()` to define their ODE(s) and optionally override hook methods for diagnostics and stochastic noise.
 
 ### Attributes
 
@@ -78,7 +78,7 @@ The `'strict'` mode exists to enable gradual migration away from legacy callable
 
 Supported methods:
 - `'RK45'` and other scipy methods → dispatched to `scipy.integrate.solve_ivp`
-- `'euler'` → custom fixed-step Euler solver (`paleobeasts.utils.solver`)
+- `'euler'` → custom fixed-step Euler solver (`ClimateCritters.utils.solver`)
 - `'euler_maruyama'` → stochastic Euler-Maruyama; requires child class to implement `sde_noise()`
 
 Custom time step for Euler methods: pass `kwargs={'dt': value}`.
@@ -138,7 +138,7 @@ Non-destructive noise system for simulating paleoclimate archive degradation (ta
 
 ## Forcing (`forcing.py`)
 
-`Forcing` wraps any time-varying parameter source — analytical sequences, interpolated arrays, or arbitrary callables — behind a single `get_forcing(t)` interface. This is what `PBModel.resolve_param` calls when a parameter is a `Forcing` object.
+`Forcing` wraps any time-varying parameter source — analytical sequences, interpolated arrays, or arbitrary callables — behind a single `get_forcing(t)` interface. This is what `ccmodel.resolve_param` calls when a parameter is a `Forcing` object.
 
 ### ForcingElement Hierarchy
 
@@ -300,4 +300,4 @@ forcing = Forcing(
 |--------|----------------|
 | **PyLEOclim** | `to_pyleo(var_names)` exports any named variable as `pyleoclim.Series` or `MultipleSeries` for spectral analysis, tipping point detection, etc. |
 | **scipy** | `integrate` dispatches to `scipy.integrate.solve_ivp` for `'RK45'` and other adaptive methods |
-| **Custom solvers** | `paleobeasts.utils.solver` provides fixed-step Euler and Euler-Maruyama (stochastic) solvers |
+| **Custom solvers** | `ClimateCritters.utils.solver` provides fixed-step Euler and Euler-Maruyama (stochastic) solvers |
