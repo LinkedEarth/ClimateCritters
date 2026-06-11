@@ -40,7 +40,7 @@ execute:
 website:
   title: "ClimateCritters"
   description: "Synthetic paleoclimate signal models"
-  favicon: thumbnails/paleobeasts_logo.png
+  favicon: thumbnails/ClimateCritters_logo.png
   page-navigation: true
   navbar:
     left:

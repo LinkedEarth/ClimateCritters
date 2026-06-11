@@ -1,4 +1,4 @@
-# PaleoBeasts Docstring Style Guide
+# ClimateCritters Docstring Style Guide
 
 Reference style: [pyleoclim `GeoSeries`](https://github.com/LinkedEarth/Pyleoclim_util/blob/master/pyleoclim/core/geoseries.py).
 Format: **NumPy / numpydoc** (`numpy` Sphinx extension).
@@ -202,7 +202,7 @@ Use for:
 
 ### Examples
 
-PaleoBeasts uses `.. code-block:: python` until Sphinx `jupyter-execute`
+ClimateCritters uses `.. code-block:: python` until Sphinx `jupyter-execute`
 is configured.  Show the minimal working path: construct the model,
 integrate, access output.
 
@@ -223,7 +223,7 @@ Examples
 
 ---
 
-## 5. PaleoBeasts-specific conventions
+## 5. ClimateCritters-specific conventions
 
 ### 5a. Callable-parameter contract
 

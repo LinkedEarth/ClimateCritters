@@ -34,7 +34,7 @@ class TestSignalModelsLorenz63toPyleo:
     @pytest.mark.parametrize('method, dt', [('euler', 0.01), ('RK45', None)])
     @pytest.mark.parametrize('var_names', ['x', 'y', 'z', ['x', 'y'], ['x', 'y', 'z']])
     def test_topyleo_t0(self, method, dt, var_names):
-        '''Test to_pyleo method on PBOutput'''
+        '''Test to_pyleo method on CCOutput'''
         model = lorenz.Lorenz63()
         output = model.integrate(t_span=(0, 10), y0=[1, 1, 1], method=method, dt=dt)
         output.to_pyleo(var_names=var_names)

@@ -15,7 +15,7 @@ Notes on how to test:
 
 import pytest
 import numpy as np
-import climatecritters as pb
+import climatecritters as cc
 
 class TestUtilsNoiseFromSeries:
     @pytest.mark.parametrize('method', ['uar1','ar1sim','phaseran'])
@@ -24,7 +24,7 @@ class TestUtilsNoiseFromSeries:
     def test_fromseries_t0(self,gen_ts,method,number,seed):
         '''Test from_series method'''
         series = gen_ts
-        pb.utils.noise.from_series(target_series=series,method=method,number=number,seed=seed)
+        cc.utils.noise.from_series(target_series=series,method=method,number=number,seed=seed)
 
 class TestUtilsNoiseFromParams:
     @pytest.mark.parametrize('method, noise_param', [('uar1',[1,5]),
@@ -37,4 +37,4 @@ class TestUtilsNoiseFromParams:
                                                        ('specified',{'time':np.arange(50)})])
     def test_fromparams_t0(self,method,noise_param,number,seed,time_pattern,settings):
         '''Test from_series method'''
-        pb.utils.noise.from_param(method=method,noise_param=noise_param,number=number,seed=seed,time_pattern=time_pattern,settings=settings)
+        cc.utils.noise.from_param(method=method,noise_param=noise_param,number=number,seed=seed,time_pattern=time_pattern,settings=settings)

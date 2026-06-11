@@ -12,7 +12,7 @@ for time-varying parameters, stochastic forcing, and export to
 
 ## Features
 
-- **Unified model API** — every model shares the same `integrate()` → `PBOutput` workflow
+- **Unified model API** — every model shares the same `integrate()` → `CCOutput` workflow
 - **Flexible forcing** — constants, callables, or composable `Forcing` sequences (Hold, Ramp, Harmonic)
 - **Time-varying parameters** — any parameter can be swapped for a callable or Forcing object at runtime
 - **Multiple solvers** — Euler, RK4, RK45, Euler-Maruyama (SDE), and scipy adaptive methods

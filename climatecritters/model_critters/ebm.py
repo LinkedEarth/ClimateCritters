@@ -11,7 +11,7 @@ __all__ = [
 
 # ---------------------------------------------------------------------------
 # Module-level physics helpers
-# All callables comply with the PBModel contract: (t), (t, state), or
+# All callables comply with the CCModel contract: (t), (t, state), or
 # (t, state, model) with the first positional arg named 't' or 'time'.
 # ---------------------------------------------------------------------------
 
@@ -49,7 +49,7 @@ def OLR_func(pRad=650, ps=1000):
     Returns
     -------
     func : callable
-        A ``(t, state)`` callable compliant with the PBModel parameter
+        A ``(t, state)`` callable compliant with the CCModel parameter
         contract (see ``contracts/signal_model_contract.md``).  Returns OLR
         in W m⁻².
     """
@@ -150,7 +150,7 @@ class EBMBase(CCModel):
 
     See also
     --------
-    climatecritters.core.PBModel : Base class for all PaleoBeasts models.
+    climatecritters.core.CCModel : Base class for all ClimateCritters models.
     EBM0D : Zero-dimensional EBM subclass.
     EBM1DLat : Latitudinally-resolved diffusive EBM subclass.
     """
@@ -454,7 +454,7 @@ class EBM1DLat(EBMBase):
     def validate_initial_state(self, y0):
         """Validate and normalize the initial temperature profile.
 
-        Overrides :meth:`PBModel.validate_initial_state` to accept a scalar
+        Overrides :meth:`CCModel.validate_initial_state` to accept a scalar
         initial condition and broadcast it uniformly across the latitude grid.
 
         Parameters
@@ -702,7 +702,7 @@ class EBM1DLat(EBMBase):
     def populate_diagnostics_from_history(self, time, history):
         """Compute diagnostic variables from the full solved trajectory.
 
-        Called automatically by :meth:`PBModel.post_integrate` after the
+        Called automatically by :meth:`CCModel.post_integrate` after the
         solver completes.  Populates ``self.diagnostic_variables`` with the
         global-mean temperature and ice-line latitude at every timestep.
 

@@ -21,7 +21,7 @@ from pathlib import Path
 
 # Paths relative to this script's location (docs/scripts/)
 DOCS_DIR = Path(__file__).parent.parent          # docs/
-REPO_ROOT = DOCS_DIR.parent                      # PaleoBeasts/
+REPO_ROOT = DOCS_DIR.parent                      # ClimateCritters/
 SRC = REPO_ROOT / "notebooks"
 DST = DOCS_DIR / "notebooks"
 

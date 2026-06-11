@@ -2,7 +2,7 @@
 
 Provides fixed-step (RK4, Euler, Euler-Maruyama, Heun-Maruyama, Milstein)
 integrators that return a :class:`Solution` object, plus internal helpers
-used by :class:`~climatecritters.core.PBModel` for state validation and history
+used by :class:`~climatecritters.core.CCModel` for state validation and history
 reconstruction.
 """
 
@@ -567,7 +567,7 @@ def milstein_method(f, t_span, y0, dt, noise_func=None, rng=None, args=()):
     per component, which balances truncation and floating-point cancellation
     errors.  For SDEs where an exact ``∂g/∂y`` is available, accuracy can be
     improved by subclassing and overriding the correction directly, but the
-    finite-difference approximation is adequate for all current PaleoBeasts
+    finite-difference approximation is adequate for all current ClimateCritters
     use cases.
     """
     n_steps = int((t_span[1] - t_span[0]) / dt) + 1

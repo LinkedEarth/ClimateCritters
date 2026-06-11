@@ -1,7 +1,7 @@
 """Noise generation and surrogate time series utilities.
 
 Thin wrappers around :class:`pyleoclim.SurrogateSeries` that expose surrogate
-and parametric noise generation through a consistent PaleoBeasts interface.
+and parametric noise generation through a consistent ClimateCritters interface.
 """
 
 __all__ = [
