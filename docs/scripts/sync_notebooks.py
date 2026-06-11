@@ -76,10 +76,27 @@ def _parse_markdown_frontmatter(source: list[str]) -> dict | None:
     return fields
 
 
-def _build_raw_frontmatter_cell(fields: dict, original_cell: dict) -> dict:
-    """Build a raw YAML front-matter cell from parsed fields."""
-    # Values that are Quarto keywords and must not be quoted
+GITHUB_REPO = "LinkedEarth/ClimateCritters"
+GITHUB_BRANCH = "main"
+
+
+def _build_raw_frontmatter_cell(fields: dict, original_cell: dict, nb_repo_path: str) -> dict:
+    """Build a raw YAML front-matter cell from parsed fields.
+
+    nb_repo_path: path of the source notebook relative to the repo root,
+                  e.g. 'notebooks/model_demos/stommel.ipynb'. Used to build
+                  the binder and download URLs injected as other-links.
+    """
     UNQUOTED = {"last-modified", "today", "now"}
+
+    binder_url = (
+        f"https://mybinder.org/v2/gh/{GITHUB_REPO}/HEAD"
+        f"?labpath={nb_repo_path}"
+    )
+    download_url = (
+        f"https://raw.githubusercontent.com/{GITHUB_REPO}"
+        f"/{GITHUB_BRANCH}/{nb_repo_path}"
+    )
 
     lines = ["---\n"]
     for key in ("title", "author", "date"):
@@ -93,6 +110,13 @@ def _build_raw_frontmatter_cell(fields: dict, original_cell: dict) -> dict:
         lines.append(f"abstract: >\n  {fields['abstract']}\n")
     if "keywords" in fields:
         lines.append(f"keywords: {fields['keywords']}\n")
+    lines.append(f'other-links:\n')
+    lines.append(f'  - text: "Launch on Binder"\n')
+    lines.append(f'    href: "{binder_url}"\n')
+    lines.append(f'    icon: rocket-takeoff\n')
+    lines.append(f'  - text: "Download notebook"\n')
+    lines.append(f'    href: "{download_url}"\n')
+    lines.append(f'    icon: download\n')
     lines.append("---")
 
     new_cell = copy.deepcopy(original_cell)
@@ -102,7 +126,7 @@ def _build_raw_frontmatter_cell(fields: dict, original_cell: dict) -> dict:
     return new_cell
 
 
-def _convert_notebook(nb: dict) -> tuple[dict, bool]:
+def _convert_notebook(nb: dict, nb_repo_path: str) -> tuple[dict, bool]:
     """Return (notebook, was_converted). Converts markdown metadata cell if present."""
     if not nb["cells"]:
         return nb, False
@@ -114,7 +138,7 @@ def _convert_notebook(nb: dict) -> tuple[dict, bool]:
         return nb, False
 
     nb = copy.deepcopy(nb)
-    nb["cells"][0] = _build_raw_frontmatter_cell(fields, first)
+    nb["cells"][0] = _build_raw_frontmatter_cell(fields, first, nb_repo_path)
     return nb, True
 
 
@@ -132,7 +156,8 @@ def sync():
             if not dst.exists() or nb_path.stat().st_mtime > dst.stat().st_mtime:
                 if nb_path.suffix == ".ipynb":
                     nb = json.loads(nb_path.read_text(encoding="utf-8"))
-                    nb, converted = _convert_notebook(nb)
+                    nb_repo_path = nb_path.relative_to(REPO_ROOT).as_posix()
+                    nb, converted = _convert_notebook(nb, nb_repo_path)
                     dst.write_text(json.dumps(nb, indent=1, ensure_ascii=False), encoding="utf-8")
                     tag = " (front matter converted)" if converted else ""
                     print(f"  synced {nb_path.relative_to(REPO_ROOT)} → docs/notebooks/{subdir}/{nb_path.name}{tag}")
