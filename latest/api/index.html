@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>index – ClimateCritters</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../api/core.CCModel.html" rel="next">
+<link href="../thumbnails/ClimateCritters_logo.png" rel="icon" type="image/png">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-bba5ebae505b5c03f3f0d8040a416a6b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../api/_styles-quartodoc.css">
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">ClimateCritters</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../get-started/installation.html"> 
+<span class="menu-text">Get Started</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../tutorials/index.html"> 
+<span class="menu-text">Tutorials</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link active" href="../api/index.html" aria-current="page"> 
+<span class="menu-text">Reference</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/LinkedEarth/ClimateCritters"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../api/index.html">Function reference</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/index.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Function reference</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Core</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+ <span class="menu-text">Base Classes</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/core.CCModel.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">core.CCModel</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/core.CCOutput.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">core.CCOutput</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/core.Forcing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">core.Forcing</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+ <span class="menu-text">Forcing</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/core.forcing.ForcingElement.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">core.forcing.ForcingElement</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/core.forcing.ResolvedSegment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">core.forcing.ResolvedSegment</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/core.forcing.ForcingSequence.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">core.forcing.ForcingSequence</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/core.forcing.Hold.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">core.forcing.Hold</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/core.forcing.Ramp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">core.forcing.Ramp</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/core.forcing.Harmonic.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">core.forcing.Harmonic</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Models</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
+ <span class="menu-text">EBMs</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/EBMBase.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">EBMBase</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/EBM0D.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">EBM0D</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/EBM1DLat.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">EBM1DLat</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
+ <span class="menu-text">Box Models</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/BoxModelSpec.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">BoxModelSpec</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/TwoBoxCarbon.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">TwoBoxCarbon</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false">
+ <span class="menu-text">Lorenz &amp; Roessler</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/Lorenz63.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lorenz63</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/Lorenz96.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lorenz96</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/Roessler.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Roessler</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false">
+ <span class="menu-text">Pendulums &amp; Oscillators</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/SimplePendulum.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">SimplePendulum</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/DoublePendulum.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DoublePendulum</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/DampedSpring.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DampedSpring</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false">
+ <span class="menu-text">Individual Models</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/ENSORechargeOscillator.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ENSORechargeOscillator</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/Model3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Model3</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/Stocker2003BipolarSeesaw.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Stocker2003BipolarSeesaw</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/Stocker2003ExtendedSeaIceSeesaw.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Stocker2003ExtendedSeaIceSeesaw</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/Stommel.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Stommel</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true">
+ <span class="menu-text">Utils</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false">
+ <span class="menu-text">Noise</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-11" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.noise.from_series.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.noise.from_series</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.noise.from_param.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.noise.from_param</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false">
+ <span class="menu-text">Resampling</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.resample.downsample.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.resample.downsample</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-13" role="navigation" aria-expanded="false">
+ <span class="menu-text">Forcing</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-13" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-13" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.forcing.create_periodic_forcing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.forcing.create_periodic_forcing</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.forcing.create_constant_forcing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.forcing.create_constant_forcing</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.forcing.create_sinusoid_forcing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.forcing.create_sinusoid_forcing</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.forcing.create_piecewise_forcing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.forcing.create_piecewise_forcing</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-14" role="navigation" aria-expanded="false">
+ <span class="menu-text">Solvers</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-14" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-14" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.solver.Solution.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.solver.Solution</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.solver.rk4_method.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.solver.rk4_method</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.solver.euler_method.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.solver.euler_method</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.solver.euler_maruyama_method.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.solver.euler_maruyama_method</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.solver.heun_maruyama_method.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.solver.heun_maruyama_method</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.solver.milstein_method.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.solver.milstein_method</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.solver.define_t_eval.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.solver.define_t_eval</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.solver.validate_monotonic_grid.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.solver.validate_monotonic_grid</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.solver.validate_layer_thicknesses.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.solver.validate_layer_thicknesses</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.solver.flux_divergence.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.solver.flux_divergence</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.solver.validate_initial_state.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.solver.validate_initial_state</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.solver.build_state_from_history.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.solver.build_state_from_history</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-15" role="navigation" aria-expanded="false">
+ <span class="menu-text">Functions</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-15" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-15" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.func.make_derivative_func.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.func.make_derivative_func</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.func.smooth_and_interpolate.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.func.smooth_and_interpolate</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#function-reference" id="toc-function-reference" class="nav-link active" data-scroll-target="#function-reference">Function reference</a>
+  <ul>
+  <li><a href="#core" id="toc-core" class="nav-link" data-scroll-target="#core">Core</a>
+  <ul>
+  <li><a href="#base-classes" id="toc-base-classes" class="nav-link" data-scroll-target="#base-classes">Base Classes</a></li>
+  <li><a href="#forcing" id="toc-forcing" class="nav-link" data-scroll-target="#forcing">Forcing</a></li>
+  </ul></li>
+  <li><a href="#models" id="toc-models" class="nav-link" data-scroll-target="#models">Models</a>
+  <ul>
+  <li><a href="#ebms" id="toc-ebms" class="nav-link" data-scroll-target="#ebms">EBMs</a></li>
+  <li><a href="#box-models" id="toc-box-models" class="nav-link" data-scroll-target="#box-models">Box Models</a></li>
+  <li><a href="#lorenz-roessler" id="toc-lorenz-roessler" class="nav-link" data-scroll-target="#lorenz-roessler">Lorenz &amp; Roessler</a></li>
+  <li><a href="#pendulums-oscillators" id="toc-pendulums-oscillators" class="nav-link" data-scroll-target="#pendulums-oscillators">Pendulums &amp; Oscillators</a></li>
+  <li><a href="#individual-models" id="toc-individual-models" class="nav-link" data-scroll-target="#individual-models">Individual Models</a></li>
+  </ul></li>
+  <li><a href="#utils" id="toc-utils" class="nav-link" data-scroll-target="#utils">Utils</a>
+  <ul>
+  <li><a href="#noise" id="toc-noise" class="nav-link" data-scroll-target="#noise">Noise</a></li>
+  <li><a href="#resampling" id="toc-resampling" class="nav-link" data-scroll-target="#resampling">Resampling</a></li>
+  <li><a href="#forcing-1" id="toc-forcing-1" class="nav-link" data-scroll-target="#forcing-1">Forcing</a></li>
+  <li><a href="#solvers" id="toc-solvers" class="nav-link" data-scroll-target="#solvers">Solvers</a></li>
+  <li><a href="#functions" id="toc-functions" class="nav-link" data-scroll-target="#functions">Functions</a></li>
+  </ul></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
+
+
+
+
+<section id="function-reference" class="level1 doc doc-index">
+<h1 class="doc doc-index">Function reference</h1>
+<section id="core" class="level2">
+<h2 class="anchored" data-anchor-id="core">Core</h2>
+<section id="base-classes" class="level3">
+<h3 class="anchored" data-anchor-id="base-classes">Base Classes</h3>
+<p>Base classes underlying all models.</p>
+<table class="caption-top table">
+<tbody>
+<tr class="odd">
+<td><a href="../api/core.CCModel.html#climatecritters.core.CCModel">core.CCModel</a></td>
+<td>The overarching model structure for ClimateCritters.</td>
+</tr>
+<tr class="even">
+<td><a href="../api/core.CCOutput.html#climatecritters.core.CCOutput">core.CCOutput</a></td>
+<td>Container for the results of one call to <code>CCModel.integrate()</code>.</td>
+</tr>
+<tr class="odd">
+<td><a href="../api/core.Forcing.html#climatecritters.core.Forcing">core.Forcing</a></td>
+<td>Unified time-varying signal consumed by models.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="forcing" class="level3">
+<h3 class="anchored" data-anchor-id="forcing">Forcing</h3>
+<p>Forcing elements.</p>
+<table class="caption-top table">
+<tbody>
+<tr class="odd">
+<td><a href="../api/core.forcing.ForcingElement.html#climatecritters.core.forcing.ForcingElement">core.forcing.ForcingElement</a></td>
+<td>A bounded forcing segment backed by an arbitrary callable.</td>
+</tr>
+<tr class="even">
+<td><a href="../api/core.forcing.ResolvedSegment.html#climatecritters.core.forcing.ResolvedSegment">core.forcing.ResolvedSegment</a></td>
+<td>Immutable record describing one compiled segment of a <a href="../api/core.forcing.ForcingSequence.html#climatecritters.core.forcing.ForcingSequence" title="0"><code>ForcingSequence</code></a>.</td>
+</tr>
+<tr class="odd">
+<td><a href="../api/core.forcing.ForcingSequence.html#climatecritters.core.forcing.ForcingSequence">core.forcing.ForcingSequence</a></td>
+<td>Composable sequence of <a href="../api/core.forcing.ForcingElement.html#climatecritters.core.forcing.ForcingElement" title="0"><code>ForcingElement</code></a> parts.</td>
+</tr>
+<tr class="even">
+<td><a href="../api/core.forcing.Hold.html#climatecritters.core.forcing.Hold">core.forcing.Hold</a></td>
+<td>Constant-valued segment.</td>
+</tr>
+<tr class="odd">
+<td><a href="../api/core.forcing.Ramp.html#climatecritters.core.forcing.Ramp">core.forcing.Ramp</a></td>
+<td>Monotonic transition between two values with linear or cosine easing.</td>
+</tr>
+<tr class="even">
+<td><a href="../api/core.forcing.Harmonic.html#climatecritters.core.forcing.Harmonic">core.forcing.Harmonic</a></td>
+<td>Sinusoidal segment with automatic phase continuity.</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="models" class="level2">
+<h2 class="anchored" data-anchor-id="models">Models</h2>
+<section id="ebms" class="level3">
+<h3 class="anchored" data-anchor-id="ebms">EBMs</h3>
+<p>Energy balance models.</p>
+<table class="caption-top table">
+<tbody>
+<tr class="odd">
+<td><a href="../api/EBMBase.html#climatecritters.EBMBase">EBMBase</a></td>
+<td>Shared energy balance physics for all EBM variants.</td>
+</tr>
+<tr class="even">
+<td><a href="../api/EBM0D.html#climatecritters.EBM0D">EBM0D</a></td>
+<td>Zero-dimensional energy balance model for global-mean surface temperature.</td>
+</tr>
+<tr class="odd">
+<td><a href="../api/EBM1DLat.html#climatecritters.EBM1DLat">EBM1DLat</a></td>
+<td>Diffusive annual-mean latitudinal energy balance model (Budyko-Sellers type).</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="box-models" class="level3">
+<h3 class="anchored" data-anchor-id="box-models">Box Models</h3>
+<p>Composable framework for building custom multi-reservoir models.</p>
+<table class="caption-top table">
+<tbody>
+<tr class="odd">
+<td><a href="../api/BoxModelSpec.html#climatecritters.BoxModelSpec">BoxModelSpec</a></td>
+<td>Declarative specification for simple ODE box models.</td>
+</tr>
+<tr class="even">
+<td><a href="../api/TwoBoxCarbon.html#climatecritters.TwoBoxCarbon">TwoBoxCarbon</a></td>
+<td>Two-box carbon exchange model with explicit box volumes.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="lorenz-roessler" class="level3">
+<h3 class="anchored" data-anchor-id="lorenz-roessler">Lorenz &amp; Roessler</h3>
+<p>Single-scale &amp; two-scale Lorenz atmospheric models + Roessler system.</p>
+<table class="caption-top table">
+<tbody>
+<tr class="odd">
+<td><a href="../api/Lorenz63.html#climatecritters.Lorenz63">Lorenz63</a></td>
+<td>Lorenz (1963) system.</td>
+</tr>
+<tr class="even">
+<td><a href="../api/Lorenz96.html#climatecritters.Lorenz96">Lorenz96</a></td>
+<td>Lorenz (1996) single-scale and two-scale atmospheric model.</td>
+</tr>
+<tr class="odd">
+<td><a href="../api/Roessler.html#climatecritters.Roessler">Roessler</a></td>
+<td>Roessler chaotic oscillator.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="pendulums-oscillators" class="level3">
+<h3 class="anchored" data-anchor-id="pendulums-oscillators">Pendulums &amp; Oscillators</h3>
+<p>Mechanical oscillators ranging from simple SHM to chaotic driven pendulums.</p>
+<table class="caption-top table">
+<tbody>
+<tr class="odd">
+<td><a href="../api/SimplePendulum.html#climatecritters.SimplePendulum">SimplePendulum</a></td>
+<td>Nonlinear pendulum with optional linear damping.</td>
+</tr>
+<tr class="even">
+<td><a href="../api/DoublePendulum.html#climatecritters.DoublePendulum">DoublePendulum</a></td>
+<td>Double pendulum — a conservative chaotic system.</td>
+</tr>
+<tr class="odd">
+<td><a href="../api/DampedSpring.html#climatecritters.DampedSpring">DampedSpring</a></td>
+<td>Damped (and optionally driven) spring-mass oscillator.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="individual-models" class="level3">
+<h3 class="anchored" data-anchor-id="individual-models">Individual Models</h3>
+<p>Standalone paleoclimate and dynamical systems models.</p>
+<table class="caption-top table">
+<tbody>
+<tr class="odd">
+<td><a href="../api/ENSORechargeOscillator.html#climatecritters.ENSORechargeOscillator">ENSORechargeOscillator</a></td>
+<td>Jin-style ENSO recharge oscillator.</td>
+</tr>
+<tr class="even">
+<td><a href="../api/Model3.html#climatecritters.Model3">Model3</a></td>
+<td>Model 3 from Ganopolski (2024) describing glacial cycle evolution under orbital forcing.</td>
+</tr>
+<tr class="odd">
+<td><a href="../api/Stocker2003BipolarSeesaw.html#climatecritters.Stocker2003BipolarSeesaw">Stocker2003BipolarSeesaw</a></td>
+<td>Minimum thermodynamic model for the thermal bipolar seesaw.</td>
+</tr>
+<tr class="even">
+<td><a href="../api/Stocker2003ExtendedSeaIceSeesaw.html#climatecritters.Stocker2003ExtendedSeaIceSeesaw">Stocker2003ExtendedSeaIceSeesaw</a></td>
+<td>Extended Stocker-style model with reservoir, Southern Ocean, sea-ice, and Antarctic states.</td>
+</tr>
+<tr class="odd">
+<td><a href="../api/Stommel.html#climatecritters.Stommel">Stommel</a></td>
+<td>Minimal two-box Stommel thermohaline circulation model.</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="utils" class="level2">
+<h2 class="anchored" data-anchor-id="utils">Utils</h2>
+<section id="noise" class="level3">
+<h3 class="anchored" data-anchor-id="noise">Noise</h3>
+<p>Post-hoc observation noise and stochastic process noise generation.</p>
+<table class="caption-top table">
+<tbody>
+<tr class="odd">
+<td><a href="../api/utils.noise.from_series.html#climatecritters.utils.noise.from_series">utils.noise.from_series</a></td>
+<td>Generate surrogate series matched to a target Pyleoclim series.</td>
+</tr>
+<tr class="even">
+<td><a href="../api/utils.noise.from_param.html#climatecritters.utils.noise.from_param">utils.noise.from_param</a></td>
+<td>Generate surrogate series from a parametric noise model.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="resampling" class="level3">
+<h3 class="anchored" data-anchor-id="resampling">Resampling</h3>
+<p>Irregular downsampling utilities for paleoclimate time series.</p>
+<table class="caption-top table">
+<tbody>
+<tr class="odd">
+<td><a href="../api/utils.resample.downsample.html#climatecritters.utils.resample.downsample">utils.resample.downsample</a></td>
+<td>Downsample a Pyleoclim series by drawing random time increments.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="forcing-1" class="level3">
+<h3 class="anchored" data-anchor-id="forcing-1">Forcing</h3>
+<p>Factory functions for common Forcing patterns.</p>
+<table class="caption-top table">
+<tbody>
+<tr class="odd">
+<td><a href="../api/utils.forcing.create_periodic_forcing.html#climatecritters.utils.forcing.create_periodic_forcing">utils.forcing.create_periodic_forcing</a></td>
+<td>Build a composite periodic forcing from normalised sine components.</td>
+</tr>
+<tr class="even">
+<td><a href="../api/utils.forcing.create_constant_forcing.html#climatecritters.utils.forcing.create_constant_forcing">utils.forcing.create_constant_forcing</a></td>
+<td>Build a constant forcing.</td>
+</tr>
+<tr class="odd">
+<td><a href="../api/utils.forcing.create_sinusoid_forcing.html#climatecritters.utils.forcing.create_sinusoid_forcing">utils.forcing.create_sinusoid_forcing</a></td>
+<td>Build a sinusoidal forcing: <code>f(t) = y0 + A * sin(2π t / period)</code>.</td>
+</tr>
+<tr class="even">
+<td><a href="../api/utils.forcing.create_piecewise_forcing.html#climatecritters.utils.forcing.create_piecewise_forcing">utils.forcing.create_piecewise_forcing</a></td>
+<td>Build a piecewise forcing from a sequence of :class:<code>~climatecritters.core.ForcingElement</code> parts.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="solvers" class="level3">
+<h3 class="anchored" data-anchor-id="solvers">Solvers</h3>
+<p>Numerical integration backends and solver helpers.</p>
+<table class="caption-top table">
+<tbody>
+<tr class="odd">
+<td><a href="../api/utils.solver.Solution.html#climatecritters.utils.solver.Solution">utils.solver.Solution</a></td>
+<td>Minimal container for the output of a fixed-step integrator.</td>
+</tr>
+<tr class="even">
+<td><a href="../api/utils.solver.rk4_method.html#climatecritters.utils.solver.rk4_method">utils.solver.rk4_method</a></td>
+<td>Fixed-step 4th-order Runge-Kutta integrator.</td>
+</tr>
+<tr class="odd">
+<td><a href="../api/utils.solver.euler_method.html#climatecritters.utils.solver.euler_method">utils.solver.euler_method</a></td>
+<td>Fixed-step forward Euler integrator.</td>
+</tr>
+<tr class="even">
+<td><a href="../api/utils.solver.euler_maruyama_method.html#climatecritters.utils.solver.euler_maruyama_method">utils.solver.euler_maruyama_method</a></td>
+<td>Fixed-step Euler-Maruyama integrator for stochastic differential equations.</td>
+</tr>
+<tr class="odd">
+<td><a href="../api/utils.solver.heun_maruyama_method.html#climatecritters.utils.solver.heun_maruyama_method">utils.solver.heun_maruyama_method</a></td>
+<td>Fixed-step Heun-Maruyama integrator for stochastic differential equations.</td>
+</tr>
+<tr class="even">
+<td><a href="../api/utils.solver.milstein_method.html#climatecritters.utils.solver.milstein_method">utils.solver.milstein_method</a></td>
+<td>Fixed-step Milstein integrator for stochastic differential equations.</td>
+</tr>
+<tr class="odd">
+<td><a href="../api/utils.solver.define_t_eval.html#climatecritters.utils.solver.define_t_eval">utils.solver.define_t_eval</a></td>
+<td>Build a <code>t_eval</code> array for use with :func:<code>scipy.integrate.solve_ivp</code>.</td>
+</tr>
+<tr class="even">
+<td><a href="../api/utils.solver.validate_monotonic_grid.html#climatecritters.utils.solver.validate_monotonic_grid">utils.solver.validate_monotonic_grid</a></td>
+<td>Validate a strictly increasing 1-D coordinate array.</td>
+</tr>
+<tr class="odd">
+<td><a href="../api/utils.solver.validate_layer_thicknesses.html#climatecritters.utils.solver.validate_layer_thicknesses">utils.solver.validate_layer_thicknesses</a></td>
+<td>Validate positive layer thicknesses.</td>
+</tr>
+<tr class="even">
+<td><a href="../api/utils.solver.flux_divergence.html#climatecritters.utils.solver.flux_divergence">utils.solver.flux_divergence</a></td>
+<td>Compute finite-volume tendency from face fluxes and layer thicknesses.</td>
+</tr>
+<tr class="odd">
+<td><a href="../api/utils.solver.validate_initial_state.html#climatecritters.utils.solver.validate_initial_state">utils.solver.validate_initial_state</a></td>
+<td>Validate and normalize the initial state vector.</td>
+</tr>
+<tr class="even">
+<td><a href="../api/utils.solver.build_state_from_history.html#climatecritters.utils.solver.build_state_from_history">utils.solver.build_state_from_history</a></td>
+<td>Build a structured state array from a solved trajectory.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="functions" class="level3">
+<h3 class="anchored" data-anchor-id="functions">Functions</h3>
+<p>Signal processing and interpolation utilities.</p>
+<table class="caption-top table">
+<tbody>
+<tr class="odd">
+<td><a href="../api/utils.func.make_derivative_func.html#climatecritters.utils.func.make_derivative_func">utils.func.make_derivative_func</a></td>
+<td>Return a callable that evaluates the derivative of a forcing at arbitrary times.</td>
+</tr>
+<tr class="even">
+<td><a href="../api/utils.func.smooth_and_interpolate.html#climatecritters.utils.func.smooth_and_interpolate">utils.func.smooth_and_interpolate</a></td>
+<td>Apply a centered moving-average and interpolate onto a target time axis.</td>
+</tr>
+</tbody>
+</table>
+
+
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<style>
+  #version-picker-menu { min-width: 0; width: auto; }
+  #version-picker-menu .dropdown-item { padding: 0.25rem 0.75rem; }
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const base = window.location.origin;
+  const pathParts = window.location.pathname.split('/').filter(Boolean);
+
+  const knownPrefixes = ['stable', 'latest'];
+  const current = knownPrefixes.includes(pathParts[0]) || /^v\d/.test(pathParts[0])
+    ? pathParts[0]
+    : null;
+
+  const label = current || 'version';
+
+  // Bootstrap 5 dropdown
+  const li = document.createElement('li');
+  li.className = 'nav-item dropdown';
+
+  const toggle = document.createElement('a');
+  toggle.className = 'nav-link dropdown-toggle';
+  toggle.href = '#';
+  toggle.setAttribute('role', 'button');
+  toggle.setAttribute('data-bs-toggle', 'dropdown');
+  toggle.setAttribute('aria-expanded', 'false');
+  toggle.textContent = label;
+
+  const menu = document.createElement('ul');
+  menu.className = 'dropdown-menu dropdown-menu-end';
+  menu.id = 'version-picker-menu';
+
+  const addOption = (v) => {
+    const item = document.createElement('li');
+    const a = document.createElement('a');
+    a.className = 'dropdown-item' + (v === current ? ' active' : '');
+    a.href = '#';
+    a.textContent = v;
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      const subPath = pathParts.slice(1).join('/');
+      window.location.href = `${base}/${v}/${subPath}`;
+    });
+    item.appendChild(a);
+    menu.appendChild(item);
+  };
+
+  for (const v of ['stable', 'latest']) addOption(v);
+  if (current && !knownPrefixes.includes(current)) addOption(current);
+
+  li.appendChild(toggle);
+  li.appendChild(menu);
+
+  const navbar = document.querySelector('.navbar-nav.ms-auto')
+               || document.querySelector('.navbar-nav')
+               || document.querySelector('nav');
+  if (navbar) navbar.appendChild(li);
+
+  // fetch versions.json and add any additional entries
+  try {
+    const res = await fetch(`${base}/versions.json`);
+    if (!res.ok) return;
+    const versions = await res.json();
+    for (const v of versions) {
+      if (!menu.querySelector(`[data-version="${v}"]`)) addOption(v);
+    }
+  } catch (_) {}
+});
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../api/core.CCModel.html" class="pagination-link" aria-label="core.CCModel">
+        <span class="nav-page-text">core.CCModel</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
