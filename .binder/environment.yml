@@ -16,4 +16,3 @@ dependencies:
     - fitter
     - git+https://github.com/LinkedEarth/Pyleoclim_util.git
     - pandas>=2.0.0
-    - '.'
