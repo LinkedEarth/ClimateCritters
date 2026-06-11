@@ -99,7 +99,7 @@ website:
           contents:
             - section: Energy Balance Models
               contents:
-                - text: 0D
+                - text: "0D"
                   href: notebooks/model_demos/ebm0d.ipynb
                 - text: "1D (latitude)"
                   href: notebooks/model_demos/ebm1d_lat.ipynb
@@ -115,7 +115,7 @@ website:
                   href: notebooks/model_demos/enso_recharge.ipynb
                 - text: "Ganopolski 2024, Model 3"
                   href: notebooks/model_demos/g24.ipynb
-                - text: Stommel
+                - text: "Stommel"
                   href: notebooks/model_demos/stommel.ipynb
             - section: Attractors
               contents:
