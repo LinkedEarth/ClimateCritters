@@ -1,0 +1,88 @@
+name: Deploy versioned docs
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Set up Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
+
+      - name: Install quartodoc interlinks filter
+        run: python -m quartodoc interlinks
+        working-directory: docs
+
+      - name: Sync notebooks
+        run: python scripts/sync_notebooks.py
+        working-directory: docs
+
+      - name: Generate tutorials index
+        run: python scripts/generate_tutorials_index.py
+        working-directory: docs
+
+      - name: Add quartodoc extension
+        run: quarto add machow/quartodoc --no-prompt
+        working-directory: docs
+
+      - name: Build Quartodoc
+        run: quartodoc build
+        working-directory: docs
+
+      - name: Render site
+        run: quarto render
+        working-directory: docs
+
+      - name: Deploy versioned docs
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/_site
+          destination_dir: ${{ env.RELEASE_VERSION }}
+          keep_files: true
+
+      - name: Update /stable/ and versions.json
+        run: |
+          git fetch origin gh-pages
+          git checkout gh-pages
+
+          # copy release build to stable/ (symlinks don't work on GitHub Pages)
+          rm -rf stable
+          cp -r ${{ env.RELEASE_VERSION }} stable
+
+          # append version to versions.json (create if missing)
+          if [ ! -f versions.json ]; then
+            echo "[]" > versions.json
+          fi
+          python3 -c "
+          import json
+          v = '${{ env.RELEASE_VERSION }}'
+          versions = json.load(open('versions.json'))
+          if v not in versions:
+              versions.insert(0, v)
+          json.dump(versions, open('versions.json', 'w'), indent=2)
+          "
+
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add stable versions.json
+          git commit -m "docs: stable -> ${{ env.RELEASE_VERSION }}"
+          git push origin gh-pages
