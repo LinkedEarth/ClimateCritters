@@ -37,7 +37,7 @@ class Daisyworld(CCModel):
     beta_width : float or callable or cc.Forcing
         Parabolic growth-rate width parameter.  Default 0.003265.
     S0 : float or callable or cc.Forcing
-        Solar constant (W m\ :sup:`-2`).  Default 1365.0.
+        Solar constant (W\m^2).  Default 1365.0.
     L : float or callable or cc.Forcing
         Normalized stellar luminosity (1.0 = present Sun).  Default 1.0.
         Register a time-varying luminosity via
