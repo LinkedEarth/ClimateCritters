@@ -116,7 +116,7 @@ website:
                   href: notebooks/model_demos/g24.ipynb
                 - text: Stommel
                   href: notebooks/model_demos/stommel.ipynb
-            - section: Attrctors
+            - section: Attractors
               contents:
                 - text: "Roessler"
                   href: notebooks/model_demos/roessler.ipynb
