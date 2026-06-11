@@ -28,6 +28,14 @@ jobs:
       - name: Install quartodoc interlinks filter
         run: python -m quartodoc interlinks
         working-directory: docs
+      
+      - name: Sync notebooks
+        run: python scripts/sync_notebooks.py
+        working-directory: docs
+
+      - name: Generate tutorials index
+        run: python scripts/generate_tutorials_index.py
+        working-directory: docs
 
       - name: add extension
         run: quarto add machow/quartodoc --no-prompt
@@ -35,14 +43,6 @@ jobs:
 
       - name: Build Quartodoc
         run: quartodoc build
-        working-directory: docs
-
-      - name: Sync notebooks
-        run: python scripts/sync_notebooks.py
-        working-directory: docs
-
-      - name: Generate tutorials index
-        run: python scripts/generate_tutorials_index.py
         working-directory: docs
 
       - name: Render and publish
