@@ -62,12 +62,14 @@ jobs:
 
       - name: Update /stable/ and versions.json
         run: |
+          cp -r docs/_site /tmp/site_build
+
           git fetch origin gh-pages
           git checkout gh-pages
 
           # copy release build to stable/ (symlinks don't work on GitHub Pages)
           rm -rf stable
-          cp -r ../docs/_site stable
+          cp -r /tmp/site_build stable
 
           # append version to versions.json (create if missing)
           if [ ! -f versions.json ]; then
