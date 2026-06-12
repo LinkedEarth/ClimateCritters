@@ -698,69 +698,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   #version-picker-menu .dropdown-item { padding: 0.25rem 0.75rem; }
 </style>
 <script>
-document.addEventListener('DOMContentLoaded', async () => {
-  const base = window.location.origin;
-  const pathParts = window.location.pathname.split('/').filter(Boolean);
-
-  const knownPrefixes = ['stable', 'latest'];
-  const current = knownPrefixes.includes(pathParts[0]) || /^v\d/.test(pathParts[0])
-    ? pathParts[0]
-    : null;
-
-  const label = current || 'version';
-
-  // Bootstrap 5 dropdown
-  const li = document.createElement('li');
-  li.className = 'nav-item dropdown';
-
-  const toggle = document.createElement('a');
-  toggle.className = 'nav-link dropdown-toggle';
-  toggle.href = '#';
-  toggle.setAttribute('role', 'button');
-  toggle.setAttribute('data-bs-toggle', 'dropdown');
-  toggle.setAttribute('aria-expanded', 'false');
-  toggle.textContent = label;
-
-  const menu = document.createElement('ul');
-  menu.className = 'dropdown-menu dropdown-menu-end';
-  menu.id = 'version-picker-menu';
-
-  const addOption = (v) => {
-    const item = document.createElement('li');
-    const a = document.createElement('a');
-    a.className = 'dropdown-item' + (v === current ? ' active' : '');
-    a.href = '#';
-    a.textContent = v;
-    a.addEventListener('click', (e) => {
-      e.preventDefault();
-      const subPath = pathParts.slice(1).join('/');
-      window.location.href = `${base}/${v}/${subPath}`;
-    });
-    item.appendChild(a);
-    menu.appendChild(item);
-  };
-
-  for (const v of ['stable', 'latest']) addOption(v);
-  if (current && !knownPrefixes.includes(current)) addOption(current);
-
-  li.appendChild(toggle);
-  li.appendChild(menu);
-
-  const navbar = document.querySelector('.navbar-nav.ms-auto')
-               || document.querySelector('.navbar-nav')
-               || document.querySelector('nav');
-  if (navbar) navbar.appendChild(li);
-
-  // fetch versions.json and add any additional entries
-  try {
-    const res = await fetch(`${base}/versions.json`);
-    if (!res.ok) return;
-    const versions = await res.json();
-    for (const v of versions) {
-      if (!menu.querySelector(`[data-version="${v}"]`)) addOption(v);
-    }
-  } catch (_) {}
-});
+var s = document.createElement('script');
+s.src = '/ClimateCritters/version-picker.js';
+document.head.appendChild(s);
 </script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
