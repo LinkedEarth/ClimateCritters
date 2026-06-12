@@ -4,16 +4,10 @@ channels:
   - defaults
 dependencies:
   - python=3.14.5
-  - seaborn
-  - scikit-learn
-  - requests
-  - statsmodels
   - jupyterlab
   - ipykernel
   - pip
   - pip:
     - setuptools
-    - spectrum
-    - fitter
     - git+https://github.com/LinkedEarth/Pyleoclim_util.git
     - pandas>=2.0.0

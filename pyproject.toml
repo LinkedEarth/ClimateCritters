@@ -12,14 +12,8 @@ authors = [
 dependencies = [
     "pandas",
     "matplotlib",
-    "seaborn",
-    "PyYAML",
-    "cloudpickle",
-    "joblib",
     "pyleoclim",
-    "statsmodels",
     "scipy",
-    "xarray",
 ]
 
 [tool.setuptools.packages.find]
