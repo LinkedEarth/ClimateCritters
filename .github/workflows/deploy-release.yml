@@ -64,6 +64,9 @@ jobs:
         run: |
           cp -r docs/_site /tmp/site_build
 
+          # discard build artifacts (e.g. docs/objects.txt) so checkout doesn't abort
+          git checkout -- .
+
           git fetch origin gh-pages
           git checkout gh-pages
 
