@@ -67,7 +67,7 @@ jobs:
 
           # copy release build to stable/ (symlinks don't work on GitHub Pages)
           rm -rf stable
-          cp -r ${{ env.RELEASE_VERSION }} stable
+          cp -r ../docs/_site stable
 
           # append version to versions.json (create if missing)
           if [ ! -f versions.json ]; then
