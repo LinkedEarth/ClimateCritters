@@ -379,6 +379,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../api/MultiPendulumBeta.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">MultiPendulumBeta</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/PendulumRodBeta.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">PendulumRodBeta</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../api/DampedSpring.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">DampedSpring</span></a>
   </div>
@@ -675,8 +687,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    solution,</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    run_name,</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Container for the results of one call to <code>CCModel.integrate()</code>.</p>
-<p><code>CCOutput</code> carries the full trajectory produced by the solver and exposes output-focused operations (noise addition, pyleoclim export, time resampling). Keeping these on the output rather than on the model means a single model instance can produce multiple independent outputs without them overwriting each other.</p>
+<p>Container for the results of one call to <a href="../api/core.CCModel.html#climatecritters.core.CCModel.integrate" title="0"><code>CCModel.integrate()</code></a>.</p>
+<p><a href="../api/core.CCOutput.html#climatecritters.core.CCOutput" title="0"><code>CCOutput</code></a> carries the full trajectory produced by the solver and exposes output-focused operations (noise addition, pyleoclim export, time resampling). Keeping these on the output rather than on the model means a single model instance can produce multiple independent outputs without them overwriting each other.</p>
 <section id="attributes" class="level2 doc-section doc-section-attributes">
 <h2 class="doc-section doc-section-attributes anchored" data-anchor-id="attributes">Attributes</h2>
 <dl>

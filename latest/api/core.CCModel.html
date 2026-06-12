@@ -379,6 +379,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../api/MultiPendulumBeta.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">MultiPendulumBeta</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/PendulumRodBeta.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">PendulumRodBeta</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../api/DampedSpring.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">DampedSpring</span></a>
   </div>
@@ -744,7 +756,7 @@ model.register_forcing('x', forcing_obj, 'additive', timing='pre')  # state</cod
 </tr>
 <tr class="odd">
 <td><a href="#climatecritters.core.CCModel.integrate">integrate</a></td>
-<td>Integrate the model over a time span and return a :class:<code>CCOutput</code>.</td>
+<td>Integrate the model over a time span and return a :class:<a href="../api/core.CCOutput.html#climatecritters.core.CCOutput" title="0"><code>CCOutput</code></a>.</td>
 </tr>
 <tr class="even">
 <td><a href="#climatecritters.core.CCModel.list">list</a></td>
@@ -848,7 +860,7 @@ model.register_forcing('x', forcing_obj, 'additive', timing='pre')  # state</cod
 <span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    run_name<span class="op">=</span><span class="va">None</span>,</span>
 <span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    kwargs<span class="op">=</span><span class="va">None</span>,</span>
 <span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Integrate the model over a time span and return a :class:<code>CCOutput</code>.</p>
+<p>Integrate the model over a time span and return a :class:<a href="../api/core.CCOutput.html#climatecritters.core.CCOutput" title="0"><code>CCOutput</code></a>.</p>
 <section id="parameters-3" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-3">Parameters</h4>
 <dl>
@@ -870,7 +882,7 @@ model.register_forcing('x', forcing_obj, 'additive', timing='pre')  # state</cod
 </dd>
 <dt><code><span class="parameter-name"><strong>output_time</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/array.html#module-array">array</a> - <code>like</code></span> <span class="parameter-default-sep">=</span> <span class="parameter-default">None</span></code></dt>
 <dd>
-<p>If provided, the returned <code>CCOutput</code> is immediately reframed onto this time axis (e.g.&nbsp;to exclude a spin-up period). <code>output.model_time</code> always retains the raw solver grid.</p>
+<p>If provided, the returned <a href="../api/core.CCOutput.html#climatecritters.core.CCOutput" title="0"><code>CCOutput</code></a> is immediately reframed onto this time axis (e.g.&nbsp;to exclude a spin-up period). <code>output.model_time</code> always retains the raw solver grid.</p>
 </dd>
 <dt><code><span class="parameter-name"><strong>run_name</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/stdtypes.html#str">str</a></span> <span class="parameter-default-sep">=</span> <span class="parameter-default">None</span></code></dt>
 <dd>
