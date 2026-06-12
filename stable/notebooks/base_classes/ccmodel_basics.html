@@ -448,7 +448,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div>
   <div class="abstract">
     <div class="block-title">Abstract</div>
-    <p>Every model in ClimateCreatures inherits from <code>CCModel</code>. <code>CCModel.integrate()</code> returns a <code>CCOutput</code> object that carries the full trajectory and exposes output-focused operations. This notebook covers the shared interface both classes provide. Examples use <code>Stommel</code> as a concrete stand-in, but the same patterns apply to every model.</p>
+    <p>Every model in ClimateCreatures inherits from <a href="../../api/core.CCModel.html#climatecritters.core.CCModel" title="0"><code>CCModel</code></a>. <a href="../../api/core.CCModel.html#climatecritters.core.CCModel.integrate" title="0"><code>CCModel.integrate()</code></a> returns a <a href="../../api/core.CCOutput.html#climatecritters.core.CCOutput" title="0"><code>CCOutput</code></a> object that carries the full trajectory and exposes output-focused operations. This notebook covers the shared interface both classes provide. Examples use <code>Stommel</code> as a concrete stand-in, but the same patterns apply to every model.</p>
   </div>
 </div>
 
@@ -679,7 +679,7 @@ E after reset:             0.3
 </section>
 <section id="ccoutput" class="level2">
 <h2 class="anchored" data-anchor-id="ccoutput">CCOutput</h2>
-<p><code>CCModel.integrate()</code> returns a <code>CCOutput</code> — a container for one run’s results. It is never constructed directly; you always get one from <code>integrate()</code>.</p>
+<p><a href="../../api/core.CCModel.html#climatecritters.core.CCModel.integrate" title="0"><code>CCModel.integrate()</code></a> returns a <a href="../../api/core.CCOutput.html#climatecritters.core.CCOutput" title="0"><code>CCOutput</code></a> — a container for one run’s results. It is never constructed directly; you always get one from <code>integrate()</code>.</p>
 <p>Separating output from model configuration means a single model instance can produce multiple independent outputs without them overwriting each other.</p>
 <div id="263ff2d0" class="cell" data-execution_count="36">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># A basic run to work with throughout this section</span></span>

@@ -583,7 +583,7 @@ Max drift:     1.71e-13  (numerical precision)</code></pre>
 <h2 class="anchored" data-anchor-id="boxmodelspec">BoxModelSpec</h2>
 <section id="declarative-rebuild-of-twoboxcarbon" class="level3">
 <h3 class="anchored" data-anchor-id="declarative-rebuild-of-twoboxcarbon">Declarative rebuild of TwoBoxCarbon</h3>
-<p><code>BoxModelSpec</code> lets you define the same equations without subclassing <code>CCModel</code>. Register state variables, parameters, tendency relations, and diagnostics; call <code>make_boxmodel()</code> to get an integrable model.</p>
+<p><code>BoxModelSpec</code> lets you define the same equations without subclassing <a href="../../api/core.CCModel.html#climatecritters.core.CCModel" title="0"><code>CCModel</code></a>. Register state variables, parameters, tendency relations, and diagnostics; call <code>make_boxmodel()</code> to get an integrable model.</p>
 <p>The spec below reproduces <code>TwoBoxCarbon</code> exactly — outputs match to floating-point precision.</p>
 <div id="cell-10" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>spec <span class="op">=</span> BoxModelSpec(<span class="st">'two_box_carbon_generic'</span>)</span>

@@ -145,6 +145,12 @@ climatecritters.DoublePendulum.cartesian_positions py:function 1 api/DoublePendu
 climatecritters.model_critters.pendulum.DoublePendulum.cartesian_positions py:function 1 api/DoublePendulum.html#climatecritters.DoublePendulum.cartesian_positions climatecritters.DoublePendulum.cartesian_positions
 climatecritters.DoublePendulum py:class 1 api/DoublePendulum.html#climatecritters.DoublePendulum -
 climatecritters.model_critters.pendulum.DoublePendulum py:class 1 api/DoublePendulum.html#climatecritters.DoublePendulum climatecritters.DoublePendulum
+climatecritters.MultiPendulumBeta.cartesian_positions py:function 1 api/MultiPendulumBeta.html#climatecritters.MultiPendulumBeta.cartesian_positions -
+climatecritters.model_critters.pendulum.MultiPendulumBeta.cartesian_positions py:function 1 api/MultiPendulumBeta.html#climatecritters.MultiPendulumBeta.cartesian_positions climatecritters.MultiPendulumBeta.cartesian_positions
+climatecritters.MultiPendulumBeta py:class 1 api/MultiPendulumBeta.html#climatecritters.MultiPendulumBeta -
+climatecritters.model_critters.pendulum.MultiPendulumBeta py:class 1 api/MultiPendulumBeta.html#climatecritters.MultiPendulumBeta climatecritters.MultiPendulumBeta
+climatecritters.PendulumRodBeta py:class 1 api/PendulumRodBeta.html#climatecritters.PendulumRodBeta -
+climatecritters.model_critters.pendulum.PendulumRodBeta py:class 1 api/PendulumRodBeta.html#climatecritters.PendulumRodBeta climatecritters.PendulumRodBeta
 climatecritters.DampedSpring.damping_ratio py:function 1 api/DampedSpring.html#climatecritters.DampedSpring.damping_ratio -
 climatecritters.model_critters.damped_spring.DampedSpring.damping_ratio py:function 1 api/DampedSpring.html#climatecritters.DampedSpring.damping_ratio climatecritters.DampedSpring.damping_ratio
 climatecritters.DampedSpring.natural_frequency py:function 1 api/DampedSpring.html#climatecritters.DampedSpring.natural_frequency -
