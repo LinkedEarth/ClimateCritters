@@ -3,6 +3,11 @@ name: Deploy latest docs
 on:
   push:
     branches: [main]
+    paths:
+      - "climatecritters/**"
+      - "notebooks/**"
+      - "docs/**"
+      - "pyproject.toml"
   workflow_dispatch:
 
 jobs:
