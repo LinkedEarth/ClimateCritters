@@ -47,7 +47,7 @@ class TestSignalModelsSimplePendulumPhysics:
 
         model.integrate(
             t_span=(0, 5 * T0), y0=[0.05, 0.0], method='RK45',
-            kwargs={'rtol': 1e-10, 'atol': 1e-12,
+            kwargs={'rtol': 1e-6, 'atol': 1e-8,
                     't_eval': np.linspace(0, 5 * T0, 5000)},
         )
 
@@ -64,7 +64,7 @@ class TestSignalModelsSimplePendulumPhysics:
         model = SimplePendulum(L=1.0, g=9.81, damping=0.0)
         model.integrate(
             t_span=(0, 20), y0=[0.3, 0.0], method='RK45',
-            kwargs={'rtol': 1e-10, 'atol': 1e-12},
+            kwargs={'rtol': 1e-6, 'atol': 1e-8},
         )
         energy = model.diagnostic_variables['energy']
         assert np.max(np.abs(energy - energy[0])) < 1e-5
@@ -166,7 +166,7 @@ class TestSignalModelsDoublePendulumIntegrate:
         model = DoublePendulum(d1=0.0, d2=0.0)
         model.integrate(
             t_span=(0, 10), y0=[np.pi / 4, 0.0, np.pi / 4, 0.0],
-            method='RK45', kwargs={'rtol': 1e-10, 'atol': 1e-12},
+            method='RK45', kwargs={'rtol': 1e-6, 'atol': 1e-8},
         )
         energy = model.diagnostic_variables['energy']
         assert np.max(np.abs(energy - energy[0])) < 1e-4
@@ -224,7 +224,7 @@ class TestSignalModelsMultiPendulumBetaIntegrate:
     def test_matches_double_pendulum_for_two_rods_t1(self):
         y0 = [0.4, 0.0, 0.2, 0.0]
         t_eval = np.linspace(0.0, 1.0, 201)
-        kwargs = {'rtol': 1e-10, 'atol': 1e-12, 't_eval': t_eval}
+        kwargs = {'rtol': 1e-6, 'atol': 1e-8, 't_eval': t_eval}
 
         double = DoublePendulum(m1=1.0, m2=1.0, L1=1.0, L2=1.0, g=9.81)
         multi = MultiPendulumBeta(

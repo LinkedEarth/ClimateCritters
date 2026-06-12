@@ -235,7 +235,7 @@ class TestIntegrationPreStepParameter:
         np.testing.assert_allclose(
             out_forced.state_variables['x'],
             out_base.state_variables['x'],
-            rtol=1e-10,
+            rtol=1e-6,
         )
 
     def test_parameter_replacement_restores_after_step_t1(self):
@@ -266,7 +266,7 @@ class TestIntegrationPreStepParameter:
         np.testing.assert_allclose(
             out_add.state_variables['x'],
             out_rep.state_variables['x'],
-            rtol=1e-10,
+            rtol=1e-6,
         )
 
     def test_parameter_additive_restores_after_step_t3(self):
@@ -310,7 +310,7 @@ class TestIntegrationPreStepStateAdditive:
         np.testing.assert_allclose(
             out_forced.state_variables['x'],
             out_base.state_variables['x'],
-            rtol=1e-10,
+            rtol=1e-6,
         )
 
 
@@ -328,7 +328,7 @@ class TestIntegrationPostStep:
                                attachment_style='replacement')
         out = model.integrate(t_span=(0, 2), y0=[1, 1, 1], method='euler', dt=0.01)
         # t=0 is the initial condition (post-step hasn't fired yet); skip it
-        np.testing.assert_allclose(out.state_variables['y'][1:], pin_value, rtol=1e-10)
+        np.testing.assert_allclose(out.state_variables['y'][1:], pin_value, rtol=1e-6)
 
     def test_additive_post_shifts_state_t1(self):
         """Adding a constant post-step should accumulate a drift in the

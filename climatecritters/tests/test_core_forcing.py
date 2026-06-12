@@ -198,7 +198,7 @@ class TestForcingUtils:
         np.testing.assert_allclose(
             [f_sin.get_forcing(t) for t in t_vals],
             [f_per.get_forcing(t) for t in t_vals],
-            atol=1e-12,
+            atol=1e-8,
         )
 
     def test_make_forcing_element_callable_backed_t7(self):

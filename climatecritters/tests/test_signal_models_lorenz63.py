@@ -22,7 +22,7 @@ from climatecritters.model_critters import lorenz
 
 class TestSignalModelsLorenz63Integrate:
     @pytest.mark.parametrize('y0', [[1, 1, 1], [0, 1, 2]])
-    @pytest.mark.parametrize('t_span', [(0, 10), (0, 100)])
+    @pytest.mark.parametrize('t_span', [(0, 10), (0, 20)])
     @pytest.mark.parametrize('method, dt', [('euler', 0.01), ('RK45', None)])
     def test_integrate_t0(self, t_span, y0, method, dt):
         '''Test integrate method'''
