@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Jordan Landers">
-<meta name="dcterms.date" content="2026-06-11">
+<meta name="dcterms.date" content="2026-06-12">
 <meta name="keywords" content="downsample, sub-sampling, proxy records, sparse sampling, exponential, Poisson, Pareto, random_choice, resolution, pyleoclim">
 
 <title>Downsampling — Simulating Sparse Proxy Records – ClimateCritters</title>
@@ -424,7 +424,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">June 11, 2026</p>
+      <p class="date">June 12, 2026</p>
     </div>
   </div>
   
@@ -776,10 +776,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   const base = window.location.origin;
   const pathParts = window.location.pathname.split('/').filter(Boolean);
 
-  const knownPrefixes = ['stable', 'latest'];
-  const current = knownPrefixes.includes(pathParts[0]) || /^v\d/.test(pathParts[0])
-    ? pathParts[0]
-    : null;
+  // find the version segment regardless of how deep the site is deployed
+  // e.g. /ClimateCritters/stable/tutorials/ → versionIdx=1, basePath=/ClimateCritters
+  const isVersion = p => ['stable', 'latest'].includes(p) || /^v\d/.test(p);
+  const versionIdx = pathParts.findIndex(isVersion);
+  const current = versionIdx >= 0 ? pathParts[versionIdx] : null;
+  const basePath = versionIdx > 0 ? '/' + pathParts.slice(0, versionIdx).join('/') : '';
+  const subPath = versionIdx >= 0 ? pathParts.slice(versionIdx + 1).join('/') : '';
 
   const label = current || 'version';
 
@@ -799,6 +802,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   menu.className = 'dropdown-menu dropdown-menu-end';
   menu.id = 'version-picker-menu';
 
+  const knownPrefixes = ['stable', 'latest'];
+
   const addOption = (v) => {
     const item = document.createElement('li');
     const a = document.createElement('a');
@@ -807,8 +812,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     a.textContent = v;
     a.addEventListener('click', (e) => {
       e.preventDefault();
-      const subPath = pathParts.slice(1).join('/');
-      window.location.href = `${base}/${v}/${subPath}`;
+      window.location.href = `${base}${basePath}/${v}/${subPath}`;
     });
     item.appendChild(a);
     menu.appendChild(item);
@@ -827,7 +831,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // fetch versions.json and add any additional entries
   try {
-    const res = await fetch(`${base}/versions.json`);
+    const res = await fetch(`${base}${basePath}/versions.json`);
     if (!res.ok) return;
     const versions = await res.json();
     for (const v of versions) {
