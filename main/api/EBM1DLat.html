@@ -1,0 +1,1602 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>ebm1dlat – ClimateCritters</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../api/BoxModelSpec.html" rel="next">
+<link href="../api/EBM0D.html" rel="prev">
+<link href="../thumbnails/ClimateCritters_logo.png" rel="icon" type="image/png">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-bba5ebae505b5c03f3f0d8040a416a6b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../api/_styles-quartodoc.css">
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">ClimateCritters</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../get-started/installation.html"> 
+<span class="menu-text">Get Started</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../tutorials/index.html"> 
+<span class="menu-text">Tutorials</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link active" href="../api/index.html" aria-current="page"> 
+<span class="menu-text">Reference</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/LinkedEarth/ClimateCritters"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">Models</li><li class="breadcrumb-item"><a href="../api/EBMBase.html">EBMs</a></li><li class="breadcrumb-item"><a href="../api/EBM1DLat.html">EBM1DLat</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Function reference</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Core</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+ <span class="menu-text">Base Classes</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/core.CCModel.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">core.CCModel</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/core.CCOutput.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">core.CCOutput</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/core.Forcing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">core.Forcing</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+ <span class="menu-text">Forcing</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/core.forcing.ForcingElement.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">core.forcing.ForcingElement</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/core.forcing.ResolvedSegment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">core.forcing.ResolvedSegment</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/core.forcing.ForcingSequence.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">core.forcing.ForcingSequence</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/core.forcing.Hold.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">core.forcing.Hold</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/core.forcing.Ramp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">core.forcing.Ramp</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/core.forcing.Harmonic.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">core.forcing.Harmonic</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Models</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">EBMs</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth2 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/EBMBase.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">EBMBase</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/EBM0D.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">EBM0D</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/EBM1DLat.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">EBM1DLat</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
+ <span class="menu-text">Box Models</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/BoxModelSpec.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">BoxModelSpec</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/TwoBoxCarbon.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">TwoBoxCarbon</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false">
+ <span class="menu-text">Lorenz &amp; Roessler</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/Lorenz63.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lorenz63</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/Lorenz96.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lorenz96</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/Roessler.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Roessler</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false">
+ <span class="menu-text">Pendulums &amp; Oscillators</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/SimplePendulum.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">SimplePendulum</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/DoublePendulum.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DoublePendulum</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/DampedSpring.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DampedSpring</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false">
+ <span class="menu-text">Individual Models</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/ENSORechargeOscillator.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ENSORechargeOscillator</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/Model3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Model3</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/Stocker2003BipolarSeesaw.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Stocker2003BipolarSeesaw</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/Stocker2003ExtendedSeaIceSeesaw.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Stocker2003ExtendedSeaIceSeesaw</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/Stommel.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Stommel</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true">
+ <span class="menu-text">Utils</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false">
+ <span class="menu-text">Noise</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-11" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.noise.from_series.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.noise.from_series</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.noise.from_param.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.noise.from_param</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false">
+ <span class="menu-text">Resampling</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.resample.downsample.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.resample.downsample</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-13" role="navigation" aria-expanded="false">
+ <span class="menu-text">Forcing</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-13" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-13" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.forcing.create_periodic_forcing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.forcing.create_periodic_forcing</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.forcing.create_constant_forcing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.forcing.create_constant_forcing</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.forcing.create_sinusoid_forcing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.forcing.create_sinusoid_forcing</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.forcing.create_piecewise_forcing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.forcing.create_piecewise_forcing</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-14" role="navigation" aria-expanded="false">
+ <span class="menu-text">Solvers</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-14" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-14" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.solver.Solution.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.solver.Solution</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.solver.rk4_method.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.solver.rk4_method</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.solver.euler_method.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.solver.euler_method</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.solver.euler_maruyama_method.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.solver.euler_maruyama_method</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.solver.heun_maruyama_method.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.solver.heun_maruyama_method</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.solver.milstein_method.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.solver.milstein_method</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.solver.define_t_eval.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.solver.define_t_eval</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.solver.validate_monotonic_grid.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.solver.validate_monotonic_grid</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.solver.validate_layer_thicknesses.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.solver.validate_layer_thicknesses</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.solver.flux_divergence.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.solver.flux_divergence</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.solver.validate_initial_state.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.solver.validate_initial_state</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.solver.build_state_from_history.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.solver.build_state_from_history</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-15" role="navigation" aria-expanded="false">
+ <span class="menu-text">Functions</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-15" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-15" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.func.make_derivative_func.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.func.make_derivative_func</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/utils.func.smooth_and_interpolate.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">utils.func.smooth_and_interpolate</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#climatecritters.EBM1DLat" id="toc-climatecritters.EBM1DLat" class="nav-link active" data-scroll-target="#climatecritters.EBM1DLat">EBM1DLat</a>
+  <ul>
+  <li><a href="#parameters" id="toc-parameters" class="nav-link" data-scroll-target="#parameters">Parameters</a></li>
+  <li><a href="#notes" id="toc-notes" class="nav-link" data-scroll-target="#notes">Notes</a></li>
+  <li><a href="#see-also" id="toc-see-also" class="nav-link" data-scroll-target="#see-also">See also</a></li>
+  <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
+  <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a>
+  <ul>
+  <li><a href="#climatecritters.EBM1DLat.annual_mean_insolation" id="toc-climatecritters.EBM1DLat.annual_mean_insolation" class="nav-link" data-scroll-target="#climatecritters.EBM1DLat.annual_mean_insolation">annual_mean_insolation</a>
+  <ul class="collapse">
+  <li><a href="#parameters-1" id="toc-parameters-1" class="nav-link" data-scroll-target="#parameters-1">Parameters</a></li>
+  <li><a href="#returns" id="toc-returns" class="nav-link" data-scroll-target="#returns">Returns</a></li>
+  </ul></li>
+  <li><a href="#climatecritters.EBM1DLat.calc_OLR" id="toc-climatecritters.EBM1DLat.calc_OLR" class="nav-link" data-scroll-target="#climatecritters.EBM1DLat.calc_OLR">calc_OLR</a>
+  <ul class="collapse">
+  <li><a href="#parameters-2" id="toc-parameters-2" class="nav-link" data-scroll-target="#parameters-2">Parameters</a></li>
+  <li><a href="#returns-1" id="toc-returns-1" class="nav-link" data-scroll-target="#returns-1">Returns</a></li>
+  </ul></li>
+  <li><a href="#climatecritters.EBM1DLat.calc_albedo" id="toc-climatecritters.EBM1DLat.calc_albedo" class="nav-link" data-scroll-target="#climatecritters.EBM1DLat.calc_albedo">calc_albedo</a>
+  <ul class="collapse">
+  <li><a href="#parameters-3" id="toc-parameters-3" class="nav-link" data-scroll-target="#parameters-3">Parameters</a></li>
+  <li><a href="#returns-2" id="toc-returns-2" class="nav-link" data-scroll-target="#returns-2">Returns</a></li>
+  </ul></li>
+  <li><a href="#climatecritters.EBM1DLat.calc_diffusion" id="toc-climatecritters.EBM1DLat.calc_diffusion" class="nav-link" data-scroll-target="#climatecritters.EBM1DLat.calc_diffusion">calc_diffusion</a>
+  <ul class="collapse">
+  <li><a href="#parameters-4" id="toc-parameters-4" class="nav-link" data-scroll-target="#parameters-4">Parameters</a></li>
+  <li><a href="#returns-3" id="toc-returns-3" class="nav-link" data-scroll-target="#returns-3">Returns</a></li>
+  </ul></li>
+  <li><a href="#climatecritters.EBM1DLat.calc_global_mean" id="toc-climatecritters.EBM1DLat.calc_global_mean" class="nav-link" data-scroll-target="#climatecritters.EBM1DLat.calc_global_mean">calc_global_mean</a>
+  <ul class="collapse">
+  <li><a href="#parameters-5" id="toc-parameters-5" class="nav-link" data-scroll-target="#parameters-5">Parameters</a></li>
+  <li><a href="#returns-4" id="toc-returns-4" class="nav-link" data-scroll-target="#returns-4">Returns</a></li>
+  </ul></li>
+  <li><a href="#climatecritters.EBM1DLat.calc_ice_line_lat" id="toc-climatecritters.EBM1DLat.calc_ice_line_lat" class="nav-link" data-scroll-target="#climatecritters.EBM1DLat.calc_ice_line_lat">calc_ice_line_lat</a>
+  <ul class="collapse">
+  <li><a href="#parameters-6" id="toc-parameters-6" class="nav-link" data-scroll-target="#parameters-6">Parameters</a></li>
+  <li><a href="#returns-5" id="toc-returns-5" class="nav-link" data-scroll-target="#returns-5">Returns</a></li>
+  </ul></li>
+  <li><a href="#climatecritters.EBM1DLat.dydt" id="toc-climatecritters.EBM1DLat.dydt" class="nav-link" data-scroll-target="#climatecritters.EBM1DLat.dydt">dydt</a>
+  <ul class="collapse">
+  <li><a href="#parameters-7" id="toc-parameters-7" class="nav-link" data-scroll-target="#parameters-7">Parameters</a></li>
+  <li><a href="#returns-6" id="toc-returns-6" class="nav-link" data-scroll-target="#returns-6">Returns</a></li>
+  </ul></li>
+  <li><a href="#climatecritters.EBM1DLat.populate_diagnostics_from_history" id="toc-climatecritters.EBM1DLat.populate_diagnostics_from_history" class="nav-link" data-scroll-target="#climatecritters.EBM1DLat.populate_diagnostics_from_history">populate_diagnostics_from_history</a>
+  <ul class="collapse">
+  <li><a href="#parameters-8" id="toc-parameters-8" class="nav-link" data-scroll-target="#parameters-8">Parameters</a></li>
+  </ul></li>
+  <li><a href="#climatecritters.EBM1DLat.validate_initial_state" id="toc-climatecritters.EBM1DLat.validate_initial_state" class="nav-link" data-scroll-target="#climatecritters.EBM1DLat.validate_initial_state">validate_initial_state</a>
+  <ul class="collapse">
+  <li><a href="#parameters-9" id="toc-parameters-9" class="nav-link" data-scroll-target="#parameters-9">Parameters</a></li>
+  <li><a href="#returns-7" id="toc-returns-7" class="nav-link" data-scroll-target="#returns-7">Returns</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">Models</li><li class="breadcrumb-item"><a href="../api/EBMBase.html">EBMs</a></li><li class="breadcrumb-item"><a href="../api/EBM1DLat.html">EBM1DLat</a></li></ol></nav></header>
+
+
+
+
+<section id="climatecritters.EBM1DLat" class="level1">
+<h1>EBM1DLat</h1>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>EBM1DLat(</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    var_name<span class="op">=</span><span class="st">'ebm1d_lat'</span>,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    grid_n<span class="op">=</span><span class="dv">50</span>,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    C<span class="op">=</span><span class="fl">10.0</span>,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    D<span class="op">=</span><span class="fl">0.55</span>,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    A<span class="op">=</span><span class="fl">210.0</span>,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    B<span class="op">=</span><span class="fl">2.0</span>,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    S0<span class="op">=</span><span class="fl">1365.0</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    CO2_forcing<span class="op">=</span><span class="fl">0.0</span>,</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    state_variables<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    diagnostic_variables<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Diffusive annual-mean latitudinal energy balance model (Budyko-Sellers type).</p>
+<p>Evolves the zonal-mean temperature profile T(phi) on a latitude grid:</p>
+<pre><code>C dT/dt = S(x)(1 - alpha(T)) - OLR(T) + D * div(grad T)</code></pre>
+<p>where <code>x = sin(phi)</code>, OLR follows the Budyko linear form <code>(A - CO2_forcing) + B * T</code>, and diffusion is computed in x-coordinates with no-flux polar boundary conditions.</p>
+<section id="parameters" class="level2 doc-section doc-section-parameters">
+<h2 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h2>
+<dl>
+<dt><code><span class="parameter-name"><strong>var_name</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/stdtypes.html#str">str</a></span> <span class="parameter-default-sep">=</span> <span class="parameter-default">'ebm1d_lat'</span></code></dt>
+<dd>
+<p>Label for the modeled quantity. Default is <code>'ebm1d_lat'</code>.</p>
+</dd>
+<dt><code><span class="parameter-name"><strong>grid_n</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#int">int</a></span> <span class="parameter-default-sep">=</span> <span class="parameter-default">50</span></code></dt>
+<dd>
+<p>Number of evenly-spaced latitude grid points from -90° to 90°. Must be ≥ 3. Default is 50.</p>
+</dd>
+<dt><code><span class="parameter-name"><strong>C</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#float">float</a> or <a href="https://docs.python.org/3/library/functions.html#callable">callable</a> or <code>cc</code>.<code>Forcing</code></span> <span class="parameter-default-sep">=</span> <span class="parameter-default">10.0</span></code></dt>
+<dd>
+<p>Heat capacity (W yr m⁻² K⁻¹). Default is 10.0.</p>
+</dd>
+<dt><code><span class="parameter-name"><strong>D</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#float">float</a> or <a href="https://docs.python.org/3/library/functions.html#callable">callable</a> or <code>cc</code>.<code>Forcing</code></span> <span class="parameter-default-sep">=</span> <span class="parameter-default">0.55</span></code></dt>
+<dd>
+<p>Meridional diffusion coefficient. Default is 0.55.</p>
+</dd>
+<dt><code><span class="parameter-name"><strong>A</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#float">float</a> or <a href="https://docs.python.org/3/library/functions.html#callable">callable</a> or <code>cc</code>.<code>Forcing</code></span> <span class="parameter-default-sep">=</span> <span class="parameter-default">210.0</span></code></dt>
+<dd>
+<p>Budyko OLR intercept (W m⁻²). Default is 210.0.</p>
+</dd>
+<dt><code><span class="parameter-name"><strong>B</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#float">float</a> or <a href="https://docs.python.org/3/library/functions.html#callable">callable</a> or <code>cc</code>.<code>Forcing</code></span> <span class="parameter-default-sep">=</span> <span class="parameter-default">2.0</span></code></dt>
+<dd>
+<p>Budyko OLR slope (W m⁻² K⁻¹). Default is 2.0.</p>
+</dd>
+<dt><code><span class="parameter-name"><strong>S0</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#float">float</a> or <a href="https://docs.python.org/3/library/functions.html#callable">callable</a> or <code>cc</code>.<code>Forcing</code></span> <span class="parameter-default-sep">=</span> <span class="parameter-default">1365.0</span></code></dt>
+<dd>
+<p>Solar constant (W m⁻²). Default is 1365.0.</p>
+</dd>
+<dt><code><span class="parameter-name"><strong>CO2_forcing</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#float">float</a> or <a href="https://docs.python.org/3/library/functions.html#callable">callable</a> or <code>cc</code>.<code>Forcing</code></span> <span class="parameter-default-sep">=</span> <span class="parameter-default">0.0</span></code></dt>
+<dd>
+<p>Radiative forcing from CO2 (W m⁻²); shifts the OLR intercept down, warming the climate. Default is 0.0.</p>
+</dd>
+<dt><code><span class="parameter-name"><strong>state_variables</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation">list of str</span> <span class="parameter-default-sep">=</span> <span class="parameter-default">None</span></code></dt>
+<dd>
+<p>Names of the integrated state variables. Defaults to <code>['T_0', 'T_1', ..., 'T_{grid_n-1}']</code>.</p>
+</dd>
+<dt><code><span class="parameter-name"><strong>diagnostic_variables</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation">list of str</span> <span class="parameter-default-sep">=</span> <span class="parameter-default">None</span></code></dt>
+<dd>
+<p>Names of diagnostic quantities computed from the solved trajectory. Default is <code>['ice_line_lat', 'Tglobal']</code>.</p>
+</dd>
+</dl>
+</section>
+<section id="notes" class="level2 doc-section doc-section-notes">
+<h2 class="doc-section doc-section-notes anchored" data-anchor-id="notes">Notes</h2>
+<p>State variables are <code>T_0</code> through <code>T_{grid_n-1}</code> (one temperature per latitude band, ordered from south pole to north pole). Diagnostic variables <code>ice_line_lat</code> and <code>Tglobal</code> are derived after integration.</p>
+<p><code>validate_initial_state</code> accepts a scalar and broadcasts it uniformly to the full grid.</p>
+<p>All parameters (<code>C</code>, <code>D</code>, <code>A</code>, <code>B</code>, <code>S0</code>, <code>CO2_forcing</code>) are registered in <code>param_values</code> and can be swapped for callables or Forcing objects. Callables must follow the contract <code>(t)</code>, <code>(t, state)</code>, or <code>(t, state, model)</code>.</p>
+</section>
+<section id="see-also" class="level2 doc-section doc-section-see-also">
+<h2 class="doc-section doc-section-see-also anchored" data-anchor-id="see-also">See also</h2>
+<p>EBM0D : Zero-dimensional variant. EBMBase : Shared base class. albedo_func1D : Latitudinally-resolved albedo callable.</p>
+</section>
+<section id="examples" class="level2 doc-section doc-section-examples">
+<h2 class="doc-section doc-section-examples anchored" data-anchor-id="examples">Examples</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> climatecritters.model_critters.ebm <span class="im">import</span> EBM1DLat</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>grid_n <span class="op">=</span> <span class="dv">50</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> EBM1DLat(S0<span class="op">=</span><span class="fl">1365.0</span>, grid_n<span class="op">=</span>grid_n)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>output <span class="op">=</span> model.integrate(</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    t_span<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">200</span>), y0<span class="op">=</span>np.full(grid_n, <span class="fl">15.0</span>), method<span class="op">=</span><span class="st">'RK45'</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the equilibrium latitude–temperature profile</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>T_final <span class="op">=</span> [output.state_variables[<span class="ss">f'T_</span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">'</span>][<span class="op">-</span><span class="dv">1</span>] <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(grid_n)]</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>phi <span class="op">=</span> np.linspace(<span class="op">-</span><span class="dv">90</span>, <span class="dv">90</span>, grid_n)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots()</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>ax.plot(phi, T_final)</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'Latitude (°)'</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">'Temperature (°C)'</span>)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'docs/reference/figures/EBM1DLat_example.png'</span>,</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>            dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../figures/EBM1DLat_example.png" class="img-fluid figure-img"></p>
+<figcaption>EBM1DLat example output</figcaption>
+</figure>
+</div>
+<p>With a CO2 ramp:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> climatecritters <span class="im">as</span> cc</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> climatecritters.model_critters.ebm <span class="im">import</span> EBM1DLat</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>co2_ramp <span class="op">=</span> cc.Forcing.from_sequence([</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    cc.forcing.Hold(duration<span class="op">=</span><span class="dv">100</span>, value<span class="op">=</span><span class="fl">0.0</span>),</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    cc.forcing.Ramp(duration<span class="op">=</span><span class="dv">100</span>, y0<span class="op">=</span><span class="fl">0.0</span>, yf<span class="op">=</span><span class="fl">4.0</span>, shape<span class="op">=</span><span class="st">'linear'</span>),</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>model_co2 <span class="op">=</span> EBM1DLat(CO2_forcing<span class="op">=</span>co2_ramp, D<span class="op">=</span><span class="fl">0.35</span>)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>output_co2 <span class="op">=</span> model_co2.integrate(t_span<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">200</span>), y0<span class="op">=</span>[<span class="fl">15.0</span>], method<span class="op">=</span><span class="st">'RK45'</span>)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots()</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>ax.plot(output_co2.time, output_co2.diagnostic_variables[<span class="st">'Tglobal'</span>])</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'time'</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">'T_global (°C)'</span>)</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'EBM1DLat — CO₂ ramp forcing'</span>)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'docs/reference/figures/EBM1DLat_co2_example.png'</span>,</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>            dpi<span class="op">=</span><span class="dv">150</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../figures/EBM1DLat_co2_example.png" class="img-fluid figure-img"></p>
+<figcaption>EBM1DLat_co2 example output</figcaption>
+</figure>
+</div>
+</section>
+<section id="methods" class="level2">
+<h2 class="anchored" data-anchor-id="methods">Methods</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#climatecritters.EBM1DLat.annual_mean_insolation">annual_mean_insolation</a></td>
+<td>Compute annual-mean insolation with a P2 latitudinal distribution.</td>
+</tr>
+<tr class="even">
+<td><a href="#climatecritters.EBM1DLat.calc_OLR">calc_OLR</a></td>
+<td>Compute the Budyko linear OLR: <code>(A - CO2_forcing) + B * T</code>.</td>
+</tr>
+<tr class="odd">
+<td><a href="#climatecritters.EBM1DLat.calc_albedo">calc_albedo</a></td>
+<td>Compute the latitudinal ice-albedo with a linear transition zone.</td>
+</tr>
+<tr class="even">
+<td><a href="#climatecritters.EBM1DLat.calc_diffusion">calc_diffusion</a></td>
+<td>Compute meridional heat diffusion in x = sin(phi) coordinates.</td>
+</tr>
+<tr class="odd">
+<td><a href="#climatecritters.EBM1DLat.calc_global_mean">calc_global_mean</a></td>
+<td>Compute the cosine-weighted global mean temperature.</td>
+</tr>
+<tr class="even">
+<td><a href="#climatecritters.EBM1DLat.calc_ice_line_lat">calc_ice_line_lat</a></td>
+<td>Interpolate the ice-line latitude from the temperature profile.</td>
+</tr>
+<tr class="odd">
+<td><a href="#climatecritters.EBM1DLat.dydt">dydt</a></td>
+<td>Evaluate the right-hand side of the PDE at time t and state.</td>
+</tr>
+<tr class="even">
+<td><a href="#climatecritters.EBM1DLat.populate_diagnostics_from_history">populate_diagnostics_from_history</a></td>
+<td>Compute diagnostic variables from the full solved trajectory.</td>
+</tr>
+<tr class="odd">
+<td><a href="#climatecritters.EBM1DLat.validate_initial_state">validate_initial_state</a></td>
+<td>Validate and normalize the initial temperature profile.</td>
+</tr>
+</tbody>
+</table>
+<section id="climatecritters.EBM1DLat.annual_mean_insolation" class="level3">
+<h3 class="anchored" data-anchor-id="climatecritters.EBM1DLat.annual_mean_insolation">annual_mean_insolation</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>EBM1DLat.annual_mean_insolation(t, state)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Compute annual-mean insolation with a P2 latitudinal distribution.</p>
+<p>Approximates the zonal-mean annual-mean absorbed solar radiation as:</p>
+<pre><code>S(x) = (S0 / 4) * s(x),    s(x) = 1 - 0.482 * P2(sin phi)</code></pre>
+<p>where P2 is the second Legendre polynomial and x = sin(phi).</p>
+<section id="parameters-1" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-1">Parameters</h4>
+<dl>
+<dt><code><span class="parameter-name"><strong>t</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#float">float</a></span></code></dt>
+<dd>
+<p>Current time, passed to <code>get_param_value</code> for time-varying S0.</p>
+</dd>
+<dt><code><span class="parameter-name"><strong>state</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/array.html#module-array">array</a> - <code>like</code></span></code></dt>
+<dd>
+<p>Current state vector (used only to satisfy the callable contract when resolving <code>S0</code>).</p>
+</dd>
+</dl>
+</section>
+<section id="returns" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"><strong>insolation</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation">ndarray of float, shape (grid_n,)</span></code></dt>
+<dd>
+<p>Annual-mean insolation at each latitude grid point (W m⁻²).</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="climatecritters.EBM1DLat.calc_OLR" class="level3">
+<h3 class="anchored" data-anchor-id="climatecritters.EBM1DLat.calc_OLR">calc_OLR</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>EBM1DLat.calc_OLR(T, t)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Compute the Budyko linear OLR: <code>(A - CO2_forcing) + B * T</code>.</p>
+<p>Overrides :meth:<code>EBMBase.calc_OLR</code>. Parameters <code>A</code>, <code>B</code>, and <code>CO2_forcing</code> are resolved through <code>get_param_value</code>, so they can be time-varying or Forcing objects.</p>
+<section id="parameters-2" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-2">Parameters</h4>
+<dl>
+<dt><code><span class="parameter-name"><strong>T</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation">(<a href="https://docs.python.org/3/library/array.html#module-array">array</a> - <code>like</code>, <code>shape</code>(<code>grid_n</code>))</span></code></dt>
+<dd>
+<p>Current temperature profile.</p>
+</dd>
+<dt><code><span class="parameter-name"><strong>t</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#float">float</a></span></code></dt>
+<dd>
+<p>Current time, passed to <code>get_param_value</code> for time-varying params.</p>
+</dd>
+</dl>
+</section>
+<section id="returns-1" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-1">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"><strong>olr</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation">ndarray of float, shape (grid_n,)</span></code></dt>
+<dd>
+<p>Outgoing longwave radiation at each latitude grid point (W m⁻²).</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="climatecritters.EBM1DLat.calc_albedo" class="level3">
+<h3 class="anchored" data-anchor-id="climatecritters.EBM1DLat.calc_albedo">calc_albedo</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>EBM1DLat.calc_albedo(T, t)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Compute the latitudinal ice-albedo with a linear transition zone.</p>
+<p>Overrides :meth:<code>EBMBase.calc_albedo</code>. Each grid point is assigned an albedo based on local temperature: 0.6 below -10 °C, 0.3 above 0 °C, and a linear blend in between.</p>
+<section id="parameters-3" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-3">Parameters</h4>
+<dl>
+<dt><code><span class="parameter-name"><strong>T</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation">(<a href="https://docs.python.org/3/library/array.html#module-array">array</a> - <code>like</code>, <code>shape</code>(<code>grid_n</code>))</span></code></dt>
+<dd>
+<p>Current temperature profile (°C or K — the threshold values -10 and 0 assume °C; ensure consistency with initial conditions).</p>
+</dd>
+<dt><code><span class="parameter-name"><strong>t</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#float">float</a></span></code></dt>
+<dd>
+<p>Current time. Unused; kept for a uniform external signature.</p>
+</dd>
+</dl>
+</section>
+<section id="returns-2" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-2">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"><strong>albedo</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation">ndarray of float, shape (grid_n,)</span></code></dt>
+<dd>
+<p>Albedo at each latitude grid point, in [0.3, 0.6].</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="climatecritters.EBM1DLat.calc_diffusion" class="level3">
+<h3 class="anchored" data-anchor-id="climatecritters.EBM1DLat.calc_diffusion">calc_diffusion</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>EBM1DLat.calc_diffusion(temperature, t, state)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Compute meridional heat diffusion in x = sin(phi) coordinates.</p>
+<p>Applies no-flux boundary conditions at the poles by setting the diffusive flux to zero at the first and last grid points before taking the divergence.</p>
+<section id="parameters-4" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-4">Parameters</h4>
+<dl>
+<dt><code><span class="parameter-name"><strong>temperature</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation">(<a href="https://docs.python.org/3/library/array.html#module-array">array</a> - <code>like</code>, <code>shape</code>(<code>grid_n</code>))</span></code></dt>
+<dd>
+<p>Current temperature profile.</p>
+</dd>
+<dt><code><span class="parameter-name"><strong>t</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#float">float</a></span></code></dt>
+<dd>
+<p>Current time, passed to <code>get_param_value</code> for time-varying D.</p>
+</dd>
+<dt><code><span class="parameter-name"><strong>state</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/array.html#module-array">array</a> - <code>like</code></span></code></dt>
+<dd>
+<p>Current full state vector (used only to satisfy the callable contract when resolving <code>D</code>).</p>
+</dd>
+</dl>
+</section>
+<section id="returns-3" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-3">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"><strong>diffusion</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation">ndarray of float, shape (grid_n,)</span></code></dt>
+<dd>
+<p>Diffusive heat flux convergence at each grid point (W m⁻²), scaled by the transport factor <code>pi/2</code>.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="climatecritters.EBM1DLat.calc_global_mean" class="level3">
+<h3 class="anchored" data-anchor-id="climatecritters.EBM1DLat.calc_global_mean">calc_global_mean</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>EBM1DLat.calc_global_mean(temperature)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Compute the cosine-weighted global mean temperature.</p>
+<section id="parameters-5" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-5">Parameters</h4>
+<dl>
+<dt><code><span class="parameter-name"><strong>temperature</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation">(<a href="https://docs.python.org/3/library/array.html#module-array">array</a> - <code>like</code>, <code>shape</code>(<code>grid_n</code>))</span></code></dt>
+<dd>
+<p>Zonal-mean temperature profile at one timestep.</p>
+</dd>
+</dl>
+</section>
+<section id="returns-4" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-4">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"><strong>Tglobal</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#float">float</a></span></code></dt>
+<dd>
+<p>Area-weighted global mean temperature in the same units as input.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="climatecritters.EBM1DLat.calc_ice_line_lat" class="level3">
+<h3 class="anchored" data-anchor-id="climatecritters.EBM1DLat.calc_ice_line_lat">calc_ice_line_lat</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>EBM1DLat.calc_ice_line_lat(temperature)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Interpolate the ice-line latitude from the temperature profile.</p>
+<p>Defines the ice line as the -10 °C isotherm. Computes the ice-line latitude independently in each hemisphere using linear interpolation between the two adjacent grid points that straddle the threshold, then returns the average of the two hemispheric values.</p>
+<p>Special cases: returns 90° if a hemisphere is entirely above the threshold (no ice) and 0° if entirely at or below it (full ice cover).</p>
+<section id="parameters-6" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-6">Parameters</h4>
+<dl>
+<dt><code><span class="parameter-name"><strong>temperature</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation">(<a href="https://docs.python.org/3/library/array.html#module-array">array</a> - <code>like</code>, <code>shape</code>(<code>grid_n</code>))</span></code></dt>
+<dd>
+<p>Zonal-mean temperature profile at one timestep.</p>
+</dd>
+</dl>
+</section>
+<section id="returns-5" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-5">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"><strong>ice_line_lat</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#float">float</a></span></code></dt>
+<dd>
+<p>Mean hemispheric ice-line latitude in degrees from the equator (range [0°, 90°]).</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="climatecritters.EBM1DLat.dydt" class="level3">
+<h3 class="anchored" data-anchor-id="climatecritters.EBM1DLat.dydt">dydt</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>EBM1DLat.dydt(t, state)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Evaluate the right-hand side of the PDE at time t and state.</p>
+<p>Computes the net energy flux at each latitude grid point from insolation, ice-albedo feedback, Budyko OLR, and meridional diffusion.</p>
+<p>This method has <strong>no side effects</strong>: because <code>uses_post_history = True</code>, all output is derived from the full solved trajectory in :meth:<code>populate_diagnostics_from_history</code> rather than accumulated here.</p>
+<section id="parameters-7" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-7">Parameters</h4>
+<dl>
+<dt><code><span class="parameter-name"><strong>t</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#float">float</a></span></code></dt>
+<dd>
+<p>Current time.</p>
+</dd>
+<dt><code><span class="parameter-name"><strong>state</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation">(<a href="https://docs.python.org/3/library/array.html#module-array">array</a> - <code>like</code>, <code>shape</code>(<code>grid_n</code>))</span></code></dt>
+<dd>
+<p>Current zonal-mean temperature profile.</p>
+</dd>
+</dl>
+</section>
+<section id="returns-6" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-6">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"><strong>dTdt</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation">ndarray of float, shape (grid_n,)</span></code></dt>
+<dd>
+<p>Time-derivative of the temperature at each latitude grid point.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="climatecritters.EBM1DLat.populate_diagnostics_from_history" class="level3">
+<h3 class="anchored" data-anchor-id="climatecritters.EBM1DLat.populate_diagnostics_from_history">populate_diagnostics_from_history</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>EBM1DLat.populate_diagnostics_from_history(time, history)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Compute diagnostic variables from the full solved trajectory.</p>
+<p>Called automatically by :meth:<code>CCModel.post_integrate</code> after the solver completes. Populates <code>self.diagnostic_variables</code> with the global-mean temperature and ice-line latitude at every timestep.</p>
+<section id="parameters-8" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-8">Parameters</h4>
+<dl>
+<dt><code><span class="parameter-name"><strong>time</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation">(<a href="https://docs.python.org/3/library/array.html#module-array">array</a> - <code>like</code>, <code>shape</code>(<code>n_steps</code>))</span></code></dt>
+<dd>
+<p>Solver time axis.</p>
+</dd>
+<dt><code><span class="parameter-name"><strong>history</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation">(<code>ndarray</code>, <code>shape</code>(<code>n_steps</code>, <code>grid_n</code>))</span></code></dt>
+<dd>
+<p>Full temperature trajectory; each row is the temperature profile at one timestep.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="climatecritters.EBM1DLat.validate_initial_state" class="level3">
+<h3 class="anchored" data-anchor-id="climatecritters.EBM1DLat.validate_initial_state">validate_initial_state</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>EBM1DLat.validate_initial_state(y0)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Validate and normalize the initial temperature profile.</p>
+<p>Overrides :meth:<code>CCModel.validate_initial_state</code> to accept a scalar initial condition and broadcast it uniformly across the latitude grid.</p>
+<section id="parameters-9" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-9">Parameters</h4>
+<dl>
+<dt><code><span class="parameter-name"><strong>y0</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation"><a href="https://docs.python.org/3/library/functions.html#float">float</a> or <a href="https://docs.python.org/3/library/array.html#module-array">array</a> - <code>like</code></span></code></dt>
+<dd>
+<p>Initial temperature(s). A scalar is broadcast to all <code>grid_n</code> grid points. An array must have length exactly <code>grid_n</code>.</p>
+</dd>
+</dl>
+</section>
+<section id="returns-7" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-7">Returns</h4>
+<dl>
+<dt><code><span class="parameter-name"><strong>y0_arr</strong></span> <span class="parameter-annotation-sep">:</span> <span class="parameter-annotation">ndarray of float, shape (grid_n,)</span></code></dt>
+<dd>
+<p>Validated and grid-length initial temperature array.</p>
+</dd>
+</dl>
+
+
+</section>
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<style>
+  #version-picker-menu { min-width: 0; width: auto; }
+  #version-picker-menu .dropdown-item { padding: 0.25rem 0.75rem; }
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const base = window.location.origin;
+  const pathParts = window.location.pathname.split('/').filter(Boolean);
+
+  const isVersion = p => ['stable', 'latest'].includes(p) || /^v\d/.test(p);
+  const versionIdx = pathParts.findIndex(isVersion);
+  const current = versionIdx >= 0 ? pathParts[versionIdx] : null;
+  const basePath = versionIdx > 0 ? '/' + pathParts.slice(0, versionIdx).join('/') : '';
+  const subPath = versionIdx >= 0 ? pathParts.slice(versionIdx + 1).join('/') : '';
+
+  console.log('[picker] pathParts:', pathParts);
+  console.log('[picker] versionIdx:', versionIdx, 'current:', current);
+  console.log('[picker] basePath:', basePath, 'subPath:', subPath);
+
+  const label = current || 'version';
+
+  const li = document.createElement('li');
+  li.className = 'nav-item dropdown';
+
+  const toggle = document.createElement('a');
+  toggle.className = 'nav-link dropdown-toggle';
+  toggle.href = '#';
+  toggle.setAttribute('role', 'button');
+  toggle.setAttribute('data-bs-toggle', 'dropdown');
+  toggle.setAttribute('aria-expanded', 'false');
+  toggle.textContent = label;
+
+  const menu = document.createElement('ul');
+  menu.className = 'dropdown-menu dropdown-menu-end';
+  menu.id = 'version-picker-menu';
+
+  const knownPrefixes = ['stable', 'latest'];
+
+  const addOption = (v) => {
+    const item = document.createElement('li');
+    const a = document.createElement('a');
+    a.className = 'dropdown-item' + (v === current ? ' active' : '');
+    a.href = '#';
+    a.textContent = v;
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      const url = `${base}${basePath}/${v}/${subPath}`;
+      console.log('[picker] navigating to:', url);
+      window.location.href = url;
+    });
+    item.appendChild(a);
+    menu.appendChild(item);
+  };
+
+  for (const v of ['stable', 'latest']) addOption(v);
+  if (current && !knownPrefixes.includes(current)) addOption(current);
+
+  li.appendChild(toggle);
+  li.appendChild(menu);
+
+  const navbar = document.querySelector('.navbar-nav.ms-auto')
+               || document.querySelector('.navbar-nav')
+               || document.querySelector('nav');
+  if (navbar) navbar.appendChild(li);
+
+  try {
+    const res = await fetch(`${base}${basePath}/versions.json`);
+    if (!res.ok) return;
+    const versions = await res.json();
+    for (const v of versions) {
+      if (!menu.querySelector(`a[data-version="${v}"]`)) addOption(v);
+    }
+  } catch (_) {}
+});
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../api/EBM0D.html" class="pagination-link" aria-label="EBM0D">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">EBM0D</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../api/BoxModelSpec.html" class="pagination-link" aria-label="BoxModelSpec">
+        <span class="nav-page-text">BoxModelSpec</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
