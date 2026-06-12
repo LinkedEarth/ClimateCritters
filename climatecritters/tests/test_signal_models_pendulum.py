@@ -4,7 +4,13 @@ import numpy as np
 import pytest
 import climatecritters as cc
 
-from climatecritters.model_critters.pendulum import SimplePendulum, DrivenPendulum, DoublePendulum
+from climatecritters.model_critters.pendulum import (
+    DoublePendulum,
+    DrivenPendulum,
+    MultiPendulumBeta,
+    PendulumRodBeta,
+    SimplePendulum,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -188,3 +194,85 @@ class TestSignalModelsDoublePendulumIntegrate:
         output = model.integrate(t_span=(0, 5), y0=[0.5, 0.0, 0.5, 0.0],
                                  method='RK45')
         output.to_pyleo(var_names=['theta1', 'theta2'])
+
+
+# ---------------------------------------------------------------------------
+# MultiPendulumBeta
+# ---------------------------------------------------------------------------
+
+class TestSignalModelsMultiPendulumBetaIntegrate:
+    def test_integrate_t0(self):
+        rods = [
+            PendulumRodBeta(m=1.0, L=1.0),
+            PendulumRodBeta(m=1.0, L=1.0),
+            PendulumRodBeta(m=0.5, L=0.8),
+        ]
+        model = MultiPendulumBeta(rods=rods)
+        model.integrate(
+            t_span=(0, 2),
+            y0=[0.3, 0.0, 0.2, 0.0, 0.1, 0.0],
+            method='RK45',
+        )
+
+        assert model.state_variables.dtype.names == (
+            'theta1', 'omega1', 'theta2', 'omega2', 'theta3', 'omega3'
+        )
+        for diag in ('energy', 'x1', 'y1', 'x2', 'y2', 'x3', 'y3'):
+            assert diag in model.diagnostic_variables
+        assert np.all(np.isfinite(model.state_variables['theta1']))
+
+    def test_matches_double_pendulum_for_two_rods_t1(self):
+        y0 = [0.4, 0.0, 0.2, 0.0]
+        t_eval = np.linspace(0.0, 1.0, 201)
+        kwargs = {'rtol': 1e-10, 'atol': 1e-12, 't_eval': t_eval}
+
+        double = DoublePendulum(m1=1.0, m2=1.0, L1=1.0, L2=1.0, g=9.81)
+        multi = MultiPendulumBeta(
+            rods=[PendulumRodBeta(m=1.0, L=1.0), PendulumRodBeta(m=1.0, L=1.0)],
+            g=9.81,
+        )
+
+        double.integrate(t_span=(0, 1), y0=y0, method='RK45', kwargs=kwargs)
+        multi.integrate(t_span=(0, 1), y0=y0, method='RK45', kwargs=kwargs)
+
+        assert np.allclose(double.time, multi.time)
+        assert np.allclose(double.state_variables['theta1'], multi.state_variables['theta1'])
+        assert np.allclose(double.state_variables['omega1'], multi.state_variables['omega1'])
+        assert np.allclose(double.state_variables['theta2'], multi.state_variables['theta2'])
+        assert np.allclose(double.state_variables['omega2'], multi.state_variables['omega2'])
+
+    def test_callable_rod_forcing_t2(self):
+        rods = [
+            PendulumRodBeta(m=1.0, L=1.0, forcing=lambda t: 0.1 * np.cos(t)),
+            PendulumRodBeta(m=1.0, L=1.0),
+        ]
+        model = MultiPendulumBeta(rods=rods)
+        model.integrate(t_span=(0, 1), y0=[0.1, 0.0, 0.1, 0.0], method='RK45')
+
+        assert np.all(np.isfinite(model.diagnostic_variables['energy']))
+
+    def test_cartesian_positions_t3(self):
+        rods = [PendulumRodBeta(m=1.0, L=1.0), PendulumRodBeta(m=1.0, L=1.0)]
+        model = MultiPendulumBeta(rods=rods)
+        model.integrate(t_span=(0, 1), y0=[0.2, 0.0, 0.1, 0.0], method='RK45')
+
+        positions = model.cartesian_positions()
+        assert len(positions) == 4
+        for arr in positions:
+            assert len(arr) == len(model.time)
+            assert np.all(np.isfinite(arr))
+
+
+class TestSignalModelsMultiPendulumBetaInvalidParams:
+    def test_requires_at_least_two_rods_t0(self):
+        with pytest.raises(ValueError, match="at least 2 rods"):
+            MultiPendulumBeta(rods=[PendulumRodBeta(m=1.0, L=1.0)])
+
+    def test_nonpositive_g_raises_t1(self):
+        rods = [PendulumRodBeta(m=1.0, L=1.0), PendulumRodBeta(m=1.0, L=1.0)]
+        with pytest.raises(ValueError, match="g must be > 0"):
+            MultiPendulumBeta(rods=rods, g=0.0)
+
+    def test_invalid_rod_raises_t2(self):
+        with pytest.raises(ValueError, match="length must be > 0"):
+            PendulumRodBeta(m=1.0, L=0.0)
