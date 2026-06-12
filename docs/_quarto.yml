@@ -6,6 +6,7 @@ project:
     - scripts
     - figures
     - objects.txt
+    - version-picker.js
   pre-render:
     - python scripts/sync_notebooks.py
     - python scripts/generate_tutorials_index.py
