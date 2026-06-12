@@ -705,17 +705,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   const base = window.location.origin;
   const pathParts = window.location.pathname.split('/').filter(Boolean);
 
-  // find the version segment regardless of how deep the site is deployed
-  // e.g. /ClimateCritters/stable/tutorials/ → versionIdx=1, basePath=/ClimateCritters
   const isVersion = p => ['stable', 'latest'].includes(p) || /^v\d/.test(p);
   const versionIdx = pathParts.findIndex(isVersion);
   const current = versionIdx >= 0 ? pathParts[versionIdx] : null;
   const basePath = versionIdx > 0 ? '/' + pathParts.slice(0, versionIdx).join('/') : '';
   const subPath = versionIdx >= 0 ? pathParts.slice(versionIdx + 1).join('/') : '';
 
+  console.log('[picker] pathParts:', pathParts);
+  console.log('[picker] versionIdx:', versionIdx, 'current:', current);
+  console.log('[picker] basePath:', basePath, 'subPath:', subPath);
+
   const label = current || 'version';
 
-  // Bootstrap 5 dropdown
   const li = document.createElement('li');
   li.className = 'nav-item dropdown';
 
@@ -741,7 +742,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     a.textContent = v;
     a.addEventListener('click', (e) => {
       e.preventDefault();
-      window.location.href = `${base}${basePath}/${v}/${subPath}`;
+      const url = `${base}${basePath}/${v}/${subPath}`;
+      console.log('[picker] navigating to:', url);
+      window.location.href = url;
     });
     item.appendChild(a);
     menu.appendChild(item);
@@ -758,13 +761,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                || document.querySelector('nav');
   if (navbar) navbar.appendChild(li);
 
-  // fetch versions.json and add any additional entries
   try {
     const res = await fetch(`${base}${basePath}/versions.json`);
     if (!res.ok) return;
     const versions = await res.json();
     for (const v of versions) {
-      if (!menu.querySelector(`[data-version="${v}"]`)) addOption(v);
+      if (!menu.querySelector(`a[data-version="${v}"]`)) addOption(v);
     }
   } catch (_) {}
 });
