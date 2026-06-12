@@ -1,0 +1,1452 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Jordan Landers">
+<meta name="dcterms.date" content="2026-06-12">
+<meta name="keywords" content="solver, RK45, rk4, Euler, adaptive, fixed-step, tolerance, discrete-event, SDE, Lorenz96, two-scale, history corruption, timestep">
+
+<title>Solver Selection Guide – ClimateCritters</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../notebooks/functionality_demos/downsample_starter.html" rel="prev">
+<link href="../../thumbnails/ClimateCritters_logo.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-bba5ebae505b5c03f3f0d8040a416a6b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../api/_styles-quartodoc.css">
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">ClimateCritters</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../get-started/installation.html"> 
+<span class="menu-text">Get Started</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link active" href="../../tutorials/index.html" aria-current="page"> 
+<span class="menu-text">Tutorials</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../api/index.html"> 
+<span class="menu-text">Reference</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/LinkedEarth/ClimateCritters"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">Functionality demos</li><li class="breadcrumb-item"><a href="../../notebooks/functionality_demos/solver_demo.html">Solvers</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../tutorials/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tutorials</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Getting started</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/base_classes/ccmodel_basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">CCModel Basics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/base_classes/forcing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Forcing Basics</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Model demos</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+ <span class="menu-text">Energy Balance Models</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/model_demos/ebm0d.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">0D</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/model_demos/ebm1d_lat.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">1D (latitude)</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">Oscillators</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/model_demos/pendulums_and_spring.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">SimplePendulum &amp; Spring</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/model_demos/double_pendulum.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Double Pendulum</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
+ <span class="menu-text">Climate</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/model_demos/enso_recharge.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ENSO</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/model_demos/g24.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Ganopolski 2024, Model 3</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/model_demos/stommel.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Stommel</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
+ <span class="menu-text">Attractors</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/model_demos/roessler.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Roessler</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/model_demos/lorenz63.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lorenz63</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/model_demos/lorenz96.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lorenz96</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false">
+ <span class="menu-text">Box Models</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/model_demos/box_models_carbon.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Carbon Cycle Demo</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true">
+ <span class="menu-text">Functionality demos</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false">
+ <span class="menu-text">Noise</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/functionality_demos/noise_demo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Noise Generation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/functionality_demos/model_noise_starter.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Noise in Models — Three Injection Modes</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/functionality_demos/downsample_starter.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Downsampling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../notebooks/functionality_demos/solver_demo.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Solvers</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#ebm0d-smooth-continuous-ode" id="toc-ebm0d-smooth-continuous-ode" class="nav-link active" data-scroll-target="#ebm0d-smooth-continuous-ode">EBM0D: smooth continuous ODE</a>
+  <ul>
+  <li><a href="#rk45-tolerances" id="toc-rk45-tolerances" class="nav-link" data-scroll-target="#rk45-tolerances">RK45 tolerances</a></li>
+  <li><a href="#fixed-step-solver-euler" id="toc-fixed-step-solver-euler" class="nav-link" data-scroll-target="#fixed-step-solver-euler">Fixed-step solver: Euler</a></li>
+  <li><a href="#spurious-structure-in-the-transient" id="toc-spurious-structure-in-the-transient" class="nav-link" data-scroll-target="#spurious-structure-in-the-transient">Spurious structure in the transient</a></li>
+  </ul></li>
+  <li><a href="#g24-discrete-event-ode" id="toc-g24-discrete-event-ode" class="nav-link" data-scroll-target="#g24-discrete-event-ode">G24: discrete-event ODE</a></li>
+  <li><a href="#sdes-noise-requires-purpose-built-integrators" id="toc-sdes-noise-requires-purpose-built-integrators" class="nav-link" data-scroll-target="#sdes-noise-requires-purpose-built-integrators">SDEs: noise requires purpose-built integrators</a></li>
+  <li><a href="#lorenz96-stiff-fast-slow-system" id="toc-lorenz96-stiff-fast-slow-system" class="nav-link" data-scroll-target="#lorenz96-stiff-fast-slow-system">Lorenz96: stiff fast-slow system</a></li>
+  <li><a href="#summary-solver-selection-guide" id="toc-summary-solver-selection-guide" class="nav-link" data-scroll-target="#summary-solver-selection-guide">Summary: solver selection guide</a></li>
+  </ul>
+<div class="quarto-other-links"><h2>Other Links</h2><ul><li><a href="https://mybinder.org/v2/gh/LinkedEarth/ClimateCritters/HEAD?labpath=notebooks/functionality_demos/solver_demo.ipynb"><i class="bi bi-rocket-takeoff"></i>Launch on Binder</a></li><li><a href="https://raw.githubusercontent.com/LinkedEarth/ClimateCritters/main/notebooks/functionality_demos/solver_demo.ipynb"><i class="bi bi-download"></i>Download notebook</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">Functionality demos</li><li class="breadcrumb-item"><a href="../../notebooks/functionality_demos/solver_demo.html">Solvers</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Solver Selection Guide</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Jordan Landers </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">June 12, 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+<div>
+  <div class="abstract">
+    <div class="block-title">Abstract</div>
+    <p>Choosing the right numerical integrator matters: adaptive RK45 handles smooth ODEs efficiently but can produce spurious structure at loose tolerances; discrete-event models like G24 require fixed-step solvers to avoid missed threshold crossings; SDE models need stochastic-aware integrators; and two-scale Lorenz96 requires fixed-step <code>rk4</code> to prevent history corruption. This notebook provides a practical guide with examples and a model-class-to-solver summary table.</p>
+  </div>
+</div>
+
+<div>
+  <div class="keywords">
+    <div class="block-title">Keywords</div>
+    <p>solver, RK45, rk4, Euler, adaptive, fixed-step, tolerance, discrete-event, SDE, Lorenz96, two-scale, history corruption, timestep</p>
+  </div>
+</div>
+
+</header>
+
+
+<div id="imports" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> climatecritters <span class="im">as</span> cc</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> climatecritters.model_critters.ebm <span class="im">import</span> EBM0D, albedo_func</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> climatecritters.model_critters.g24 <span class="im">import</span> Model3, calc_f</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> climatecritters.model_critters.lorenz <span class="im">import</span> Lorenz96</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<section id="ebm0d-smooth-continuous-ode" class="level2">
+<h2 class="anchored" data-anchor-id="ebm0d-smooth-continuous-ode">EBM0D: smooth continuous ODE</h2>
+<p><code>EBM0D</code> is a single-variable ODE with no fast processes and a smooth right-hand side — the ideal case for an adaptive solver.</p>
+<section id="rk45-tolerances" class="level3">
+<h3 class="anchored" data-anchor-id="rk45-tolerances">RK45 tolerances</h3>
+<p>ClimateCritters uses tighter-than-scipy-default tolerances (<code>rtol=1e-8, atol=1e-10</code>) to suppress ghost structure in slow steady-state tails. With scipy defaults the equilibrium temperature can appear to drift by a few mK even after the model has converged.</p>
+<p>Run the same integration with both tolerance levels and compare.</p>
+<div id="ebm-tol-run" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> EBM0D()</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Package-default tight tolerances</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>out_tight <span class="op">=</span> model.integrate(t_span<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">500</span>), y0<span class="op">=</span>[<span class="fl">255.0</span>], method<span class="op">=</span><span class="st">'RK45'</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Scipy-default relaxed tolerances (pass empty kwargs to bypass CC defaults)</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>out_scipy <span class="op">=</span> model.integrate(t_span<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">500</span>), y0<span class="op">=</span>[<span class="fl">255.0</span>], method<span class="op">=</span><span class="st">'RK45'</span>, kwargs<span class="op">=</span>{})</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>T_tight <span class="op">=</span> out_tight.state_variables[<span class="st">'T'</span>]</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>T_scipy <span class="op">=</span> out_scipy.state_variables[<span class="st">'T'</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="ebm-tol-plot" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">4</span>))</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Full transient</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].plot(out_tight.time, T_tight, color<span class="op">=</span><span class="st">'steelblue'</span>, lw<span class="op">=</span><span class="fl">1.5</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>             label<span class="op">=</span><span class="st">'RK45 tight (rtol=1e-8)'</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].plot(out_scipy.time, T_scipy, color<span class="op">=</span><span class="st">'firebrick'</span>, lw<span class="op">=</span><span class="dv">1</span>, ls<span class="op">=</span><span class="st">'--'</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>             label<span class="op">=</span><span class="st">'RK45 scipy default'</span>)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_xlabel(<span class="st">'time (yr)'</span>)<span class="op">;</span> axes[<span class="dv">0</span>].set_ylabel(<span class="st">'T (K)'</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_title(<span class="st">'Full transient (0–500 yr)'</span>)<span class="op">;</span> axes[<span class="dv">0</span>].legend()</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Zoom on the equilibrium tail — separate masks per run (adaptive solver step counts differ)</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>mask_tight <span class="op">=</span> out_tight.time <span class="op">&gt;</span> <span class="dv">400</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>mask_scipy <span class="op">=</span> out_scipy.time <span class="op">&gt;</span> <span class="dv">400</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].plot(out_tight.time[mask_tight], T_tight[mask_tight], color<span class="op">=</span><span class="st">'steelblue'</span>, lw<span class="op">=</span><span class="fl">1.5</span>,</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>             label<span class="op">=</span><span class="st">'RK45 tight'</span>)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].plot(out_scipy.time[mask_scipy], T_scipy[mask_scipy], color<span class="op">=</span><span class="st">'firebrick'</span>, lw<span class="op">=</span><span class="dv">1</span>, ls<span class="op">=</span><span class="st">'--'</span>,</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>             label<span class="op">=</span><span class="st">'RK45 scipy default'</span>)</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_xlabel(<span class="st">'time (yr)'</span>)<span class="op">;</span> axes[<span class="dv">1</span>].set_ylabel(<span class="st">'T (K)'</span>)</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_title(<span class="st">'Equilibrium tail (400–500 yr, zoomed)'</span>)<span class="op">;</span> axes[<span class="dv">1</span>].legend()</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>fig.suptitle(<span class="st">'EBM0D — RK45 tolerance comparison'</span>)</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()<span class="op">;</span> plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="solver_demo_files/figure-html/cell-4-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Figure.</strong> Left: both runs trace the same transient — tolerance has no visible effect during the fast warm-up. Right (zoomed): with scipy defaults (rtol=1e-3, atol=1e-6) the equilibrium tail shows a few mK of drift that disappears with tight tolerances. For publication-quality figures or bifurcation analyses that compare equilibria, use the package defaults or tighter.</p>
+</section>
+<section id="fixed-step-solver-euler" class="level3">
+<h3 class="anchored" data-anchor-id="fixed-step-solver-euler">Fixed-step solver: Euler</h3>
+<p><code>euler</code> takes a fixed <code>dt</code> and never adapts. It is slower per unit of accuracy than RK45 but has no overhead from step-size control — useful when the right-hand side is cheap or when a specific temporal resolution is required.</p>
+<div id="ebm-euler-run" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>model_e <span class="op">=</span> EBM0D()</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>out_euler <span class="op">=</span> model_e.integrate(t_span<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">500</span>), y0<span class="op">=</span>[<span class="fl">255.0</span>], method<span class="op">=</span><span class="st">'euler'</span>, dt<span class="op">=</span><span class="fl">1.0</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>T_euler   <span class="op">=</span> out_euler.state_variables[<span class="st">'T'</span>]</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Euler T_eq = </span><span class="sc">{</span>T_euler[<span class="op">-</span><span class="dv">1</span>]<span class="sc">:.4f}</span><span class="ss"> K   RK45 T_eq = </span><span class="sc">{</span>T_tight[<span class="op">-</span><span class="dv">1</span>]<span class="sc">:.4f}</span><span class="ss"> K'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Euler T_eq = 288.1313 K   RK45 T_eq = 288.1313 K</code></pre>
+</div>
+</div>
+<div id="ebm-euler-plot" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">4</span>))</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>ax.plot(out_tight.time, T_tight, color<span class="op">=</span><span class="st">'steelblue'</span>, lw<span class="op">=</span><span class="dv">2</span>,   label<span class="op">=</span><span class="st">'RK45 (adaptive, tight)'</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>ax.plot(out_euler.time, T_euler, color<span class="op">=</span><span class="st">'firebrick'</span>, lw<span class="op">=</span><span class="fl">1.2</span>, ls<span class="op">=</span><span class="st">'--'</span>, label<span class="op">=</span><span class="st">'Euler dt=1.0'</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'time (yr)'</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">'T (K)'</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'EBM0D — RK45 vs Euler (dt=1.0 yr)'</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>ax.legend()<span class="op">;</span> plt.tight_layout()<span class="op">;</span> plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="solver_demo_files/figure-html/cell-6-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Figure.</strong> Both methods converge to the same equilibrium temperature. Euler overshoots the fast early transient slightly and is marginally slower due to the fixed small step, but produces the correct long-run behaviour. RK45 adapts its step size to track the transient efficiently and is the preferred choice for smooth ODEs like EBM0D.</p>
+</section>
+<section id="spurious-structure-in-the-transient" class="level3">
+<h3 class="anchored" data-anchor-id="spurious-structure-in-the-transient">Spurious structure in the transient</h3>
+<p>With the ice-albedo feedback active (<code>albedo=albedo_func</code>) the EBM0D has two attractors separated by an unstable branch near 260–290 K. Loose solver tolerances don’t change the long-run equilibrium, but they can make the <em>transient</em> look wrong: the solver takes large, inaccurate steps that produce oscillations or apparent excursions toward the opposite branch — structure that does not exist in the true solution. A reader looking only at the transient could mistake a numerical artefact for genuine metastability or bifurcation behaviour.</p>
+<div id="ebm-bistab-run" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>ICs <span class="op">=</span> [<span class="dv">230</span>, <span class="dv">245</span>,<span class="dv">251</span>, <span class="dv">258</span>,<span class="dv">265</span>, <span class="dv">268</span>,<span class="dv">272</span>, <span class="dv">278</span>, <span class="dv">288</span>, <span class="dv">295</span>, <span class="dv">300</span>]   <span class="co"># K</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>colors <span class="op">=</span> plt.cm.coolwarm(np.linspace(<span class="dv">0</span>, <span class="dv">1</span>, <span class="bu">len</span>(ICs)))</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>runs_tight, runs_scipy <span class="op">=</span> [], []</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> EBM0D(albedo<span class="op">=</span>albedo_func)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> T0 <span class="kw">in</span> ICs:</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    runs_tight.append((T0, m.integrate(t_span<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">500</span>), y0<span class="op">=</span>[T0], method<span class="op">=</span><span class="st">'RK45'</span>)))</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    runs_scipy.append((T0, m.integrate(t_span<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">500</span>), y0<span class="op">=</span>[T0], method<span class="op">=</span><span class="st">'RK45'</span>, kwargs<span class="op">=</span>{})))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="ebm-bistab-plot" class="cell" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>fig, axs <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">13</span>, <span class="dv">4</span>), sharey<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ik, (title, run_set) <span class="kw">in</span> <span class="bu">enumerate</span>([</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>        (<span class="st">'RK45 tight tolerances'</span>, runs_tight),</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>        (<span class="st">'RK45 scipy defaults'</span>,   runs_scipy)]):</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (T0, out), c <span class="kw">in</span> <span class="bu">zip</span>(run_set, colors):</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>        axs[ik].plot(out.time, out.state_variables[<span class="st">'T'</span>], color<span class="op">=</span>c, lw<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    axs[ik].axhspan(<span class="dv">260</span>, <span class="dv">290</span>, alpha<span class="op">=</span><span class="fl">0.07</span>, color<span class="op">=</span><span class="st">'green'</span>)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    axs[ik].set_xlabel(<span class="st">'time (yr)'</span>)<span class="op">;</span> axs[ik].set_title(title)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">0</span>].set_ylabel(<span class="st">'T (K)'</span>)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>fig.suptitle(<span class="st">'EBM0D with ice-albedo feedback — tolerance vs bistability'</span>)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()<span class="op">;</span> plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="solver_demo_files/figure-html/cell-8-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Figure.</strong> All trajectories reach the same long-run equilibria regardless of tolerance (warm or cold branch, matching tight tolerances), so the solver configuration has no effect on the <em>answer</em>. The transient is a different matter: with scipy default tolerances (right panel) some trajectories show noisy, irregular paths — including brief apparent excursions toward the opposite branch — that are absent under tight tolerances (left panel). These are solver artefacts, not physics. The shaded band marks the unstable transition zone where the true solution changes direction rapidly; this is exactly where a large step is most likely to mis-evaluate the derivative and introduce spurious structure.</p>
+</section>
+</section>
+<section id="g24-discrete-event-ode" class="level2">
+<h2 class="anchored" data-anchor-id="g24-discrete-event-ode">G24: discrete-event ODE</h2>
+<p><code>Model3</code> from Ganopolski (2024) switches between two regime functions at discrete thresholds — the right-hand side is continuous but contains rapid jumps in <code>k</code> (the glaciation/deglaciation state). Adaptive solvers can mis-step across these events and introduce artificial sub-harmonic structure in the ice-volume record.</p>
+<p><strong>Fixed-step solvers (Euler, rk4)</strong> must be used. The paper uses ~6.5 kyr. This section shows: (1) how Euler and rk4 compare across timesteps, and (2) what happens when you pass RK45 to this model.</p>
+<div id="g24-setup" class="cell" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>g24_forcing <span class="op">=</span> cc.Forcing(calc_f, params<span class="op">=</span>{<span class="st">'A'</span>: <span class="dv">25</span>, <span class="st">'eps'</span>: <span class="fl">0.5</span>})</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>f1, f2 <span class="op">=</span> <span class="op">-</span><span class="fl">16.0</span>, <span class="fl">16.0</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>vc     <span class="op">=</span> <span class="fl">1.4</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>t1, t2 <span class="op">=</span> <span class="fl">30.0</span>, <span class="fl">10.0</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>A, eps <span class="op">=</span> <span class="dv">25</span>, <span class="fl">0.5</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>T_SPAN <span class="op">=</span> (<span class="op">-</span><span class="dv">2000</span>, <span class="dv">0</span>)   <span class="co"># kyr</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>ZOOM   <span class="op">=</span> (<span class="op">-</span><span class="dv">1000</span>, <span class="dv">0</span>)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>delta_ts <span class="op">=</span> [<span class="fl">2.0</span>, <span class="fl">4.0</span>, <span class="fl">6.5</span>, <span class="fl">10.0</span>]</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>runs_euler <span class="op">=</span> {}</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> dt <span class="kw">in</span> delta_ts:</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    m <span class="op">=</span> Model3(vc<span class="op">=</span>vc, f1<span class="op">=</span>f1, f2<span class="op">=</span>f2, t1<span class="op">=</span>t1, t2<span class="op">=</span>t2)</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    m.register_forcing(<span class="st">'insolation'</span>, g24_forcing)</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    out <span class="op">=</span> m.integrate(t_span<span class="op">=</span>T_SPAN, y0<span class="op">=</span>[<span class="fl">0.0</span>, <span class="dv">1</span>], method<span class="op">=</span><span class="st">'euler'</span>, dt<span class="op">=</span>dt)</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    runs_euler[dt] <span class="op">=</span> out</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>    n_term <span class="op">=</span> <span class="bu">int</span>(np.<span class="bu">sum</span>(np.diff(out.state_variables[<span class="st">'k'</span>]) <span class="op">&gt;</span> <span class="dv">0</span>))</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f'dt=</span><span class="sc">{</span>dt<span class="sc">:5.1f}</span><span class="ss"> kyr  </span><span class="sc">{</span>n_term<span class="sc">}</span><span class="ss"> terminations  '</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>          <span class="ss">f'(mean </span><span class="sc">{</span><span class="bu">abs</span>(T_SPAN[<span class="dv">0</span>])<span class="op">/</span><span class="bu">max</span>(n_term,<span class="dv">1</span>)<span class="sc">:.0f}</span><span class="ss"> kyr cycle)'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>dt=  2.0 kyr  20 terminations  (mean 100 kyr cycle)
+dt=  4.0 kyr  20 terminations  (mean 100 kyr cycle)
+dt=  6.5 kyr  19 terminations  (mean 105 kyr cycle)
+dt= 10.0 kyr  18 terminations  (mean 111 kyr cycle)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>/Users/jlanders/PycharmProjects/ClimateCritters/climatecritters/model_critters/g24.py:213: RuntimeWarning: invalid value encountered in sqrt
+  return 1 + np.sqrt((f2 - f) / (f2 - f1))
+/Users/jlanders/PycharmProjects/ClimateCritters/climatecritters/model_critters/g24.py:232: RuntimeWarning: invalid value encountered in sqrt
+  return 1 - np.sqrt((f2 - f) / (f2 - f1))</code></pre>
+</div>
+</div>
+<div id="g24-fig" class="cell" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>colours <span class="op">=</span> [<span class="st">'#2196F3'</span>, <span class="st">'#E91E63'</span>, <span class="st">'#4CAF50'</span>, <span class="st">'#9C27B0'</span>]</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="bu">len</span>(delta_ts)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> plt.figure(figsize<span class="op">=</span>(<span class="dv">13</span>, <span class="dv">11</span>))</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="co"># 2 rows per dt: [forcing strip, ice volume] with height ratio 1:2.5</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>hr <span class="op">=</span> [h <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n) <span class="cf">for</span> h <span class="kw">in</span> (<span class="dv">1</span>, <span class="fl">2.5</span>)]</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>gs <span class="op">=</span> fig.add_gridspec(<span class="dv">2</span> <span class="op">*</span> n, <span class="dv">1</span>, hspace<span class="op">=</span><span class="fl">0.1</span>, height_ratios<span class="op">=</span>hr)</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> idx, (dt, col) <span class="kw">in</span> <span class="bu">enumerate</span>(<span class="bu">zip</span>(delta_ts, colours)):</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    ax_f <span class="op">=</span> fig.add_subplot(gs[<span class="dv">2</span> <span class="op">*</span> idx])</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    ax_v <span class="op">=</span> fig.add_subplot(gs[<span class="dv">2</span> <span class="op">*</span> idx <span class="op">+</span> <span class="dv">1</span>], sharex<span class="op">=</span>ax_f)</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    out <span class="op">=</span> runs_euler[dt]</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    t <span class="op">=</span> out.time</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    v <span class="op">=</span> out.state_variables[<span class="st">'v'</span>]</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    k <span class="op">=</span> out.state_variables[<span class="st">'k'</span>]</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    mask <span class="op">=</span> (t <span class="op">&gt;=</span> ZOOM[<span class="dv">0</span>]) <span class="op">&amp;</span> (t <span class="op">&lt;=</span> ZOOM[<span class="dv">1</span>])</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    tm, vm, km <span class="op">=</span> t[mask], v[mask], k[mask]</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Forcing sampled at this dt's timesteps</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>    fm <span class="op">=</span> calc_f(tm, A<span class="op">=</span>A, eps<span class="op">=</span>eps)</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ── Forcing strip ──────────────────────────────────────────────────────</span></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>    ax_f.plot(tm, fm, lw<span class="op">=</span><span class="fl">0.8</span>, color<span class="op">=</span>col, alpha<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>    ax_f.scatter(tm, fm, s<span class="op">=</span><span class="dv">2</span>, color<span class="op">=</span>col, alpha<span class="op">=</span><span class="fl">0.5</span>, zorder<span class="op">=</span><span class="dv">3</span>)</span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>    ax_f.axhline(f1, ls<span class="op">=</span><span class="st">'--'</span>, color<span class="op">=</span><span class="st">'#888'</span>, lw<span class="op">=</span><span class="fl">0.7</span>)   <span class="co"># inception threshold</span></span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>    ax_f.axhline(f2, ls<span class="op">=</span><span class="st">'--'</span>, color<span class="op">=</span><span class="st">'#888'</span>, lw<span class="op">=</span><span class="fl">0.7</span>)   <span class="co"># deglaciation threshold</span></span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>    ax_f.set_ylabel(<span class="st">'f'</span>, fontsize<span class="op">=</span><span class="dv">7</span>)</span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>    ax_f.tick_params(labelbottom<span class="op">=</span><span class="va">False</span>, labelsize<span class="op">=</span><span class="dv">7</span>)</span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>    ax_f.set_title(<span class="ss">f'dt = </span><span class="sc">{</span>dt<span class="sc">}</span><span class="ss"> kyr'</span>, loc<span class="op">=</span><span class="st">'left'</span>, fontsize<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ── Ice volume ─────────────────────────────────────────────────────────</span></span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>    in_k2 <span class="op">=</span> <span class="va">False</span></span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(tm)):</span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> km[j] <span class="op">==</span> <span class="dv">2</span> <span class="kw">and</span> <span class="kw">not</span> in_k2:</span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>            x0 <span class="op">=</span> tm[j]<span class="op">;</span> in_k2 <span class="op">=</span> <span class="va">True</span></span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> km[j] <span class="op">!=</span> <span class="dv">2</span> <span class="kw">and</span> in_k2:</span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>            ax_v.axvspan(x0, tm[j], alpha<span class="op">=</span><span class="fl">0.15</span>, color<span class="op">=</span>col, lw<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a>            in_k2 <span class="op">=</span> <span class="va">False</span></span>
+<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> in_k2:</span>
+<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a>        ax_v.axvspan(x0, tm[<span class="op">-</span><span class="dv">1</span>], alpha<span class="op">=</span><span class="fl">0.15</span>, color<span class="op">=</span>col, lw<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a>    ax_v.plot(tm, vm, lw<span class="op">=</span><span class="fl">0.9</span>, color<span class="op">=</span>col)</span>
+<span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a>    ax_v.axhline(vc, ls<span class="op">=</span><span class="st">'--'</span>, color<span class="op">=</span><span class="st">'#888'</span>, lw<span class="op">=</span><span class="fl">0.8</span>, alpha<span class="op">=</span><span class="fl">0.6</span>)</span>
+<span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a>    ax_v.set_ylabel(<span class="st">'v'</span>, fontsize<span class="op">=</span><span class="dv">8</span>)</span>
+<span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a>    ax_v.tick_params(labelsize<span class="op">=</span><span class="dv">8</span>)</span>
+<span id="cb12-47"><a href="#cb12-47" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> idx <span class="op">&lt;</span> n <span class="op">-</span> <span class="dv">1</span>:</span>
+<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a>        ax_v.tick_params(labelbottom<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb12-49"><a href="#cb12-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-50"><a href="#cb12-50" aria-hidden="true" tabindex="-1"></a>    ax_f.invert_xaxis()</span>
+<span id="cb12-51"><a href="#cb12-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-52"><a href="#cb12-52" aria-hidden="true" tabindex="-1"></a>ax_v.set_xlabel(<span class="st">'time (kyr)'</span>)</span>
+<span id="cb12-53"><a href="#cb12-53" aria-hidden="true" tabindex="-1"></a>fig.suptitle(<span class="st">'G24 — Euler timestep sensitivity</span><span class="ch">\n</span><span class="st">forcing (top strip) and ice volume (bottom) per dt'</span>,</span>
+<span id="cb12-54"><a href="#cb12-54" aria-hidden="true" tabindex="-1"></a>             y<span class="op">=</span><span class="fl">1.01</span>)</span>
+<span id="cb12-55"><a href="#cb12-55" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="solver_demo_files/figure-html/cell-10-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Figure.</strong> Each dt group shows: (top) the orbital forcing <span class="math inline">\(f(t)\)</span> sampled at that timestep — markers indicate the actual evaluation points — with dashed lines at the inception (<span class="math inline">\(f_1\)</span>) and deglaciation (<span class="math inline">\(f_2\)</span>) thresholds; (bottom) the resulting ice volume, with deglaciation phases (k = 2) shaded and <span class="math inline">\(v_c\)</span> dashed.</p>
+<p>At <strong>dt = 2–4 kyr</strong> the forcing is well-resolved: the ~21 kyr precession and ~41 kyr obliquity beats are both captured, and the ice volume shows canonical ~100 kyr saw-tooth cycles. At <strong>dt = 6.5 kyr</strong> the forcing is marginally resolved; the ~23 kyr precession cycle begins to alias but the 100 kyr rhythm persists. At <strong>dt = 10 kyr</strong> long gaps between forcing evaluations allow threshold crossings to be stepped over entirely — the model enters or exits a glaciation at the wrong time, producing irregular or shortened cycles.</p>
+<div id="g24-rk45" class="cell" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Attempt RK45 — adaptive solver on a discontinuous RHS</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span>:</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    m_rk45 <span class="op">=</span> Model3(vc<span class="op">=</span>vc, f1<span class="op">=</span>f1, f2<span class="op">=</span>f2, t1<span class="op">=</span>t1, t2<span class="op">=</span>t2)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    m_rk45.register_forcing(<span class="st">'insolation'</span>, g24_forcing)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    out_rk45 <span class="op">=</span> m_rk45.integrate(t_span<span class="op">=</span>(<span class="op">-</span><span class="dv">400</span>, <span class="dv">0</span>), y0<span class="op">=</span>[<span class="fl">0.0</span>, <span class="dv">1</span>], method<span class="op">=</span><span class="st">'RK45'</span>)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    v_rk45 <span class="op">=</span> out_rk45.state_variables[<span class="st">'v'</span>]</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    t_rk45 <span class="op">=</span> out_rk45.time</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">1</span>, figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">6</span>), sharex<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    ref <span class="op">=</span> runs_euler[<span class="fl">2.0</span>]</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    mask <span class="op">=</span> (ref.time <span class="op">&gt;=</span> <span class="op">-</span><span class="dv">400</span>) <span class="op">&amp;</span> (ref.time <span class="op">&lt;=</span> <span class="dv">0</span>)</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">0</span>].plot(ref.time[mask], ref.state_variables[<span class="st">'v'</span>][mask],</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>                 color<span class="op">=</span><span class="st">'#2196F3'</span>, lw<span class="op">=</span><span class="fl">0.9</span>, label<span class="op">=</span><span class="st">'Euler dt=2 kyr (reference)'</span>)</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">0</span>].axhline(vc, ls<span class="op">=</span><span class="st">'--'</span>, color<span class="op">=</span><span class="st">'#888'</span>, lw<span class="op">=</span><span class="fl">0.8</span>, alpha<span class="op">=</span><span class="fl">0.6</span>)</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">0</span>].set_ylabel(<span class="st">'v'</span>)<span class="op">;</span> axes[<span class="dv">0</span>].legend(fontsize<span class="op">=</span><span class="dv">8</span>)<span class="op">;</span> axes[<span class="dv">0</span>].invert_xaxis()</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">1</span>].plot(t_rk45, v_rk45, color<span class="op">=</span><span class="st">'#E91E63'</span>, lw<span class="op">=</span><span class="fl">0.9</span>, label<span class="op">=</span><span class="st">'RK45 (adaptive)'</span>)</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">1</span>].axhline(vc, ls<span class="op">=</span><span class="st">'--'</span>, color<span class="op">=</span><span class="st">'#888'</span>, lw<span class="op">=</span><span class="fl">0.8</span>, alpha<span class="op">=</span><span class="fl">0.6</span>)</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">1</span>].set_ylabel(<span class="st">'v'</span>)<span class="op">;</span> axes[<span class="dv">1</span>].set_xlabel(<span class="st">'time (kyr)'</span>)</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">1</span>].legend(fontsize<span class="op">=</span><span class="dv">8</span>)<span class="op">;</span> axes[<span class="dv">1</span>].invert_xaxis()</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>    fig.suptitle(<span class="st">'G24 — RK45 vs Euler reference'</span>)</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>    plt.tight_layout()<span class="op">;</span> plt.show()</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a><span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> e:</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f'RK45 failed: </span><span class="sc">{</span><span class="bu">type</span>(e)<span class="sc">.</span><span class="va">__name__</span><span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>e<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>()</span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">'This is expected: Model3 has a discontinuous RHS (k switches at '</span>)</span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">'threshold crossings). Adaptive solvers like RK45 try to evaluate '</span>)</span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">'the derivative at intermediate sub-steps, and the threshold-crossing '</span>)</span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">'logic misfires there, causing the solver to either diverge, stall, '</span>)</span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">'or produce nonsense. Always use a fixed-step method with G24.'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="solver_demo_files/figure-html/cell-11-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Note.</strong> RK45 either fails outright or produces a qualitatively wrong ice-volume record for G24. The root cause is that <code>Model3</code> evaluates a threshold (<code>v ≥ v_c</code> and <code>f ≥ f2</code>) at every derivative call — but RK45 evaluates the derivative at several internal sub-step times per step. A threshold crossing that occurs between two full steps triggers mid-stage, leaving the model in the wrong regime for the remainder of the step. Fixed-step solvers (<code>euler</code>, <code>rk4</code>) evaluate the derivative exactly once per step, so threshold logic fires at the correct time.</p>
+</section>
+<section id="sdes-noise-requires-purpose-built-integrators" class="level2">
+<h2 class="anchored" data-anchor-id="sdes-noise-requires-purpose-built-integrators">SDEs: noise requires purpose-built integrators</h2>
+<p>When a model has stochastic forcing (set via <code>model.sde_noise</code>), the noise term must be handled by an SDE-aware method — <code>euler_maruyama</code>, <code>heun_maruyama</code>, or <code>milstein</code>. Passing a deterministic solver like RK45 silently ignores the noise entirely: RK45 evaluates the derivative at several internal sub-steps and never calls the noise function, so you get a deterministic trajectory that looks correct but contains none of the intended stochasticity.</p>
+<div id="sde-code" class="cell" data-execution_count="11">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>sigma <span class="op">=</span> <span class="fl">0.8</span>   <span class="co"># noise amplitude (K yr^{-1/2})</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> sde_noise_fn(t, state):</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.array([sigma])</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>N_ENS <span class="op">=</span> <span class="dv">15</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>T_SPAN_SDE <span class="op">=</span> (<span class="dv">0</span>, <span class="dv">500</span>)</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>DT_SDE     <span class="op">=</span> <span class="fl">1.0</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="co"># SDE ensemble with heun_maruyama (correct)</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>ens_sde <span class="op">=</span> []</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> seed <span class="kw">in</span> <span class="bu">range</span>(N_ENS):</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    m <span class="op">=</span> EBM0D()<span class="op">;</span> m.sde_noise <span class="op">=</span> sde_noise_fn</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    out <span class="op">=</span> m.integrate(t_span<span class="op">=</span>T_SPAN_SDE, y0<span class="op">=</span>[<span class="fl">255.0</span>], method<span class="op">=</span><span class="st">'heun_maruyama'</span>,</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>                      kwargs<span class="op">=</span>{<span class="st">'dt'</span>: DT_SDE, <span class="st">'random_seed'</span>: seed})</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    ens_sde.append(out)</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a><span class="co"># RK45 with sde_noise set — noise is silently ignored</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>m_rk45_sde <span class="op">=</span> EBM0D()<span class="op">;</span> m_rk45_sde.sde_noise <span class="op">=</span> sde_noise_fn</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>out_rk45_sde <span class="op">=</span> m_rk45_sde.integrate(t_span<span class="op">=</span>T_SPAN_SDE, y0<span class="op">=</span>[<span class="fl">255.0</span>], method<span class="op">=</span><span class="st">'RK45'</span>)</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">13</span>, <span class="dv">4</span>), sharey<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Left: heun_maruyama ensemble</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> out <span class="kw">in</span> ens_sde:</span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">0</span>].plot(out.time, out.state_variables[<span class="st">'T'</span>],</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>                 color<span class="op">=</span><span class="st">'steelblue'</span>, lw<span class="op">=</span><span class="fl">0.6</span>, alpha<span class="op">=</span><span class="fl">0.35</span>)</span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].plot(ens_sde[<span class="dv">0</span>].time,</span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>             np.mean([o.state_variables[<span class="st">'T'</span>] <span class="cf">for</span> o <span class="kw">in</span> ens_sde], axis<span class="op">=</span><span class="dv">0</span>),</span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>             color<span class="op">=</span><span class="st">'navy'</span>, lw<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">'ensemble mean'</span>)</span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_title(<span class="st">'heun_maruyama  (correct SDE solver)'</span>)</span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_xlabel(<span class="st">'time (yr)'</span>)<span class="op">;</span> axes[<span class="dv">0</span>].set_ylabel(<span class="st">'T (K)'</span>)</span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].legend(fontsize<span class="op">=</span><span class="dv">8</span>)</span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a><span class="co"># Right: RK45 — flat deterministic line despite sde_noise being set</span></span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].plot(out_rk45_sde.time, out_rk45_sde.state_variables[<span class="st">'T'</span>],</span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>             color<span class="op">=</span><span class="st">'firebrick'</span>, lw<span class="op">=</span><span class="fl">1.5</span>, label<span class="op">=</span><span class="st">'RK45 (sde_noise ignored)'</span>)</span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_title(<span class="st">'RK45 with sde_noise set  (noise silently ignored)'</span>)</span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_xlabel(<span class="st">'time (yr)'</span>)</span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].legend(fontsize<span class="op">=</span><span class="dv">8</span>)</span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a>fig.suptitle(<span class="st">'EBM0D — SDE solver vs deterministic solver with noise term set'</span>)</span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()<span class="op">;</span> plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>&lt;positron-console-cell-11&gt;:13: DeprecationWarning: Passing 'dt' inside kwargs is deprecated and will be removed in a future version. Use the explicit parameter: integrate(..., dt=value).</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="solver_demo_files/figure-html/cell-12-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Figure.</strong> Left: <code>heun_maruyama</code> produces a spread of stochastic realisations around the deterministic transient — the noise is correctly integrated at each step. Right: RK45 with the same <code>sde_noise</code> function set returns a single smooth trajectory identical to the noiseless run; the noise function is never called. Use <code>euler_maruyama</code>, <code>heun_maruyama</code>, or <code>milstein</code> whenever <code>model.sde_noise</code> is set.</p>
+</section>
+<section id="lorenz96-stiff-fast-slow-system" class="level2">
+<h2 class="anchored" data-anchor-id="lorenz96-stiff-fast-slow-system">Lorenz96: stiff fast-slow system</h2>
+<p>The two-scale Lorenz96 model (<code>J &gt; 0</code>) couples slow atmospheric variables <span class="math inline">\(X_k\)</span> to <span class="math inline">\(J\)</span> fast variables <span class="math inline">\(Y_{k,j}\)</span>. The fast variables evolve on timescales ~10× shorter than the slow ones, making the system mildly stiff.</p>
+<p><strong>Adaptive solvers fail here.</strong> Scipy’s RK45 evaluates <code>dydt</code> at sub-step quadrature points to estimate local error. For a model that <em>accumulates state history</em> during <code>dydt</code> (as L96 does for its Y-variable bookkeeping), those sub-step evaluations corrupt the history array and produce a trajectory that is physically wrong — not just inaccurate, but completely different from the true solution.</p>
+<p>Use <code>method='rk4'</code> with an explicit fixed <code>dt ≤ 0.005</code>.</p>
+<blockquote class="blockquote">
+<p><em>This example also appears in the <code>lorenz96</code> model demo, where it is presented in the context of the full model walkthrough. It is reproduced here for thematic completeness.</em></p>
+</blockquote>
+<div id="l96-run" class="cell" data-execution_count="12">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>K, J_val <span class="op">=</span> <span class="dv">36</span>, <span class="dv">10</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>F_ts     <span class="op">=</span> <span class="fl">10.0</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>rng      <span class="op">=</span> np.random.default_rng(<span class="dv">42</span>)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>y0 <span class="op">=</span> np.concatenate([rng.standard_normal(K) <span class="op">+</span> F_ts,</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>                     rng.standard_normal(K <span class="op">*</span> J_val) <span class="op">*</span> <span class="fl">0.01</span>])</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Correct: rk4 with explicit dt and si</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>model_rk4 <span class="op">=</span> Lorenz96(n<span class="op">=</span>K, F<span class="op">=</span>F_ts, J<span class="op">=</span>J_val, h<span class="op">=</span><span class="fl">1.0</span>, b<span class="op">=</span><span class="fl">10.0</span>, c<span class="op">=</span><span class="fl">10.0</span>)</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>out_rk4   <span class="op">=</span> model_rk4.integrate(</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>    t_span<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">10</span>), y0<span class="op">=</span>y0.tolist(), method<span class="op">=</span><span class="st">'rk4'</span>,</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>    dt<span class="op">=</span><span class="fl">0.005</span>, kwargs<span class="op">=</span>{<span class="st">'si'</span>: <span class="fl">0.005</span>}</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Wrong: RK45 adaptive — sub-step evaluations corrupt Y history</span></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span>:</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>    model_rk45 <span class="op">=</span> Lorenz96(n<span class="op">=</span>K, F<span class="op">=</span>F_ts, J<span class="op">=</span>J_val, h<span class="op">=</span><span class="fl">1.0</span>, b<span class="op">=</span><span class="fl">10.0</span>, c<span class="op">=</span><span class="fl">10.0</span>)</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>    out_rk45   <span class="op">=</span> model_rk45.integrate(</span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>        t_span<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">10</span>), y0<span class="op">=</span>y0.tolist(), method<span class="op">=</span><span class="st">'RK45'</span>, kwargs<span class="op">=</span>{}</span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>    rk45_ok <span class="op">=</span> <span class="va">True</span></span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a><span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> e:</span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f'RK45 raised: </span><span class="sc">{</span>e<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>    rk45_ok <span class="op">=</span> <span class="va">False</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="l96-plot" class="cell" data-execution_count="13">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>X_rk4 <span class="op">=</span> np.array([out_rk4.state_variables[<span class="ss">f'x</span><span class="sc">{</span>k<span class="sc">}</span><span class="ss">'</span>] <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(K)])</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>t_rk4 <span class="op">=</span> out_rk4.time</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="co"># gridspec: two equal plot columns + a narrow dedicated colorbar column</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> plt.figure(figsize<span class="op">=</span>(<span class="dv">13</span>, <span class="dv">4</span>))</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>gs  <span class="op">=</span> fig.add_gridspec(<span class="dv">1</span>, <span class="dv">1</span> <span class="op">+</span> rk45_ok, width_ratios<span class="op">=</span>[<span class="dv">1</span>, <span class="dv">1</span>], wspace<span class="op">=</span><span class="fl">0.2</span>)</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="co"># fig, axes = plt.subplots(1 + rk45_ok, 1, figsize=(12, 5 if not rk45_ok else 8),</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="co">#                          sharex=True if rk45_ok else False)</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">not</span> rk45_ok:</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>    gs <span class="op">=</span> [gs]</span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>gs0 <span class="op">=</span> gs[<span class="dv">0</span>].subgridspec(<span class="dv">1</span>, <span class="dv">2</span>, width_ratios <span class="op">=</span> [<span class="dv">1</span>,<span class="fl">.03</span>],wspace<span class="op">=</span><span class="fl">0.05</span> )</span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>ax0 <span class="op">=</span> fig.add_subplot(gs0[<span class="dv">0</span>])</span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>cax0 <span class="op">=</span> fig.add_subplot(gs0[<span class="dv">1</span>])</span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>im0 <span class="op">=</span> ax0.imshow(X_rk4.T, aspect<span class="op">=</span><span class="st">'auto'</span>, origin<span class="op">=</span><span class="st">'lower'</span>,</span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>                     extent<span class="op">=</span>[t_rk4[<span class="dv">0</span>], t_rk4[<span class="op">-</span><span class="dv">1</span>], <span class="op">-</span><span class="fl">0.5</span>, K <span class="op">-</span> <span class="fl">0.5</span>],</span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>                     cmap<span class="op">=</span><span class="st">'RdBu_r'</span>, vmin<span class="op">=-</span><span class="dv">15</span>, vmax<span class="op">=</span><span class="dv">15</span>)</span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>plt.colorbar(im0, cax<span class="op">=</span>cax0)</span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>ax0.<span class="bu">set</span>(ylabel<span class="op">=</span><span class="st">'site k'</span>, title<span class="op">=</span><span class="st">'rk4 (dt=0.005) — correct'</span>, xlabel<span class="op">=</span><span class="st">'time'</span>)</span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> rk45_ok:</span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a>    gs1 <span class="op">=</span> gs[<span class="dv">1</span>].subgridspec(<span class="dv">1</span>, <span class="dv">2</span>, width_ratios <span class="op">=</span> [<span class="dv">1</span>,<span class="fl">.03</span>],wspace<span class="op">=</span><span class="fl">0.05</span> )</span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a>    ax1 <span class="op">=</span> fig.add_subplot(gs1[<span class="dv">0</span>])</span>
+<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a>    cax1 <span class="op">=</span> fig.add_subplot(gs1[<span class="dv">1</span>])</span>
+<span id="cb17-31"><a href="#cb17-31" aria-hidden="true" tabindex="-1"></a>    X_rk45 <span class="op">=</span> np.array([out_rk45.state_variables[<span class="ss">f'x</span><span class="sc">{</span>k<span class="sc">}</span><span class="ss">'</span>] <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(K)])</span>
+<span id="cb17-32"><a href="#cb17-32" aria-hidden="true" tabindex="-1"></a>    t_rk45 <span class="op">=</span> out_rk45.time</span>
+<span id="cb17-33"><a href="#cb17-33" aria-hidden="true" tabindex="-1"></a>    im1 <span class="op">=</span> ax1.imshow(X_rk45.T, aspect<span class="op">=</span><span class="st">'auto'</span>, origin<span class="op">=</span><span class="st">'lower'</span>,</span>
+<span id="cb17-34"><a href="#cb17-34" aria-hidden="true" tabindex="-1"></a>                         extent<span class="op">=</span>[t_rk45[<span class="dv">0</span>], t_rk45[<span class="op">-</span><span class="dv">1</span>], <span class="op">-</span><span class="fl">0.5</span>, K <span class="op">-</span> <span class="fl">0.5</span>],</span>
+<span id="cb17-35"><a href="#cb17-35" aria-hidden="true" tabindex="-1"></a>                         cmap<span class="op">=</span><span class="st">'RdBu_r'</span>, vmin<span class="op">=-</span><span class="dv">15</span>, vmax<span class="op">=</span><span class="dv">15</span>)</span>
+<span id="cb17-36"><a href="#cb17-36" aria-hidden="true" tabindex="-1"></a>    plt.colorbar(im1, cax<span class="op">=</span>cax1)</span>
+<span id="cb17-37"><a href="#cb17-37" aria-hidden="true" tabindex="-1"></a>    ax1.<span class="bu">set</span>(ylabel<span class="op">=</span><span class="st">'site k'</span>, title<span class="op">=</span><span class="st">'RK45 (adaptive) — corrupted history'</span>, xlabel<span class="op">=</span><span class="st">'time'</span>, ylim<span class="op">=</span>ax0.get_ylim())</span>
+<span id="cb17-38"><a href="#cb17-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-39"><a href="#cb17-39" aria-hidden="true" tabindex="-1"></a>fig.suptitle(<span class="st">'Lorenz96 two-scale: rk4 vs RK45'</span>)</span>
+<span id="cb17-40"><a href="#cb17-40" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()<span class="op">;</span> plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>&lt;positron-console-cell-13&gt;:40: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="solver_demo_files/figure-html/cell-14-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Figure.</strong> Space-time diagram of slow variable <span class="math inline">\(X_k\)</span> for the two-scale system. The <code>rk4</code> run (top) shows the correct pattern: eastward-propagating wave packets breaking into chaotic bursts, identical to the single-scale system at qualitative level. If RK45 does not crash (whether it crashes depends on the implementation version), its output shows either explosive growth or spurious spatial patterns — artefacts of corrupted sub-step Y-variable history. Even when the error is silent, the trajectory diverges from truth within a few time units.</p>
+</section>
+<section id="summary-solver-selection-guide" class="level2">
+<h2 class="anchored" data-anchor-id="summary-solver-selection-guide">Summary: solver selection guide</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Model class</th>
+<th>Recommended</th>
+<th>Avoid</th>
+<th>Key constraint</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Smooth ODE (EBM0D, Stommel, ENSORecharge, Rössler, Lorenz63)</td>
+<td><code>RK45</code> (default)</td>
+<td><code>euler</code> unless timestep-matched</td>
+<td>Use CC tight tolerances</td>
+</tr>
+<tr class="even">
+<td>Discrete-event ODE (G24)</td>
+<td><code>euler</code>, dt ≤ 6.5 kyr</td>
+<td><code>RK45</code>, <code>heun_maruyama</code></td>
+<td>Threshold crossings mis-stepped by adaptive solvers</td>
+</tr>
+<tr class="odd">
+<td>Single-scale Lorenz96</td>
+<td><code>RK45</code> or <code>rk4</code></td>
+<td>—</td>
+<td><code>dt=0.05</code> adequate for space-time diagnostics</td>
+</tr>
+<tr class="even">
+<td>Two-scale Lorenz96</td>
+<td><code>rk4</code>, dt ≤ 0.005</td>
+<td><code>RK45</code> (corrupts Y history)</td>
+<td><code>si</code> (recording interval) set equal to <code>dt</code></td>
+</tr>
+<tr class="odd">
+<td>DampedSpring / SimplePendulum</td>
+<td><code>RK45</code></td>
+<td><code>euler</code></td>
+<td>Stiff regimes need tight rtol</td>
+</tr>
+<tr class="even">
+<td>DoublePendulum (energy diagnostics)</td>
+<td><code>RK45</code> with rtol ≤ 1e-8</td>
+<td>Default tolerances</td>
+<td>Energy error scales with rtol</td>
+</tr>
+<tr class="odd">
+<td>SDE models</td>
+<td><code>euler_maruyama</code>, <code>heun_maruyama</code>, or <code>milstein</code></td>
+<td><code>RK45</code></td>
+<td>Must supply <code>sde_noise</code>; pass <code>random_seed</code> for reproducibility</td>
+</tr>
+</tbody>
+</table>
+
+
+</section>
+
+</main> <!-- /main -->
+<style>
+  #version-picker-menu { min-width: 0; width: auto; }
+  #version-picker-menu .dropdown-item { padding: 0.25rem 0.75rem; }
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const base = window.location.origin;
+  const pathParts = window.location.pathname.split('/').filter(Boolean);
+
+  const isVersion = p => ['stable', 'latest'].includes(p) || /^v\d/.test(p);
+  const versionIdx = pathParts.findIndex(isVersion);
+  const current = versionIdx >= 0 ? pathParts[versionIdx] : null;
+  const basePath = versionIdx > 0 ? '/' + pathParts.slice(0, versionIdx).join('/') : '';
+  const subPath = versionIdx >= 0 ? pathParts.slice(versionIdx + 1).join('/') : '';
+
+  const label = current || 'version';
+
+  const li = document.createElement('li');
+  li.className = 'nav-item dropdown';
+
+  const toggle = document.createElement('a');
+  toggle.className = 'nav-link dropdown-toggle';
+  toggle.href = '#';
+  toggle.setAttribute('role', 'button');
+  toggle.setAttribute('data-bs-toggle', 'dropdown');
+  toggle.setAttribute('aria-expanded', 'false');
+  toggle.textContent = label;
+
+  const menu = document.createElement('ul');
+  menu.className = 'dropdown-menu dropdown-menu-end';
+  menu.id = 'version-picker-menu';
+
+  const knownPrefixes = ['stable', 'latest'];
+
+  const addOption = (v) => {
+    const item = document.createElement('li');
+    const a = document.createElement('a');
+    a.className = 'dropdown-item' + (v === current ? ' active' : '');
+    a.href = '#';
+    a.textContent = v;
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.location.href = `${base}${basePath}/${v}/${subPath}`;
+    });
+    item.appendChild(a);
+    menu.appendChild(item);
+  };
+
+  for (const v of ['stable', 'latest']) addOption(v);
+  if (current && !knownPrefixes.includes(current)) addOption(current);
+
+  li.appendChild(toggle);
+  li.appendChild(menu);
+
+  const navbar = document.querySelector('.navbar-nav.ms-auto')
+               || document.querySelector('.navbar-nav')
+               || document.querySelector('nav');
+  if (navbar) navbar.appendChild(li);
+
+  try {
+    const res = await fetch(`${base}${basePath}/versions.json`);
+    if (!res.ok) return;
+    const versions = await res.json();
+    for (const v of versions) {
+      if (!menu.querySelector(`a[data-version="${v}"]`)) addOption(v);
+    }
+  } catch (_) {}
+});
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../notebooks/functionality_demos/downsample_starter.html" class="pagination-link" aria-label="Downsampling">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Downsampling</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
