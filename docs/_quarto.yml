@@ -32,6 +32,8 @@ interlinks:
       inv: objects.txt
   aliases:
     climatecritters.core.forcing: null
+    climatecritters.core.ccmodel: null
+    climatecritters.core.ccoutput: null
     pandas: pd
 
 execute:
@@ -219,6 +221,8 @@ quartodoc:
       contents:
         - SimplePendulum
         - DoublePendulum
+        - MultiPendulumBeta
+        - PendulumRodBeta
         - DampedSpring
 
     - subtitle: Individual Models
