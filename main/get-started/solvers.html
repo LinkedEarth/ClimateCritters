@@ -344,7 +344,7 @@ window.Quarto = {
 </header>
 
 
-<p><code>CCModel.integrate()</code> supports several solvers, selectable via the <code>method</code> argument. The choice affects step-size control, numerical accuracy, and whether stochastic forcing is possible.</p>
+<p><a href="../api/core.CCModel.html#climatecritters.core.CCModel.integrate" title="0"><code>CCModel.integrate()</code></a> supports several solvers, selectable via the <code>method</code> argument. The choice affects step-size control, numerical accuracy, and whether stochastic forcing is possible.</p>
 <section id="adaptive-solvers-scipy" class="level2">
 <h2 class="anchored" data-anchor-id="adaptive-solvers-scipy">Adaptive solvers (SciPy)</h2>
 <p>Passing any SciPy solver name — <code>'RK45'</code>, <code>'DOP853'</code>, <code>'Radau'</code>, <code>'LSODA'</code> — delegates to <code>scipy.integrate.solve_ivp</code>. The solver adapts its step size internally to meet an error tolerance, so <code>dt</code> is not required. This is a reasonable default for most smooth, well-behaved systems.</p>
