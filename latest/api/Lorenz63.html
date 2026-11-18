@@ -669,6 +669,7 @@ dz/dt = x * y - beta * z</code></pre>
 <h2 class="doc-section doc-section-notes anchored" data-anchor-id="notes">Notes</h2>
 <p>The classic strange attractor exists for <code>sigma=10</code>, <code>rho=28</code>, <code>beta=8/3</code>. Time-varying parameters are supported as callables with signatures <code>(t)</code>, <code>(t, state)</code>, or <code>(t, state, model)</code>.</p>
 <p>State variables are <code>x</code>, <code>y</code>, <code>z</code> in that order.</p>
+<p><code>dydt</code> has no side effects, so it can be evaluated directly, without calling <code>integrate</code> first (e.g.&nbsp;for fixed-point or periodic-orbit solvers). All solvers are supported, including <code>method='rk4'</code>.</p>
 </section>
 <section id="references" class="level2 doc-section doc-section-references">
 <h2 class="doc-section doc-section-references anchored" data-anchor-id="references">References</h2>

@@ -631,7 +631,7 @@ window.Quarto = {
 <section id="solver-notes" class="level2">
 <h2 class="anchored" data-anchor-id="solver-notes">Solver notes</h2>
 <p>RK45 is appropriate for this model at default parameters. The system is not stiff.</p>
-<p><strong><code>t_span</code> must start at 0 or later.</strong> The model internally appends to the time array only when <code>t &gt; 0</code>; a negative start time will leave a gap in the output. For all standard use cases <code>t_span=(0, T)</code> is correct.</p>
+<p><strong>Fixed-step RK4 is also available</strong>, e.g.&nbsp;<code>method='rk4', dt=0.001, kwargs={'si': 0.01}</code> (integrate at <code>dt</code>, save every <code>si</code>). The output is built from the solver trajectory after integration, so any <code>t_span</code> (including negative start times) works, and <code>model.dydt(t, state)</code> can be called directly without side effects.</p>
 <p><strong>Trajectories are not reproducible across runs with random initial conditions.</strong> The strange attractor is an invariant set — its shape is preserved — but the precise path through it is exponentially sensitive to the initial condition. Two runs from nearby but different starting points will diverge within a few time units.</p>
 
 
