@@ -121,7 +121,7 @@ class Stocker2003BipolarSeesaw(Model):
         history = np.asarray(history, dtype=float)
         Tn_vals = []
         for t, row in zip(time, history):
-            Tn_vals.append(float(self.get_param_value("Tn", t, row)))
+            Tn_vals.append(float(self.call_with_forcings(t, self.get_param_value, "Tn", t, row)))
         Tn_vals = np.asarray(Tn_vals, dtype=float)
         self.diagnostic_variables = {"Tn": Tn_vals}
 
@@ -338,6 +338,6 @@ class Stocker2003ExtendedSeaIceSeesaw(Model):
         history = np.asarray(history, dtype=float)
         Tn_vals = []
         for t, row in zip(time, history):
-            Tn_vals.append(self.resolve_north(t, row))
+            Tn_vals.append(self.call_with_forcings(t, self.resolve_north, t, row))
         self.diagnostic_variables = {"T_N": np.asarray(Tn_vals, dtype=float)}
 

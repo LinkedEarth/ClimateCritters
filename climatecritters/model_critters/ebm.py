@@ -283,12 +283,16 @@ class EBM0D(EBMBase):
         }
         self.params = ()
 
+    #: Output and diagnostics are built from the solver trajectory after
+    #: integration, so ``dydt`` is side-effect free.
+    uses_post_history = True
+
     def dydt(self, t, x):
         """Evaluate the right-hand side of the ODE at time t and state x.
 
-        Called by the solver at each timestep.  As a side effect, appends the
-        current state to ``self.state_variables`` and appends each diagnostic
-        quantity to the corresponding list in ``self.diagnostic_variables``.
+        Side-effect free: the state history and the diagnostics
+        (``albedo``, ``absorbed_SW``, ``OLR``, ``solar_incoming``) are built
+        after integration by ``populate_diagnostics_from_history``.
 
         Parameters
         ----------
@@ -302,6 +306,20 @@ class EBM0D(EBMBase):
         dydt : list of float
             Time-derivatives ``[dT/dt]``.
         """
+        tendencies, _ = self._evaluate(t, x)
+        return tendencies
+
+    def populate_diagnostics_from_history(self, time, history):
+        names = ('albedo', 'absorbed_SW', 'OLR', 'solar_incoming')
+        rows = [self.call_with_forcings(t, self._evaluate, t, row)[1]
+                for t, row in zip(time, history)]
+        self.diagnostic_variables = {
+            name: np.array([r[i] for r in rows], dtype=float)
+            for i, name in enumerate(names)
+        }
+
+    def _evaluate(self, t, x):
+        """Return ``([dT/dt], (albedo, absorbed_SW, OLR, solar_incoming))``."""
         T = float(x[0])
 
         f_solar_incoming = self.get_param_value('S0', t, x)
@@ -311,17 +329,7 @@ class EBM0D(EBMBase):
         C = self.calc_C(T, t)
         dTdt = (absorbed_SW - OLR) / C
 
-        new_row = np.array([(T,)], dtype=self.dtypes)
-        self.state_variables = np.concatenate([self.state_variables, new_row], axis=0)
-        self.diagnostic_variables['albedo'].append(albedo)
-        self.diagnostic_variables['absorbed_SW'].append(absorbed_SW)
-        self.diagnostic_variables['OLR'].append(OLR)
-        self.diagnostic_variables['solar_incoming'].append(f_solar_incoming)
-
-        if t > self.t_span[0]:
-            self.time.append(t)
-
-        return [dTdt]
+        return [dTdt], (albedo, absorbed_SW, OLR, f_solar_incoming)
 
 
 # ---------------------------------------------------------------------------

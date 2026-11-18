@@ -142,8 +142,9 @@ class SimplePendulum(Model):
 
         for i, (t, row) in enumerate(zip(time, history)):
             theta, omega = float(row[0]), float(row[1])
-            L = float(self.get_param_value("L", t, row))
-            g = float(self.get_param_value("g", t, row))
+            with self.forcings_applied(t):
+                L = float(self.get_param_value("L", t, row))
+                g = float(self.get_param_value("g", t, row))
             energy_vals[i] = 0.5 * (L * omega) ** 2 + g * L * (1.0 - np.cos(theta))
             omega0_vals[i] = np.sqrt(g / L)
 
@@ -279,7 +280,7 @@ class DrivenPendulum(Model):
         for i, (t, row) in enumerate(zip(time, history)):
             theta, omega = float(row[0]), float(row[1])
             energy_vals[i] = 0.5 * omega ** 2 + (1.0 - np.cos(theta))
-            drive_vals[i] = self._drive(t)
+            drive_vals[i] = self.call_with_forcings(t, self._drive, t)
 
         self.diagnostic_variables = {
             "energy": energy_vals,
@@ -437,13 +438,13 @@ class DoublePendulum(Model):
         x2 = np.empty(n)
         y2 = np.empty(n)
 
-        m1 = self.param_values["m1"]
-        m2 = self.param_values["m2"]
-        L1 = self.param_values["L1"]
-        L2 = self.param_values["L2"]
-        g  = self.param_values["g"]
-
         for i, (t, row) in enumerate(zip(time, history)):
+            with self.forcings_applied(t):
+                m1 = self.param_values["m1"]
+                m2 = self.param_values["m2"]
+                L1 = self.param_values["L1"]
+                L2 = self.param_values["L2"]
+                g  = self.param_values["g"]
             th1, om1, th2, om2 = [float(v) for v in row]
             delta = th1 - th2
 
@@ -718,8 +719,9 @@ class MultiPendulumBeta(Model):
         for step, (t, row) in enumerate(zip(time, history)):
             thetas = row[0::2]
             omegas = row[1::2]
-            mass_matrix, _ = self._build_system(t, thetas, omegas, row)
-            g = float(self.get_param_value("g", t, row))
+            with self.forcings_applied(t):
+                mass_matrix, _ = self._build_system(t, thetas, omegas, row)
+                g = float(self.get_param_value("g", t, row))
 
             kinetic = 0.5 * omegas @ mass_matrix @ omegas
             potential = -g * float(np.sum(cum_masses * lengths * np.cos(thetas)))

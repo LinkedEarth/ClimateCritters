@@ -144,8 +144,9 @@ class DampedSpring(Model):
 
         for i, (t, row) in enumerate(zip(time, history)):
             pos, vel = float(row[0]), float(row[1])
-            m = float(self.get_param_value("m", t, row))
-            k = float(self.get_param_value("k", t, row))
+            with self.forcings_applied(t):
+                m = float(self.get_param_value("m", t, row))
+                k = float(self.get_param_value("k", t, row))
             energy_vals[i] = 0.5 * m * vel ** 2 + 0.5 * k * pos ** 2
             omega0_vals[i] = np.sqrt(k / m)
 
