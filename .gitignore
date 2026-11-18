@@ -278,3 +278,9 @@ fabric.properties
 docs/notebooks/
 
 /.luarc.json
+
+# Jupyter / JupyterLab local state (autosaves, LSP caches, layouts)
+.virtual_documents/
+.jupyter/
+*.jupyterlab-workspace
+.jupyter_ystore.db
