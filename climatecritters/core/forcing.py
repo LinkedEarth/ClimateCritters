@@ -35,7 +35,7 @@ The typical workflow::
 from __future__ import annotations
 
 import functools
-import importlib
+import importlib.resources
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
