@@ -670,7 +670,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Model 3 from Ganopolski (2024) describing glacial cycle evolution under orbital forcing.</p>
 <p>The model tracks ice volume <code>v</code> and glacial regime <code>k</code> (1 = glaciation, 2 = deglaciation). The ice volume relaxes toward a forcing-dependent equilibrium:</p>
 <pre><code>dv/dt = (ve(f) - v) / t1    when k=1  (glaciation)
-dv/dt = -vc / t2             when k=2  (deglaciation)</code></pre>
+dv/dt = -vc / t2             when k=2  (deglaciation), until v = 0</code></pre>
 <p>Regime switches follow:</p>
 <ul>
 <li>k=1 → k=2 if v &gt; vc, df/dt &gt; 0, and f &gt; 0</li>
