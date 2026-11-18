@@ -21,8 +21,11 @@ dependencies = [
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["climatecritters"]
+include = ["climatecritters*"]   # trailing * pulls in subpackages (core, model_critters, utils, ...)
 #exclude = ["archive2*"]
+
+[tool.setuptools.package-data]
+"climatecritters.data" = ["*.csv"]   # loaded at runtime via importlib.resources
 
 [build-system]
 requires = ["setuptools>=61.0"]
