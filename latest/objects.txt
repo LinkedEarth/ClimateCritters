@@ -2,12 +2,16 @@
 # Project: climatecritters
 # Version: 0.0.9999
 # The remainder of this file is compressed using zlib.
+climatecritters.core.Model.call_with_forcings py:function 1 api/core.Model.html#climatecritters.core.Model.call_with_forcings -
+climatecritters.core.model.Model.call_with_forcings py:function 1 api/core.Model.html#climatecritters.core.Model.call_with_forcings climatecritters.core.Model.call_with_forcings
 climatecritters.core.Model.clear_forcings py:function 1 api/core.Model.html#climatecritters.core.Model.clear_forcings -
 climatecritters.core.model.Model.clear_forcings py:function 1 api/core.Model.html#climatecritters.core.Model.clear_forcings climatecritters.core.Model.clear_forcings
 climatecritters.core.Model.doc py:function 1 api/core.Model.html#climatecritters.core.Model.doc -
 climatecritters.core.model.Model.doc py:function 1 api/core.Model.html#climatecritters.core.Model.doc climatecritters.core.Model.doc
 climatecritters.core.Model.dydt py:function 1 api/core.Model.html#climatecritters.core.Model.dydt -
 climatecritters.core.model.Model.dydt py:function 1 api/core.Model.html#climatecritters.core.Model.dydt climatecritters.core.Model.dydt
+climatecritters.core.Model.forcings_applied py:function 1 api/core.Model.html#climatecritters.core.Model.forcings_applied -
+climatecritters.core.model.Model.forcings_applied py:function 1 api/core.Model.html#climatecritters.core.Model.forcings_applied climatecritters.core.Model.forcings_applied
 climatecritters.core.Model.get_forcings py:function 1 api/core.Model.html#climatecritters.core.Model.get_forcings -
 climatecritters.core.model.Model.get_forcings py:function 1 api/core.Model.html#climatecritters.core.Model.get_forcings climatecritters.core.Model.get_forcings
 climatecritters.core.Model.get_param_value py:function 1 api/core.Model.html#climatecritters.core.Model.get_param_value -

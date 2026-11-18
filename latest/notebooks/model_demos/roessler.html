@@ -86,7 +86,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../../site_libs/quarto-html/quarto-syntax-highlighting-63b5708e65d6cd79cd7618c58d0c21e7.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-f35a81a4717690815b2013502477d714.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-8d3ad9c781c51ccd60b292c95058b2c2.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -618,7 +618,7 @@ z range: [0.00, 22.60]</code></pre>
 <section id="solver-notes" class="level2">
 <h2 class="anchored" data-anchor-id="solver-notes">Solver notes</h2>
 <p><code>RK45</code> is appropriate. The Rössler system is not stiff at canonical parameters.</p>
-<p><strong><code>t_span</code> must start at 0 or later.</strong> Like <code>Lorenz63</code>, this model accumulates state in <code>dydt</code> using a <code>if t &gt; 0</code> guard. Negative start times leave a gap in the output.</p>
+<p><strong>Fixed-step RK4 is also available</strong>, e.g.&nbsp;<code>method='rk4', dt=0.001, kwargs={'si': 0.01}</code>. The output is built from the solver trajectory after integration, so any <code>t_span</code> works (including negative start times) and <code>model.dydt(t, state)</code> has no side effects.</p>
 <p><strong>Discard a transient</strong> (first ~100 time units) before taking attractor statistics — the trajectory may start far from the attractor depending on the initial condition.</p>
 
 

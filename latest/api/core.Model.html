@@ -83,7 +83,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-63b5708e65d6cd79cd7618c58d0c21e7.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-f35a81a4717690815b2013502477d714.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-8d3ad9c781c51ccd60b292c95058b2c2.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -617,6 +617,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#external-forcings" id="toc-external-forcings" class="nav-link" data-scroll-target="#external-forcings">External forcings</a></li>
   <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a>
   <ul>
+  <li><a href="#climatecritters.core.Model.call_with_forcings" id="toc-climatecritters.core.Model.call_with_forcings" class="nav-link" data-scroll-target="#climatecritters.core.Model.call_with_forcings">call_with_forcings</a></li>
   <li><a href="#climatecritters.core.Model.clear_forcings" id="toc-climatecritters.core.Model.clear_forcings" class="nav-link" data-scroll-target="#climatecritters.core.Model.clear_forcings">clear_forcings</a>
   <ul class="collapse">
   <li><a href="#parameters" id="toc-parameters" class="nav-link" data-scroll-target="#parameters">Parameters</a></li>
@@ -626,6 +627,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#parameters-1" id="toc-parameters-1" class="nav-link" data-scroll-target="#parameters-1">Parameters</a></li>
   </ul></li>
   <li><a href="#climatecritters.core.Model.dydt" id="toc-climatecritters.core.Model.dydt" class="nav-link" data-scroll-target="#climatecritters.core.Model.dydt">dydt</a></li>
+  <li><a href="#climatecritters.core.Model.forcings_applied" id="toc-climatecritters.core.Model.forcings_applied" class="nav-link" data-scroll-target="#climatecritters.core.Model.forcings_applied">forcings_applied</a></li>
   <li><a href="#climatecritters.core.Model.get_forcings" id="toc-climatecritters.core.Model.get_forcings" class="nav-link" data-scroll-target="#climatecritters.core.Model.get_forcings">get_forcings</a>
   <ul class="collapse">
   <li><a href="#parameters-2" id="toc-parameters-2" class="nav-link" data-scroll-target="#parameters-2">Parameters</a></li>
@@ -701,16 +703,24 @@ model.register_forcing('x', forcing_obj, 'additive', timing='pre')  # state</cod
 </thead>
 <tbody>
 <tr class="odd">
+<td><a href="#climatecritters.core.Model.call_with_forcings">call_with_forcings</a></td>
+<td>Return <code>fn(*args, **kwargs)</code> evaluated inside <code>forcings_applied(t)</code>.</td>
+</tr>
+<tr class="even">
 <td><a href="#climatecritters.core.Model.clear_forcings">clear_forcings</a></td>
 <td>Remove registered forcings.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="#climatecritters.core.Model.doc">doc</a></td>
 <td>Pretty-print documentation for the requested category.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><a href="#climatecritters.core.Model.dydt">dydt</a></td>
 <td>Define the system of differential equations.</td>
+</tr>
+<tr class="odd">
+<td><a href="#climatecritters.core.Model.forcings_applied">forcings_applied</a></td>
+<td>Context manager: apply registered parameter forcings at time <code>t</code>.</td>
 </tr>
 <tr class="even">
 <td><a href="#climatecritters.core.Model.get_forcings">get_forcings</a></td>
@@ -762,9 +772,17 @@ model.register_forcing('x', forcing_obj, 'additive', timing='pre')  # state</cod
 </tr>
 </tbody>
 </table>
+<section id="climatecritters.core.Model.call_with_forcings" class="level3">
+<h3 class="anchored" data-anchor-id="climatecritters.core.Model.call_with_forcings">call_with_forcings</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>core.Model.call_with_forcings(t, fn, <span class="op">*</span>args, <span class="op">**</span>kwargs)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Return <code>fn(*args, **kwargs)</code> evaluated inside <code>forcings_applied(t)</code>.</p>
+<p>Convenience for list comprehensions in <code>populate_diagnostics_from_history</code>::</p>
+<pre><code>q = [self.call_with_forcings(t, self.overturning, t, row)
+     for t, row in zip(time, history)]</code></pre>
+</section>
 <section id="climatecritters.core.Model.clear_forcings" class="level3">
 <h3 class="anchored" data-anchor-id="climatecritters.core.Model.clear_forcings">clear_forcings</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>core.Model.clear_forcings(var_name<span class="op">=</span><span class="va">None</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>core.Model.clear_forcings(var_name<span class="op">=</span><span class="va">None</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Remove registered forcings.</p>
 <section id="parameters" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h4>
@@ -778,7 +796,7 @@ model.register_forcing('x', forcing_obj, 'additive', timing='pre')  # state</cod
 </section>
 <section id="climatecritters.core.Model.doc" class="level3">
 <h3 class="anchored" data-anchor-id="climatecritters.core.Model.doc">doc</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>core.Model.doc(print_target)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>core.Model.doc(print_target)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Pretty-print documentation for the requested category.</p>
 <p>Descriptions are parsed from the NumPy-style docstrings of the class and its base classes. For parameters the current value is also shown.</p>
 <section id="parameters-1" class="level4 doc-section doc-section-parameters">
@@ -793,13 +811,24 @@ model.register_forcing('x', forcing_obj, 'additive', timing='pre')  # state</cod
 </section>
 <section id="climatecritters.core.Model.dydt" class="level3">
 <h3 class="anchored" data-anchor-id="climatecritters.core.Model.dydt">dydt</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>core.Model.dydt(t, y)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>core.Model.dydt(t, y)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Define the system of differential equations.</p>
 <p>Must be overridden by every subclass. The solver calls this at each timestep with the current time <code>t</code> and state vector <code>y</code>, and expects a list of derivatives of the same length as <code>y</code>. Use <code>get_param_value</code> inside the implementation to access parameters.</p>
 </section>
+<section id="climatecritters.core.Model.forcings_applied" class="level3">
+<h3 class="anchored" data-anchor-id="climatecritters.core.Model.forcings_applied">forcings_applied</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>core.Model.forcings_applied(t, _specs<span class="op">=</span><span class="va">None</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Context manager: apply registered parameter forcings at time <code>t</code>.</p>
+<p>Inside the block, <code>param_values</code> holds the forced values exactly as <code>dydt</code> sees them during integration (replacement forcings first, then additive ones), so <code>get_param_value</code> returns forced values. The original values are restored on exit, even if an exception is raised.</p>
+<p>Use it wherever model quantities are evaluated outside the solver, in particular in <code>populate_diagnostics_from_history</code>::</p>
+<pre><code>for t, row in zip(time, history):
+    with self.forcings_applied(t):
+        q[i] = self.overturning(t, row)</code></pre>
+<p>State forcings are not applied: they act on tendencies, not on parameters.</p>
+</section>
 <section id="climatecritters.core.Model.get_forcings" class="level3">
 <h3 class="anchored" data-anchor-id="climatecritters.core.Model.get_forcings">get_forcings</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>core.Model.get_forcings(var_name<span class="op">=</span><span class="va">None</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>core.Model.get_forcings(var_name<span class="op">=</span><span class="va">None</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Return registered forcings, optionally filtered by variable name.</p>
 <section id="parameters-2" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-2">Parameters</h4>
@@ -813,27 +842,27 @@ model.register_forcing('x', forcing_obj, 'additive', timing='pre')  # state</cod
 </section>
 <section id="climatecritters.core.Model.get_param_value" class="level3">
 <h3 class="anchored" data-anchor-id="climatecritters.core.Model.get_param_value">get_param_value</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>core.Model.get_param_value(name, t, state)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>core.Model.get_param_value(name, t, state)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Resolve a named parameter to its value at the current time and state.</p>
 <p>This is the standard way to access parameters inside <code>dydt</code>. It looks up the value from <code>param_values</code> by name and delegates resolution to <code>_resolve_param</code>, so callers in <code>dydt</code> don’t need to know whether a parameter is stored as a constant, a callable, or a Forcing object.</p>
 </section>
 <section id="climatecritters.core.Model.get_param_vector" class="level3">
 <h3 class="anchored" data-anchor-id="climatecritters.core.Model.get_param_vector">get_param_vector</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>core.Model.get_param_vector(name, t, state, size)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>core.Model.get_param_vector(name, t, state, size)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Resolve a parameter and broadcast it to a fixed-length vector.</p>
 <p>Spatial models often allow parameters to be either a single scalar (applied uniformly) or a full grid-length array. This method resolves the parameter via <code>get_param_value</code> and then either broadcasts a scalar or validates that an array has the expected size, eliminating that boilerplate from every <code>dydt</code> that works on a spatial grid.</p>
 </section>
 <section id="climatecritters.core.Model.integrate" class="level3">
 <h3 class="anchored" data-anchor-id="climatecritters.core.Model.integrate">integrate</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>core.Model.integrate(</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    t_span<span class="op">=</span><span class="va">None</span>,</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    y0<span class="op">=</span><span class="va">None</span>,</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    method<span class="op">=</span><span class="st">'RK45'</span>,</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    dt<span class="op">=</span><span class="va">None</span>,</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    output_time<span class="op">=</span><span class="va">None</span>,</span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    run_name<span class="op">=</span><span class="va">None</span>,</span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    kwargs<span class="op">=</span><span class="va">None</span>,</span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>core.Model.integrate(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    t_span<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    y0<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    method<span class="op">=</span><span class="st">'RK45'</span>,</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    dt<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    output_time<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    run_name<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    kwargs<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Integrate the model over a time span and return an <a href="../api/core.Output.html#climatecritters.core.Output" title="0"><code>Output</code></a>.</p>
 <section id="parameters-3" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-3">Parameters</h4>
@@ -871,7 +900,7 @@ model.register_forcing('x', forcing_obj, 'additive', timing='pre')  # state</cod
 </section>
 <section id="climatecritters.core.Model.list" class="level3">
 <h3 class="anchored" data-anchor-id="climatecritters.core.Model.list">list</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>core.Model.<span class="bu">list</span>(list_target)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>core.Model.<span class="bu">list</span>(list_target)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Return a list of names for the requested category.</p>
 <section id="parameters-4" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-4">Parameters</h4>
@@ -894,24 +923,24 @@ model.register_forcing('x', forcing_obj, 'additive', timing='pre')  # state</cod
 </section>
 <section id="climatecritters.core.Model.populate_diagnostics_from_history" class="level3">
 <h3 class="anchored" data-anchor-id="climatecritters.core.Model.populate_diagnostics_from_history">populate_diagnostics_from_history</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>core.Model.populate_diagnostics_from_history(time, history)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>core.Model.populate_diagnostics_from_history(time, history)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Compute diagnostic variables from the full solved trajectory.</p>
 <p>Called by <code>post_integrate</code> for models where <code>uses_post_history = True</code>. The base implementation does nothing because diagnostics are model-specific; subclasses override this to derive any quantities that can only be computed once the complete trajectory is available (e.g.&nbsp;derived fields, fluxes).</p>
 </section>
 <section id="climatecritters.core.Model.post_integrate" class="level3">
 <h3 class="anchored" data-anchor-id="climatecritters.core.Model.post_integrate">post_integrate</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>core.Model.post_integrate(time, history)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>core.Model.post_integrate(time, history)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Orchestrate post-solve output construction for <code>uses_post_history</code> models.</p>
 <p>Some models (e.g.&nbsp;spatial PDEs) cannot accumulate state during the solve without side effects; instead they store the full trajectory and derive all outputs here. This method sequences the required steps in the correct order: build the structured state array, set the time axis, populate diagnostics, and convert diagnostic lists to arrays. It is called automatically by <code>integrate</code> when <code>uses_post_history = True</code>.</p>
 </section>
 <section id="climatecritters.core.Model.register_forcing" class="level3">
 <h3 class="anchored" data-anchor-id="climatecritters.core.Model.register_forcing">register_forcing</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>core.Model.register_forcing(</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    var_name,</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    forcing_object,</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    attachment_style<span class="op">=</span><span class="va">None</span>,</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    timing<span class="op">=</span><span class="va">None</span>,</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>core.Model.register_forcing(</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    var_name,</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    forcing_object,</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    attachment_style<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    timing<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Attach an external forcing to a named parameter or state variable.</p>
 <section id="parameters-5" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-5">Parameters</h4>
@@ -946,13 +975,13 @@ model.register_forcing('x', forcing_obj, 'additive', timing='pre')  # state</cod
 </section>
 <section id="climatecritters.core.Model.sde_noise" class="level3">
 <h3 class="anchored" data-anchor-id="climatecritters.core.Model.sde_noise">sde_noise</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>core.Model.sde_noise(t, y)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>core.Model.sde_noise(t, y)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Define the diffusion term for stochastic (SDE) integration methods.</p>
 <p>Override in subclasses that use <code>method='euler_maruyama'</code>, <code>'heun_maruyama'</code>, or <code>'milstein'</code>. Called at each timestep with the current time <code>t</code> and state vector <code>y</code>; must return a vector of per-state diffusion scales the same shape as <code>y</code>. The base implementation returns zeros, recovering deterministic integration for models that don’t define stochastic dynamics.</p>
 </section>
 <section id="climatecritters.core.Model.set_function" class="level3">
 <h3 class="anchored" data-anchor-id="climatecritters.core.Model.set_function">set_function</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>core.Model.set_function(name, function, bind<span class="op">=</span><span class="va">None</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>core.Model.set_function(name, function, bind<span class="op">=</span><span class="va">None</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Swap out a model calculation function on a single instance.</p>
 <p>Subclassing is the right approach when a different formulation should apply everywhere, but for one-off experiments (e.g.&nbsp;testing an alternative albedo scheme without writing a new class) it is useful to replace a single method on one instance. The <code>bind</code> parameter handles whether the replacement expects <code>self</code> as its first argument.</p>
 <section id="parameters-6" class="level4 doc-section doc-section-parameters">
@@ -975,13 +1004,13 @@ model.register_forcing('x', forcing_obj, 'additive', timing='pre')  # state</cod
 </section>
 <section id="climatecritters.core.Model.set_param_value" class="level3">
 <h3 class="anchored" data-anchor-id="climatecritters.core.Model.set_param_value">set_param_value</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>core.Model.set_param_value(name, value)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>core.Model.set_param_value(name, value)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Add or update a parameter and keep the attribute and <code>param_values</code> in sync.</p>
 <p><code>__setattr__</code> syncs the direction <code>model.alpha = v → param_values</code>, but only for names already in <code>param_values</code>. This method handles the reverse and covers inserting new parameters that weren’t declared at initialization.</p>
 </section>
 <section id="climatecritters.core.Model.validate_initial_state" class="level3">
 <h3 class="anchored" data-anchor-id="climatecritters.core.Model.validate_initial_state">validate_initial_state</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>core.Model.validate_initial_state(y0)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>core.Model.validate_initial_state(y0)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Validate and normalize the initial state vector.</p>
 <p>Exists as a method so that subclasses with non-standard initial state requirements (e.g.&nbsp;a spatially discretised model that accepts a scalar and broadcasts it to the grid) can override it. The base implementation delegates to the utility in <code>utils/solver</code>.</p>
 
