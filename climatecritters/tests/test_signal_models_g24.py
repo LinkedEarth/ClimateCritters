@@ -106,3 +106,17 @@ class TestSignalModelsG24SequenceForcing:
         model3.register_forcing('insolation', forcing)
         model3.integrate(t_span=(0, 10), y0=[1, 1], method='euler', dt=1)
         assert np.isfinite(model3.state_variables['v'][-1])
+
+
+class TestSignalModelsG24NonNegativeIce:
+    def test_ice_volume_nonnegative_t0(self):
+        '''Ice volume must stay >= 0 (Ganopolski 2024): deglaciation stops at v = 0.'''
+        from climatecritters.model_critters.g24 import calc_f, vc_func
+        model = g24.Model3(vc=lambda t: vc_func(t))
+        model.register_forcing('insolation', cc.Forcing(calc_f))
+        with np.errstate(invalid='ignore'):
+            output = model.integrate(t_span=(-2000, 0), y0=[0.0, 1], method='RK45',
+                                     kwargs={'max_step': 0.5})
+        v = np.asarray(output.state_variables['v'])
+        assert v.min() > -0.1  # floor, up to one solver step of overshoot
+        assert v.max() > 1.0   # glacial cycles still develop

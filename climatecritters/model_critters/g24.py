@@ -11,7 +11,7 @@ class Model3(Model):
     equilibrium:
 
         dv/dt = (ve(f) - v) / t1    when k=1  (glaciation)
-        dv/dt = -vc / t2             when k=2  (deglaciation)
+        dv/dt = -vc / t2             when k=2  (deglaciation), until v = 0
 
     Regime switches follow:
 
@@ -136,7 +136,9 @@ class Model3(Model):
             ve = self.calc_ve(v, f, f1, f2)
             dvdt = (ve - v) / t1
         elif k == 2:
-            dvdt = -vc / t2
+            # Ganopolski (2024) requires v >= 0: ice volume declines linearly
+            # to zero, then stays ice-free until f < f1 restarts glaciation.
+            dvdt = -vc / t2 if v > 0 else 0.0
 
         # Always append state so that [1:] in integrate() removes the initial
         # y0 setup row and leaves state_variables aligned with self.time.
