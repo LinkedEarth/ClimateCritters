@@ -291,9 +291,11 @@ class Melcher25(Model):
         db_vals   = history[:, 0]
         alpha_raw = self.param_values.get('alpha', 0.0)
 
-        if callable(alpha_raw) or hasattr(alpha_raw, 'get_forcing'):
+        alpha_forced = any(name == 'alpha'
+                           for specs in self._pre_param_forcings() for name, _ in specs)
+        if callable(alpha_raw) or hasattr(alpha_raw, 'get_forcing') or alpha_forced:
             alpha_for_thresh = np.array([
-                float(self._resolve_param(alpha_raw, t, history[i]))
+                float(self.call_with_forcings(t, self.get_param_value, 'alpha', t, history[i]))
                 for i, t in enumerate(time)
             ])
         else:

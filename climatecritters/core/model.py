@@ -1,4 +1,5 @@
 from scipy.integrate import solve_ivp
+import contextlib
 import inspect
 import re
 import textwrap
@@ -474,52 +475,95 @@ class Model:
         Returns the original ``dydt`` unchanged if no pre-step forcings are
         registered, so the caller can always substitute the result.
         """
-        pre_param_replace = []   # [(var_name, spec), ...]
-        pre_param_additive = []  # [(var_name, spec), ...]
+        pre_params = self._pre_param_forcings()
         pre_state = []           # [(idx, spec), ...]
 
         for var_name, specs in self._forcings.items():
             for spec in specs:
-                if spec.timing != "pre":
-                    continue
-                if var_name in self.param_values:
-                    if spec.attachment_style == "additive":
-                        pre_param_additive.append((var_name, spec))
-                    else:
-                        pre_param_replace.append((var_name, spec))
-                elif var_name in self.integrated_state_vars:
+                if spec.timing == "pre" and var_name not in self.param_values \
+                        and var_name in self.integrated_state_vars:
                     idx = self.integrated_state_vars.index(var_name)
                     pre_state.append((idx, spec))
 
-        if not pre_param_replace and not pre_param_additive and not pre_state:
+        if not any(pre_params) and not pre_state:
             return self.dydt
 
         original_dydt = self.dydt
 
         def forced_dydt(t, x, *args):
-            saved = {}
+            with self.forcings_applied(t, _specs=pre_params):
+                dxdt = np.asarray(original_dydt(t, x, *args), dtype=float).copy()
+
             t_eval = self.time_util(t)
-
-            for var_name, spec in pre_param_replace:
-                saved[var_name] = self.param_values[var_name]
-                self.param_values[var_name] = spec.evaluate(t_eval)
-
-            for var_name, spec in pre_param_additive:
-                if var_name not in saved:
-                    saved[var_name] = self.param_values[var_name]
-                self.param_values[var_name] = self.param_values[var_name] + spec.evaluate(t_eval)
-
-            dxdt = np.asarray(original_dydt(t, x, *args), dtype=float).copy()
-
-            for var_name, original_val in saved.items():
-                self.param_values[var_name] = original_val
-
             for idx, spec in pre_state:
                 dxdt[idx] += spec.evaluate(t_eval)
 
             return dxdt
 
         return forced_dydt
+
+    def _pre_param_forcings(self):
+        """Return ``(replace, additive)`` lists of ``(name, spec)`` pre-step parameter forcings."""
+        replace, additive = [], []
+        for var_name, specs in self._forcings.items():
+            for spec in specs:
+                if spec.timing == "pre" and var_name in self.param_values:
+                    if spec.attachment_style == "additive":
+                        additive.append((var_name, spec))
+                    else:
+                        replace.append((var_name, spec))
+        return replace, additive
+
+    @contextlib.contextmanager
+    def forcings_applied(self, t, _specs=None):
+        """Context manager: apply registered parameter forcings at time ``t``.
+
+        Inside the block, ``param_values`` holds the forced values exactly as
+        ``dydt`` sees them during integration (replacement forcings first,
+        then additive ones), so ``get_param_value`` returns forced values.
+        The original values are restored on exit, even if an exception is
+        raised.
+
+        Use it wherever model quantities are evaluated outside the solver,
+        in particular in ``populate_diagnostics_from_history``::
+
+            for t, row in zip(time, history):
+                with self.forcings_applied(t):
+                    q[i] = self.overturning(t, row)
+
+        State forcings are not applied: they act on tendencies, not on
+        parameters.
+        """
+        replace, additive = _specs if _specs is not None else self._pre_param_forcings()
+        saved = {}
+        t_eval = self.time_util(t) if (replace or additive) else t
+        try:
+            for var_name, spec in replace:
+                if var_name not in saved:
+                    saved[var_name] = self.param_values[var_name]
+                self.param_values[var_name] = spec.evaluate(t_eval)
+
+            for var_name, spec in additive:
+                if var_name not in saved:
+                    saved[var_name] = self.param_values[var_name]
+                self.param_values[var_name] = self.param_values[var_name] + spec.evaluate(t_eval)
+
+            yield
+        finally:
+            for var_name, original_val in saved.items():
+                self.param_values[var_name] = original_val
+
+    def call_with_forcings(self, t, fn, *args, **kwargs):
+        """Return ``fn(*args, **kwargs)`` evaluated inside ``forcings_applied(t)``.
+
+        Convenience for list comprehensions in
+        ``populate_diagnostics_from_history``::
+
+            q = [self.call_with_forcings(t, self.overturning, t, row)
+                 for t, row in zip(time, history)]
+        """
+        with self.forcings_applied(t):
+            return fn(*args, **kwargs)
 
     def _build_post_step(self):
         """Return a post-step callback for all post-step forcings, or None.

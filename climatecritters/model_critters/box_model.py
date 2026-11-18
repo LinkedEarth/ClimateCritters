@@ -501,14 +501,16 @@ class GenericBoxModel(Model):
             if name in self.spec.diagnostic_relations:
                 diagnostics[name] = np.asarray(
                     [
-                        float(self.spec.diagnostic_relations[name](self._context(t, row)))
+                        float(self.call_with_forcings(
+                            t, lambda: self.spec.diagnostic_relations[name](self._context(t, row))))
                         for t, row in zip(time, history)
                     ],
                     dtype=float,
                 )
             elif name in self.spec.input_specs:
                 diagnostics[name] = np.asarray(
-                    [float(self.resolve_input(name, t, row)) for t, row in zip(time, history)],
+                    [float(self.call_with_forcings(t, self.resolve_input, name, t, row))
+                     for t, row in zip(time, history)],
                     dtype=float,
                 )
             else:

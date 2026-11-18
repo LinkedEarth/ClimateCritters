@@ -140,5 +140,5 @@ class Stommel(Model):
         history = np.asarray(history, dtype=float)
         q_vals = np.empty(len(time))
         for i, (t, row) in enumerate(zip(time, history)):
-            q_vals[i] = self.overturning(t, row)
+            q_vals[i] = self.call_with_forcings(t, self.overturning, t, row)
         self.diagnostic_variables = {'q': q_vals}

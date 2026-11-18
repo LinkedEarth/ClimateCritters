@@ -129,7 +129,25 @@ class Daisyworld(Model):
         growth = 1.0 - beta_width * (T_opt - T_local) ** 2
         return np.maximum(0.0, growth)
 
+    #: Output and diagnostics are built from the solver trajectory after
+    #: integration, so ``dydt`` is side-effect free.
+    uses_post_history = True
+
     def dydt(self, t, x):
+        tendencies, _ = self._evaluate(t, x)
+        return tendencies
+
+    def populate_diagnostics_from_history(self, time, history):
+        names = ('A_planet', 'A_bare', 'beta_w', 'beta_b')
+        rows = [self.call_with_forcings(t, self._evaluate, t, row)[1]
+                for t, row in zip(time, history)]
+        self.diagnostic_variables = {
+            name: np.array([r[i] for r in rows], dtype=float)
+            for i, name in enumerate(names)
+        }
+
+    def _evaluate(self, t, x):
+        """Return ``([dAw/dt, dAb/dt, dT/dt], (A_planet, A_bare, beta_w, beta_b))``."""
         Aw = float(x[0])
         Ab = float(x[1])
         T = float(x[2])
@@ -167,14 +185,4 @@ class Daisyworld(Model):
         emitted = sigma * (T ** 4)
         dTdt = (absorbed - emitted) / C
 
-        new_row = np.array([(Aw, Ab, T)], dtype=self.dtypes)
-        self.state_variables = np.concatenate([self.state_variables, new_row], axis=0)
-        if t > 0:
-            self.time.append(t)
-
-        self.diagnostic_variables['A_planet'].append(A_planet)
-        self.diagnostic_variables['A_bare'].append(A_bare)
-        self.diagnostic_variables['beta_w'].append(beta_w)
-        self.diagnostic_variables['beta_b'].append(beta_b)
-
-        return [dAwdt, dAbdt, dTdt]
+        return [dAwdt, dAbdt, dTdt], (A_planet, A_bare, beta_w, beta_b)

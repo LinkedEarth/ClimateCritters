@@ -131,7 +131,7 @@ class TwoBoxCarbon(Model):
 
     def populate_diagnostics_from_history(self, time, history):
         net_flux = np.asarray(
-            [self.tendencies(t, row)[0] for t, row in zip(time, history)],
+            [self.call_with_forcings(t, self.tendencies, t, row)[0] for t, row in zip(time, history)],
             dtype=float,
         )
         self.diagnostic_variables = {"net_flux": net_flux}

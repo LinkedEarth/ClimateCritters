@@ -89,6 +89,10 @@ class Roessler(Model):
         }
         self.params = ()
 
+    #: Output is built from the solver trajectory after integration, so
+    #: ``dydt`` is side-effect free and ``method='rk4'`` is supported.
+    uses_post_history = True
+
     def dydt(self, t, state):
         x_val, y_val, z_val = state[0], state[1], state[2]
         a = self.get_param_value('a', t, state)
@@ -98,10 +102,5 @@ class Roessler(Model):
         dxdt = -y_val - z_val
         dydt = x_val + a * y_val
         dzdt = b + z_val * (x_val - c)
-
-        new_row = np.array([(x_val, y_val, z_val)], dtype=self.dtypes)
-        self.state_variables = np.concatenate([self.state_variables, new_row], axis=0)
-        if t > 0:
-            self.time.append(t)
 
         return [dxdt, dydt, dzdt]
