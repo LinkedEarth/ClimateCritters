@@ -210,6 +210,10 @@ class Lorenz63(Model):
 
     State variables are ``x``, ``y``, ``z`` in that order.
 
+    ``dydt`` has no side effects, so it can be evaluated directly, without
+    calling ``integrate`` first (e.g. for fixed-point or periodic-orbit
+    solvers).  All solvers are supported, including ``method='rk4'``.
+
     References
     ----------
     Lorenz, E. N., 1963: Deterministic Nonperiodic Flow. *J. Atmos. Sci.*, 20,
@@ -255,6 +259,11 @@ class Lorenz63(Model):
         }
         self.params = ()
 
+    #: Output is built from the solver's trajectory after integration, so
+    #: ``dydt`` is side-effect free (callable directly, e.g. by Newton solvers)
+    #: and fixed-step ``rk4`` with ``si`` subsampling is supported.
+    uses_post_history = True
+
     def dydt(self, t, x):
         x_val, y_val, z_val = x[0], x[1], x[2]
         sigma = self.get_param_value('sigma', t, x)
@@ -264,10 +273,5 @@ class Lorenz63(Model):
         dxdt = sigma * (y_val - x_val)
         dydt = x_val * (rho - z_val) - y_val
         dzdt = x_val * y_val - beta * z_val
-
-        new_row = np.array([(x_val, y_val, z_val)], dtype=self.dtypes)
-        self.state_variables = np.concatenate([self.state_variables, new_row], axis=0)
-        if t > 0:
-            self.time.append(t)
 
         return [dxdt, dydt, dzdt]
